@@ -88,6 +88,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   // Stall during CSRs
   output logic        CSRWriteFenceM,          // CSR write or fence instruction; needs to flush the following instructions
   output logic [4:0]  RdE, RdM,                // Pipelined destination registers
+  output logic        HLVHSVInstrM,            // Valid HLV/HLVX/HSV encoding in Memory stage
   // Forwarding controls
   output logic [4:0]  RdW                      // Register destinations in Execute, Memory, or Writeback stage
 );
@@ -149,6 +150,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   logic        RWFunctD, MWFunctD;             // detect RW/MW instructions
   logic        PFunctD, CSRFunctD;             // detect privileged / CSR instruction
   logic        FenceM;                         // Fence.I or sfence.VMA instruction in memory stage
+  logic        HLVHSVInstrD, HLVHSVInstrE;     // Valid HLV/HLVX/HSV encoding
   logic [2:0]  PreALUSelectD;                  // ALU Output selection mux control (before possible Zicond logic)
   logic [2:0]  ALUSelectD;                     // ALU Output selection mux control
   logic        IWValidFunct3D;                 // Detects if Funct3 is valid for IW instructions
@@ -172,6 +174,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   // Be rigorous about detecting illegal instructions if CSRs or bit manipulation or conditional ops are supported
   // otherwise be cheap
 
+  logic HLVHSVValidD; // H-extension virtual-machine load/store strict decoding
   if (P.ZICSR_SUPPORTED | P.ZBA_SUPPORTED  | P.ZBB_SUPPORTED  | P.ZBC_SUPPORTED  | P.ZBS_SUPPORTED |
       P.ZBKB_SUPPORTED  | P.ZBKC_SUPPORTED | P.ZBKX_SUPPORTED | P.ZKNE_SUPPORTED |
       P.ZKND_SUPPORTED  | P.ZKNH_SUPPORTED | P.ZICOND_SUPPORTED) begin : legalcheck // Exact integer decoding
@@ -217,6 +220,21 @@ module controller import cvw::*;  #(parameter cvw_t P) (
     assign PFunctD          = Funct3D == 3'b000 & RdD == 5'b0;
     assign CSRFunctD        = Funct3D[1:0] != 2'b00;
     assign IWValidFunct3D   = Funct3D == 3'b000 | Funct3D == 3'b001 | Funct3D == 3'b101;
+
+    // H-extension virtual-machine load/store strict decoding
+    always_comb begin
+      case (Funct7D[2:0])
+        3'b000: HLVHSVValidD = (Rs2D == 5'b00000) | (Rs2D == 5'b00001);
+        3'b001: HLVHSVValidD = (RdD == 5'b00000);
+        3'b010: HLVHSVValidD = (Rs2D == 5'b00000) | (Rs2D == 5'b00001) | (Rs2D == 5'b00011);
+        3'b011: HLVHSVValidD = (RdD == 5'b00000);
+        3'b100: HLVHSVValidD = (Rs2D == 5'b00000) | (Rs2D == 5'b00011) | ((P.XLEN == 64) & (Rs2D == 5'b00001));
+        3'b101: HLVHSVValidD = (RdD == 5'b00000);
+        3'b110: HLVHSVValidD = (P.XLEN == 64) & (Rs2D == 5'b00000);
+        3'b111: HLVHSVValidD = (P.XLEN == 64) & (RdD == 5'b00000);
+        default: HLVHSVValidD = 1'b0;
+      endcase
+    end
   end else begin : legalcheck2
     assign IFunctD = 1'b1; // Don't bother to separate out shift decoding
     assign RFunctD = ~Funct7D[0]; // Not a multiply
@@ -235,7 +253,10 @@ module controller import cvw::*;  #(parameter cvw_t P) (
     assign PFunctD = 1'b1; // don't bother to check fields for privileged instructions
     assign CSRFunctD = 1'b1; // don't bother to check Funct3 for CSR operations
     assign IWValidFunct3D = 1'b1;
+    assign HLVHSVValidD = 1'b1; // don't bother to check fields for HLV/HSV
   end
+  assign HLVHSVInstrD = P.H_SUPPORTED & (OpD == 7'b1110011) & (Funct3D == 3'b100) &
+                        (Funct7D[6:3] == 4'b0110) & HLVHSVValidD;
 
   // Main Instruction Decoder
   /* verilator lint_off CASEINCOMPLETE */
@@ -291,7 +312,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
                       ControlsD = `CTRLW'b0_000_00_00_000_0_0_0_0_0_0_1_0_0_00_0_0; // privileged; decoded further in privdec modules
                    else if (CSRFunctD)
                       ControlsD = `CTRLW'b1_000_00_00_010_0_0_0_0_0_1_0_0_0_00_0_0; // csrs
-                  end
+                   end
     endcase
   end
   /* verilator lint_on CASEINCOMPLETE */
@@ -307,6 +328,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   assign CSRZeroSrcD = InstrD[14] ? (InstrD[19:15] == 0) : (Rs1D == 0); // Is a CSR instruction using zero as the source?
   assign CSRWriteD = CSRReadD & !(CSRZeroSrcD & InstrD[13]);            // Don't write if setting or clearing zeros
   assign SFenceVmaD = PrivilegedD & (InstrD[31:25] ==  7'b0001001);
+
   assign FenceD = SFenceVmaD | FenceXD; // possible sfence.vma or fence.i
 
   // ALU Decoding is lazy, only using func7[5] to distinguish add/sub and srl/sra
@@ -419,9 +441,9 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   flopenrc #(1)  controlregD(clk, reset, FlushD, ~StallD, 1'b1, InstrValidD);
 
   // Execute stage pipeline control register and logic
-  flopenrc #(45) controlregE(clk, reset, FlushE, ~StallE,
-                           {ALUSelectD, RegWriteD, ResultSrcD, MemRWD, JumpD, BranchD, ALUSrcAD, ALUSrcBD, ALUResultSrcD, CSRReadD, CSRWriteD, PrivilegedD, Funct3D, Funct7D, W64D, BUW64D, SubArithD, MDUD, AtomicD, InvalidateICacheD, FlushDCacheD, FenceD, CMOpD, IFUPrefetchD, LSUPrefetchD, CZeroD, InstrValidD},
-                           {ALUSelectE, IEURegWriteE, ResultSrcE, MemRWE, JumpE, BranchE, ALUSrcAE, ALUSrcBE, ALUResultSrcE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, Funct7E, W64E, UW64E, SubArithE, MDUE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, CMOpE, IFUPrefetchE, LSUPrefetchE, CZeroE, InstrValidE});
+  flopenrc #(46) controlregE(clk, reset, FlushE, ~StallE,
+                           {ALUSelectD, RegWriteD, ResultSrcD, MemRWD, JumpD, BranchD, ALUSrcAD, ALUSrcBD, ALUResultSrcD, CSRReadD, CSRWriteD, PrivilegedD, Funct3D, Funct7D, W64D, BUW64D, SubArithD, MDUD, AtomicD, InvalidateICacheD, FlushDCacheD, FenceD, CMOpD, IFUPrefetchD, LSUPrefetchD, CZeroD, InstrValidD, HLVHSVInstrD},
+                           {ALUSelectE, IEURegWriteE, ResultSrcE, MemRWE, JumpE, BranchE, ALUSrcAE, ALUSrcBE, ALUResultSrcE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, Funct7E, W64E, UW64E, SubArithE, MDUE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, CMOpE, IFUPrefetchE, LSUPrefetchE, CZeroE, InstrValidE, HLVHSVInstrE});
   flopenrc #(5)  Rs1EReg(clk, reset, FlushE, ~StallE, Rs1D, Rs1E);
   flopenrc #(5)  Rs2EReg(clk, reset, FlushE, ~StallE, Rs2D, Rs2E);
   flopenrc #(5)  RdEReg(clk, reset, FlushE, ~StallE, RdD, RdE);
@@ -443,9 +465,9 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   assign IntDivE = MDUE & Funct3E[2]; // Integer division operation
 
   // Memory stage pipeline control register
-  flopenrc #(25) controlregM(clk, reset, FlushM, ~StallM,
-                         {RegWriteE, ResultSrcE, MemRWE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, FWriteIntE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, InstrValidE, IntDivE, CMOpE, LSUPrefetchE},
-                         {RegWriteM, ResultSrcM, MemRWM, CSRReadM, CSRWriteM, PrivilegedM, Funct3M, FWriteIntM, AtomicM, InvalidateICacheM, FlushDCacheM, FenceM, InstrValidM, IntDivM, CMOpM, LSUPrefetchM});
+  flopenrc #(26) controlregM(clk, reset, FlushM, ~StallM,
+                         {RegWriteE, ResultSrcE, MemRWE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, FWriteIntE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, InstrValidE, IntDivE, CMOpE, LSUPrefetchE, HLVHSVInstrE},
+                         {RegWriteM, ResultSrcM, MemRWM, CSRReadM, CSRWriteM, PrivilegedM, Funct3M, FWriteIntM, AtomicM, InvalidateICacheM, FlushDCacheM, FenceM, InstrValidM, IntDivM, CMOpM, LSUPrefetchM, HLVHSVInstrM});
   flopenrc #(5)  RdMReg(clk, reset, FlushM, ~StallM, RdE, RdM);
 
   // Writeback stage pipeline control register
