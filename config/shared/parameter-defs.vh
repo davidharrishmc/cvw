@@ -104,6 +104,7 @@ localparam cvw_t P = '{
   PLIC_SPI_ID :        PLIC_SPI_ID,
   PLIC_SDC_ID :        PLIC_SDC_ID,
   PLIC_PWM_ID :        PLIC_PWM_ID,
+  GEILEN :              GEILEN,
   BPRED_SUPPORTED :        BPRED_SUPPORTED,
   BPRED_TYPE :        BPRED_TYPE,
   BPRED_SIZE :        BPRED_SIZE,
