@@ -40,6 +40,8 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   input  logic [2:0]              Funct3M,                              // Size of memory operation
   input  logic [6:0]              Funct7M,                              // Atomic memory operation function
   input  logic [1:0]              AtomicM,                              // Atomic memory operation
+  input  logic                    HLVHSVInstrM,                         // Valid HLV/HLVX/HSV encoding in Memory stage
+  input  logic                    HLVHSVLegalM,                         // HLV/HLVX/HSV may issue its LSU access
   input  logic                    FlushDCacheM,                         // Flush D cache to next level of memory
   input  logic [3:0]              CMOpM,                                // 1: cbo.inval; 2: cbo.clean; 4: cbo.flush; 8: cbo.zero
   input  logic                    LSUPrefetchM,                         // Prefetch; presently unused
@@ -85,6 +87,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.XLEN-1:0]       SATP_REGW,                            // SATP (supervisor address translation and protection) CSR
   input  logic                    STATUS_MXR, STATUS_SUM, STATUS_MPRV,  // STATUS CSR bits: make executable readable, supervisor user memory, machine privilege
   input  logic [1:0]              STATUS_MPP,                           // Machine previous privilege mode
+  input  logic                    HSTATUS_SPVP,                         // HLV/HLVX/HSV effective privilege: 0=VU, 1=VS
   input  logic                    ENVCFG_PBMTE,                         // Page-based memory types enabled
   input  logic                    ENVCFG_ADUE,                          // HPTW A/D Update enable
   input  logic [P.XLEN-1:0]       PCSpillF,                             // Fetch PC
@@ -105,6 +108,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   logic [P.XLEN+1:0]     IHAdrM;                                 // Either IEU or HPTW memory address
 
   logic [1:0]            PreLSURWM;                              // IEU or HPTW Read/Write signal
+  logic [1:0]            GatedMemRWM;                            // MemRWM suppressed for HLV/HSV traps
   logic [1:0]            LSURWM;                                 // IEU or HPTW Read/Write signal gated by LR/SC
   logic [2:0]            LSUFunct3M;                             // IEU or HPTW memory operation size
   logic [2:0]            LSUSizeM;                               // Memory operation size as an AHB HSIZE
@@ -164,12 +168,20 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   // Zero-extend address to 34 bits for XLEN=32
   /////////////////////////////////////////////////////////////////////////////////////////////
 
+  // HLV/HLVX/HSV decode enters the LSU as a normal memory op, but V-mode,
+  // U-mode-with-HU=0, and non-Bare cases trap in privdec and must not access memory.
+  if (P.H_SUPPORTED) begin: hlsv_gating
+    assign GatedMemRWM = (HLVHSVInstrM & ~HLVHSVLegalM) ? 2'b00 : MemRWM;
+  end else begin: nohlsv_gating
+    assign GatedMemRWM = MemRWM;
+  end
+
   flopenrc #(P.XLEN) AddressMReg(clk, reset, FlushM, ~StallM, IEUAdrE, IEUAdrM);
   if(MISALIGN_SUPPORT) begin : ziccslm_align
     logic [P.XLEN-1:0] IEUAdrSpillE;
     logic [P.XLEN-1:0] IEUAdrSpillM;
     align #(P) align(.clk, .reset, .StallM, .FlushM, .IEUAdrE, .IEUAdrM, .Funct3M, .FpLoadStoreM,
-                     .MemRWM,
+                     .MemRWM(GatedMemRWM),
                      .DCacheReadDataWordM, .CacheBusHPWTStall, .SelHPTW,
                      .ByteMaskM, .ByteMaskExtendedM, .LSUWriteDataM, .ByteMaskSpillM, .LSUWriteDataSpillM,
                      .IEUAdrSpillE, .IEUAdrSpillM, .IEUAdrxTvalM, .SelSpillE, .DCacheReadDataWordSpillM, .SpillStallM);
@@ -182,7 +194,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
     assign DCacheReadDataWordSpillM = DCacheReadDataWordM;
     assign ByteMaskSpillM = ByteMaskM;
     assign LSUWriteDataSpillM = LSUWriteDataM;
-    assign MemRWSpillM = MemRWM;
+    assign MemRWSpillM = GatedMemRWM;
     assign {SpillStallM} = 1'b0;
     assign IEUAdrxTvalM = IEUAdrM;
   end
@@ -199,7 +211,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   if(P.VIRTMEM_SUPPORTED) begin : hptw
-    hptw #(P) hptw(.clk, .reset, .MemRWM, .AtomicM, .ITLBMissOrUpdateAF, .ITLBWriteF,
+    hptw #(P) hptw(.clk, .reset, .MemRWM(GatedMemRWM), .AtomicM, .ITLBMissOrUpdateAF, .ITLBWriteF,
       .DTLBMissOrUpdateDAM, .DTLBWriteM,
       .FlushW, .DCacheBusStallM, .MemAccessInFlightM, .MemAccessDoneM, .SATP_REGW, .PCSpillF,
       .STATUS_MXR, .STATUS_SUM, .STATUS_MPRV, .STATUS_MPP, .ENVCFG_ADUE, .PrivilegeModeW,
@@ -225,7 +237,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
       else if (MemAccessPerformedM) MemAccessDoneM <= 1'b1;
     flopenr #(P.LLEN) ReadDataHoldReg(clk, reset, MemAccessPerformedM & ~MemAccessDoneM, ReadDataM, ReadDataHoldM);
   end else begin // No HPTW, so signals are not multiplexed
-    assign PreLSURWM = MemRWM;
+    assign PreLSURWM = GatedMemRWM;
     assign IHAdrM = IEUAdrExtM;
     assign LSUFunct3M = Funct3M;
     assign LSUFunct7M = Funct7M;
@@ -262,14 +274,21 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   // MMU and misalignment fault logic required if privileged unit exists
   /////////////////////////////////////////////////////////////////////////////////////////////
   if(P.ZICSR_SUPPORTED == 1) begin : dmmu
-    logic DisableTranslation;                             // During HPTW walk or D$ flush disable virtual memory address translation
+    logic DisableTranslation;                             // During HPTW walk, D$ flush, or Bare/Bare HLV/HSV, disable virtual translation
     logic WriteAccessM;
     logic DataUpdateDAM;                                  // DTLB hit needs to update dirty or access bits
 
-    assign DisableTranslation = SelHPTW | FlushDCacheM;
+    // norm:hlsv_trans requires two-stage translation for HLV/HLVX/HSV. This
+    // first path only supports VSATP/HGATP Bare/Bare; privdec traps non-Bare
+    // cases so the LSU never silently applies HS-stage translation here.
+    if (P.H_SUPPORTED) begin: hlsv_disabletranslation
+      assign DisableTranslation = SelHPTW | FlushDCacheM | HLVHSVLegalM;
+    end else begin: nohlsv_disabletranslation
+      assign DisableTranslation = SelHPTW | FlushDCacheM;
+    end
     assign WriteAccessM = PreLSURWM[0];
     mmu #(.P(P), .TLB_ENTRIES(P.DTLB_ENTRIES), .IMMU(0))
-    dmmu(.clk, .reset, .SATP_REGW, .STATUS_MXR, .STATUS_SUM, .STATUS_MPRV, .STATUS_MPP, .ENVCFG_PBMTE, .ENVCFG_ADUE,
+    dmmu(.clk, .reset, .SATP_REGW, .STATUS_MXR, .STATUS_SUM, .STATUS_MPRV, .STATUS_MPP, .HSTATUS_SPVP, .HLVHSVLegalM, .ENVCFG_PBMTE, .ENVCFG_ADUE,
       .PrivilegeModeW, .DisableTranslation, .VAdr(IHAdrM), .Size(LSUFunct3M[1:0]),
       .PTE, .PageTypeWriteVal(PageType), .TLBWrite(DTLBWriteM), .TLBFlush(sfencevmaM), .TLBFlushAll(sfencevmaAllM),
       .PhysicalAddress(PAdrM), .TLBMiss(DTLBMissM), .Cacheable(CacheableM), .Idempotent(), .SelTIM(SelDTIM),
@@ -310,7 +329,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
     logic [1:0]           DTIMMemRWM;
 
     // The DTIM uses untranslated addresses, so it is not compatible with virtual memory.
-    mux2 #(P.PA_BITS) DTIMAdrMux(IEUAdrExtE[P.PA_BITS-1:0], IEUAdrExtM[P.PA_BITS-1:0], MemRWM[0], DTIMAdr);
+    mux2 #(P.PA_BITS) DTIMAdrMux(IEUAdrExtE[P.PA_BITS-1:0], IEUAdrExtM[P.PA_BITS-1:0], GatedMemRWM[0], DTIMAdr);
     assign DTIMMemRWM = SelDTIM ? LSURWM : 0;
     dtim #(P) dtim(.clk, .reset, .ce(~GatedStallW),
               .MemRWM(DTIMMemRWM),
