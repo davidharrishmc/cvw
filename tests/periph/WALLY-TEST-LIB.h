@@ -950,9 +950,14 @@ spi_burst_send: //function for loading multiple frames at once to test delays wi
 // PWM test types.  The PWM outputs are routed to GPIO pins 0-3 (iof_en), so PWM activity is observed
 // through the GPIO high_ip register.  t4 = log2 of the number of PWM periods N to observe.  The period
 // is derived from pwmcmp0 and pwmscale (or the full 16-bit count in center-aligned mode).  The routine
-// waits for the first high output, then counts high intervals for another N - 1/2 periods, so the
-// result is exactly N for a correct waveform regardless of software timing, fewer if pulses are
-// missing, and more if extra pulses appear.  If no output goes high within N + 1 periods the result is 0.
+// waits for the first high output, then watches for another N - 1/2 periods.  A pulse is counted when
+// its falling edge is seen, so the result is exactly N for a correct waveform regardless of software
+// timing, fewer if pulses are missing, and more if extra pulses appear.  If no output goes high within
+// N + 1 periods the result is 0.  An output still high when watching ends is given one more period to
+// fall, so a pulse that ends just past the window still counts, but one that never falls is not counted
+// and adds PWM_STUCK_HIGH to the result instead; a waveform that fails to drop is therefore
+// distinguishable from one that pulses correctly.
+#define PWM_STUCK_HIGH 0x10000
 pwm_cycle_wait:
     li t2, 0x10020000 // PWM base address
     lw t3, 32(t2) // period in scaled counts: pwmcmp0
@@ -966,6 +971,7 @@ pwm_cycle_wait_common:
     lw t6, 0(t2) // pwmcfg
     andi t6, t6, 0xF // pwmscale
     sll t3, t3, t6 // period in clocks
+    mv a3, t3 // keep the period: an output still high at the end gets one more period to fall
     sll t2, t3, t4 // N periods
     srli t6, t3, 1 // half a period
     sub a5, t2, t6 // window after the first edge: N - 1/2 periods
@@ -985,24 +991,38 @@ pwm_first_edge:
     rdcycle t3
     add a4, t3, a5 // end of the observation window
 
-pwm_next_edge:
-    addi t5, t5, 1
-
 pwm_wait_low:
     sw t6, 0(t4) // clear high_ip
     rdcycle t3
-    bgt t3, a4, pwm_over // end of the observation window (an output that never falls counts as one interval)
+    bgt t3, a4, pwm_extend // watching ended with an output still high: allow one more period to fall
     lw t3, 0(t4)
     bnez t3, pwm_wait_low // wait until all PWM outputs are low
+    addi t5, t5, 1 // the output fell: count the completed pulse
 
 pwm_poll:
     rdcycle t3
     bgt t3, a4, pwm_over // end of the observation window
     lw t3, 0(t4)
-    bnez t3, pwm_next_edge
+    bnez t3, pwm_wait_low // a new pulse started
     j pwm_poll
 
-pwm_over: // disable the PWM, clear the interrupt, and record the number of high intervals seen
+pwm_extend: // watching ended during a pulse: give it one more period to fall before calling it stuck
+    add a4, t3, a3
+
+pwm_extend_loop:
+    sw t6, 0(t4) // clear high_ip
+    rdcycle t3
+    bgt t3, a4, pwm_stuck // the output never fell
+    lw t3, 0(t4)
+    bnez t3, pwm_extend_loop // wait until all PWM outputs are low
+    addi t5, t5, 1 // the output fell just past the window: count the completed pulse
+    j pwm_over
+
+pwm_stuck: // an output that never fell: flag it instead of counting it as a pulse
+    li t3, PWM_STUCK_HIGH
+    add t5, t5, t3
+
+pwm_over: // disable the PWM, clear the interrupt, and record the number of pulses seen
     li t2, 0x10020000
     li t3, 0x00000000
     sw t3, 0(t2) // clear pwmcfg

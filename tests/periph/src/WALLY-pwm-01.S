@@ -414,7 +414,7 @@ WORD PWMCompare0, 0x00000006, write32_test
 WORD PWMCompare3, 0x00000000, write32_test
 WORD PWMConfig, 0x00000206, write32_test    # zerocmp, scale 6
 WORD PWMConfig, 0x00001206, write32_test    # enalways
-WORD 0x0, 0x00000002, pwm_cycle_wait    # four periods, but the output never falls: one interval
+WORD 0x0, 0x00000002, pwm_cycle_wait    # four periods, but the output never falls: no completed pulse
 WORD PWMCompare3, 0x0000FFFF, write32_test
 
 # =========== Timer mode: the counter free-runs past the pwms wrap, and a one-shot ends at the wrap ===========
@@ -523,7 +523,7 @@ WORD 0x00000200 // 72: cleared again
 WORD 0x00000001 // 73: pin 0 pulsed again
 WORD 0x00001200 // 74: enoneshot cleared, enalways still set
 WORD 0x00000001 // 75: pin 0 pulsing
-WORD 0x00000001 // 76: four periods, but the output never falls: one interval
+WORD PWM_STUCK_HIGH // 76: four periods, but the output never falls: no completed pulse
 WORD 0x00010000 // 77: counter free-runs past the pwms wrap and the one-shot stops it at 0x10000
 WORD 0x00000000 // 78: pwmenoneshot cleared by the wrap
 WORD 0x00000800 // 79: interrupt pending from a software-set pwmcmp0ip
