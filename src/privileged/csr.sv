@@ -141,7 +141,8 @@ module csr import cvw::*;  #(parameter cvw_t P) (
   always_comb
     if (InterruptM)           NextFaultXtvalM = '0;
     else case (CauseM)
-      12, 1, 3:               NextFaultXtvalM = PCSpillM;  // Instruction page/access faults, breakpoint
+      12, 1:                  NextFaultXtvalM = PCSpillM;  // Instruction page/access faults report the faulting half of a spilled fetch
+      3:                      NextFaultXtvalM = PCM;       // Breakpoint reports the address of the ebreak itself, not the second half of a spilled fetch
       2:                      NextFaultXtvalM = {{(P.XLEN-32){1'b0}}, InstrOrigM}; // Illegal instruction fault
       0, 4, 6, 13, 15, 5, 7:  NextFaultXtvalM = IEUAdrxTvalM; // Instruction misaligned, Load/Store Misaligned/page/access faults
       default:                NextFaultXtvalM = '0; // Ecall, interrupts
