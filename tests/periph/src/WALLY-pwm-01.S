@@ -417,12 +417,12 @@ WORD PWMConfig, 0x00001206, write32_test    # enalways
 WORD 0x0, 0x00000002, pwm_cycle_wait    # four periods, but the output never falls: no completed pulse
 WORD PWMCompare3, 0x0000FFFF, write32_test
 
-# =========== Timer mode: the counter free-runs past the pwms wrap, and a one-shot ends at the wrap ===========
-WORD PWMCount, 0x0000FFF0, write32_test    # start just below the pwms wrap
+# =========== Timer mode: the pwms carry out resets the counter and ends a one-shot ===========
+WORD PWMCount, 0x0000FFF0, write32_test    # start just below the pwms carry out
 WORD PWMConfig, 0x00002000, write32_test    # enoneshot, no zerocmp
 WORD 0x0, 0x00000100, pwm_wait
-WORD PWMCount, 0x00010000, read32_test    # not reset at the wrap; the one-shot stopped counting at 0x10000
-WORD PWMConfig, 0x00000000, read32_test    # pwmenoneshot cleared by the wrap
+WORD PWMCount, 0x00000000, read32_test    # reset by the carry out, and the one-shot stopped it there
+WORD PWMConfig, 0x00000000, read32_test    # pwmenoneshot cleared by the carry out
 WORD PWMCount, 0x00000000, write32_test
 
 # =========== Pending bits set and cleared by software through pwmcfg, with pwmsticky set ===========
@@ -524,8 +524,8 @@ WORD 0x00000001 // 73: pin 0 pulsed again
 WORD 0x00001200 // 74: enoneshot cleared, enalways still set
 WORD 0x00000001 // 75: pin 0 pulsing
 WORD PWM_STUCK_HIGH // 76: four periods, but the output never falls: no completed pulse
-WORD 0x00010000 // 77: counter free-runs past the pwms wrap and the one-shot stops it at 0x10000
-WORD 0x00000000 // 78: pwmenoneshot cleared by the wrap
+WORD 0x00000000 // 77: counter reset by the pwms carry out, and the one-shot stops it there
+WORD 0x00000000 // 78: pwmenoneshot cleared by the carry out
 WORD 0x00000800 // 79: interrupt pending from a software-set pwmcmp0ip
 WORD 0x10000100 // 80: pwmcmp0ip set by software reads back
 WORD 0x00000100 // 81: pwmcmp0ip cleared by software with pwmsticky set

@@ -87,6 +87,7 @@ module pwm_apb import cvw::*; #(parameter cvw_t P) (
 
   // Combinational signal logic
   logic [P.PWM_WIDTH+14:0] PWMPrescale;
+  logic [P.PWM_WIDTH+14:0] ScaleMask;
   logic [3:0] PWMComparator;
   logic [3:0] PWMDeglitchMuxSelect;
   logic PWMCountReset;
@@ -104,13 +105,18 @@ module pwm_apb import cvw::*; #(parameter cvw_t P) (
   assign PWMEnOneShot = PWMConfig[8];
   assign PWMCompareCenter = PWMConfig[12:9];
   assign PWMCompareGang = PWMConfig[16:13];
-  assign Carryout = &PWMScaled; // pwms is all ones: the counter is about to wrap
+  // carryout is the carry out of the high bit of the pwms incrementer (FU540 manual 14.8), so it is the
+  // one clock on which the whole of pwmcount below pwms is also all ones, not the entire final scaled
+  // tick.  Resetting on &pwms alone would cut that tick from pwmscale clocks down to one.
+  assign ScaleMask = ({{(P.PWM_WIDTH+14){1'b0}}, 1'b1} << PWMScale) - 1; // the pwmscale low bits of pwmcount
+  assign Carryout = &PWMScaled & ((PWMCount & ScaleMask) == ScaleMask);
   assign PWMCountEn = PWMEnAlways | PWMEnOneShot;
-  // A PWM cycle ends when pwms reaches pwmcmp0 with pwmzerocmp set, or when pwms wraps.  The end of a cycle
-  // finishes a one-shot and releases the deglitch hold.  Only pwmzerocmp resets the counter; otherwise it
-  // free-runs and wraps naturally so it can serve as a timer (FU540 manual 14.4, 14.13).
+  // A PWM cycle ends when pwms reaches pwmcmp0 with pwmzerocmp set, or when pwms carries out.  The end of a
+  // cycle resets the counter, finishes a one-shot, and releases the deglitch hold; Figure 6 of the FU540
+  // manual ORs carryout with the pwmcmp0 match to drive the pwmcount reset, and 14.4 has the counter
+  // "reset to zero at the end of every PWM cycle" either way.
   assign PWMCycleEnd = PWMCountEn & ((PWMComparator[0] & PWMZeroCompare) | Carryout);
-  assign PWMCountReset = PWMCountEn & PWMComparator[0] & PWMZeroCompare;
+  assign PWMCountReset = PWMCycleEnd;
 
 
   // Deglitch Circuit logic
