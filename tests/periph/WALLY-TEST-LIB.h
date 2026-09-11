@@ -90,6 +90,202 @@ rvtest_entry_point:
 
 .endm
 
+// Code to trigger traps goes here so we have consistent mtvals for instruction addresses
+// Even if more tests are added.
+.macro CAUSE_TRAP_TRIGGERS
+j end_trap_triggers
+
+// The following tests involve causing many of the interrupts and exceptions that are easily done in a few lines
+//      This effectively includes everything that isn't to do with page faults (virtual memory)
+//
+//      INPUTS: a3 (x13): the number of times one of the infinitely looping interrupt causes should loop before giving up and continuing without the interrupt firing.
+//
+cause_instr_addr_misaligned:
+    // cause a misaligned address trap
+    auipc t3, 0      // get current PC, which is aligned
+    addi t3, t3, 0x2  // add 2 to pc to create misaligned address (Assumes compressed instructions are disabled)
+    jr t3 // cause instruction address midaligned trap
+    ret
+
+cause_instr_access:
+    SREG ra, -REGBYTES(sp) // push the return address onto the stack
+    addi sp, sp, -REGBYTES
+    jalr zero // cause instruction access trap (address zero is an address with no memory)
+    LREG ra, 0(sp) // pop return address back from the stack
+    addi sp, sp, REGBYTES
+    ret
+
+cause_illegal_instr:
+    .word 0xFFFFFFFF // 32 bit 1s is an illegal instruction
+    ret
+
+cause_breakpnt:
+    ebreak
+    ret
+
+cause_load_addr_misaligned:
+    li t3, 0x02000000 // base address of clint, because with zicclsm misaligned cached access won't trap
+    addi t3, t3, 1
+    lw t4, 0(t3)    // load from a misaligned address
+    ret
+
+cause_load_acc:
+    lw t4, 0(zero)    // load from unimplemented address (zero)
+    ret
+
+cause_store_addr_misaligned:
+    li t3, 0x02000000 // base address of clint, because with zicclsm misaligned cached access won't trap
+    addi t3, t3, 1
+    sw t4, 0(t3)     // store to a misaligned address
+    ret
+
+cause_store_acc:
+    sw t4, 0(zero)     // store to unimplemented address (zero)
+    ret
+
+cause_ecall:
+    // ASSUMES you have already gone to the mode you need to call this from.
+    ecall
+    ret
+
+cause_m_time_interrupt:
+    // The following code works for both RV32 and RV64.
+    // RV64 alone would be easier using double-word adds and stores
+    li t3, 0x30          // Desired offset from the present time
+    mv a3, t3            // copy value in to know to stop waiting for interrupt after this many cycles
+    la t4, 0x02004000    // MTIMECMP register in CLINT
+    la t5, 0x0200BFF8    // MTIME register in CLINT
+    lw t2, 0(t5)         // low word of MTIME
+    lw t6, 4(t5)         // high word of MTIME
+    add t3, t2, t3       // add desired offset to the current time
+    bgtu t3, t2, nowrap_m  // check new time exceeds current time (no wraparound)
+    addi t6, t6, 1       // if wrap, increment most significant word
+nowrap_m:
+    sw t6,4(t4)          // store into most significant word of MTIMECMP
+    sw t3, 0(t4)         // store into least significant word of MTIMECMP
+time_loop_m:
+    addi a3, a3, -1
+    bnez a3, time_loop_m // go through this loop for [a3 value] iterations before returning without performing interrupt
+    ret
+
+cause_s_time_interrupt:
+    li t3, 0x30          // Desired offset from the present time
+    mv a3, t3            // copy value in to know to stop waiting for interrupt after this many cycles
+    la t5, 0x0200BFF8    // MTIME register in CLINT *** we still read from mtime since stimecmp is compared to it
+    lw t2, 0(t5)         // low word of MTIME
+    lw t6, 4(t5)         // high word of MTIME
+    add t3, t2, t3       // add desired offset to the current time
+#if __riscv_xlen == 32
+    bgtu t3, t2, nowrap_s  // check new time exceeds current time (no wraparound)
+    addi t6, t6, 1       // if wrap, increment most significant word
+nowrap_s:
+    csrw stimecmp, t3    // store into STIMECMP
+    csrw stimecmph, t6   // store into STIMECMPH
+#else
+    csrw stimecmp, t3    // store into STIMECMP
+#endif
+time_loop_s:
+    addi a3, a3, -1
+    bnez a3, time_loop_s // go through this loop for [a3 value] iterations before returning without performing interrupt
+    ret
+
+cause_m_soft_interrupt:
+    la t3, 0x02000000      // MSIP register in CLINT
+    li t4, 1               // 1 in the lsb
+    sw t4, 0(t3)          // Write MSIP bit
+    ret
+
+cause_s_soft_interrupt:
+    li t3, 0x2
+    csrs sip, t3 // set supervisor software interrupt pending. SIP is a subset of MIP, so writing this should also change MIP.
+    ret
+
+cause_s_soft_from_m_interrupt:
+    li t3, 0x2
+    csrs mip, t3 // set supervisor software interrupt pending. SIP is a subset of MIP, so writing this should also change MIP.
+    ret
+
+cause_m_ext_interrupt:
+    // these interrupts involve a time loop waiting for the interrupt to go off.
+    // since interrupts are not always enabled, we need to make it stop after a certain number of loops, which is the number in a3
+    li a3, 0x40
+    // ========== Configure PLIC ==========
+    // m priority threshold = 0
+    li t3, 0xC200000
+    li t4, 0
+    sw t4, 0(t3)
+    // s priority threshold = 7
+    li t3, 0xC201000
+    li t4, 7
+    sw t4, 0(t3)
+    // source 3 (GPIO) priority = 1
+    li t3, 0xC000000
+    li t4, 1
+    sw t4, 0x0C(t3)
+    // enable source 3 in M Mode
+    li t3, 0x0C002000
+    li t4, 0b1000
+    sw t4, 0(t3)
+
+    li t3, 0x10060000 // load base GPIO memory location
+    li t4, 0x1
+    sw t4, 0x08(t3)  // enable the first pin as an output
+    sw t4, 0x04(t3)  // enable the first pin as an input as well to cause the interrupt to fire
+
+    sw zero, 0x1C(t3) // clear rise_ip
+    sw zero, 0x24(t3) // clear fall_ip
+    sw zero, 0x2C(t3) // clear high_ip
+    sw zero, 0x34(t3) // clear low_ip
+
+    sw t4, 0x28(t3)  // set first pin to interrupt on a rising value
+    sw t4, 0x0C(t3)  // write a 1 to the first output pin (cause interrupt)
+m_ext_loop:
+    addi a3, a3, -1
+    bnez a3, m_ext_loop // go through this loop for [a3 value] iterations before returning without performing interrupt
+    ret
+
+cause_s_ext_interrupt_GPIO:
+    // these interrupts involve a time loop waiting for the interrupt to go off.
+    // since interrupts are not always enabled, we need to make it stop after a certain number of loops, which is the number in a3
+    li a3, 0x40
+    // ========== Configure PLIC ==========
+    // s priority threshold = 0
+    li t3, 0xC201000
+    li t4, 0
+    sw t4, 0(t3)
+    // m priority threshold = 7
+    li t3, 0xC200000
+    li t4, 7
+    sw t4, 0(t3)
+    // source 3 (GPIO) priority = 1
+    li t3, 0xC000000
+    li t4, 1
+    sw t4, 0x0C(t3)
+    // enable source 3 in S mode
+    li t3, 0x0C002080
+    li t4, 0b1000
+    sw t4, 0(t3)
+
+    li t3, 0x10060000 // load base GPIO memory location
+    li t4, 0x1
+    sw t4, 0x08(t3)  // enable the first pin as an output
+    sw t4, 0x04(t3)  // enable the first pin as an input as well to cause the interrupt to fire
+
+    sw zero, 0x1C(t3) // clear rise_ip
+    sw zero, 0x24(t3) // clear fall_ip
+    sw zero, 0x2C(t3) // clear high_ip
+    sw zero, 0x34(t3) // clear low_ip
+
+    sw t4, 0x28(t3)  // set first pin to interrupt on a rising value
+    sw t4, 0x0C(t3)  // write a 1 to the first output pin (cause interrupt)
+s_ext_loop:
+    addi a3, a3, -1
+    bnez a3, s_ext_loop // go through this loop for [a3 value] iterations before returning without performing interrupt
+    ret
+
+end_trap_triggers:
+.endm
+
 .macro TRAP_HANDLER MODE, VECTORED=1, EXT_SIGNATURE=0
     // MODE decides which mode this trap handler will be taken in (M or S mode)
     // Vectored decides whether interrupts are handled with the vector table at trap_handler_MODE (1)
@@ -540,6 +736,7 @@ test_loop:
 //   spi_burst_send         : write the 4 bytes of t4 to SPI address t3          : none
 //   goto_m_mode            : ecall into machine mode                            : mcause (0xb from M, 0x9 from S)
 //   goto_s_mode            : ecall into supervisor mode                         : mcause (0xb from M, 0x9 from S)
+//   goto_u_mode            : ecall into user mode                               : mcause (0xb from M, 0x9 from S)
 //   write_mideleg          : write t4 to mideleg                                : none
 //   terminate_test         : ecall into machine mode, then halt                 : mcause (0xb from M, 0x9 from S)
 //
@@ -742,6 +939,11 @@ goto_s_mode:
 
 goto_m_mode:
     li a0, 2 // Trap handler behavior (go to machine mode)
+    ecall // writes mcause to the output.
+    j test_loop
+
+goto_u_mode:
+    li a0, 4 // Trap handler behavior (go to user mode)
     ecall // writes mcause to the output.
     j test_loop
 
