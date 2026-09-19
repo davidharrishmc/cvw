@@ -343,7 +343,9 @@ coverage exclude -scope /core/ifu/immu/immu -fecexprrow $line 4
 # The instruction side ties AtomicAccessM low, so every row that needs an atomic access is
 # unreachable in the instruction MMU.
 set line [GetLineNum ${SRC}/mmu/mmu.sv "assign MisalignedCausesAccessFaultM"]
-coverage exclude -scope /core/ifu/immu/immu -fecexprrow $line 4 5 6
+coverage exclude -scope /core/ifu/immu/immu -fecexprrow $line 4
+set line [GetLineNum ${SRC}/mmu/mmu.sv "assign MisalignedFaultAllowedM"]
+coverage exclude -scope /core/ifu/immu/immu -fecexprrow $line 6
 
 # The following peripherals are always supported (Supported_0, row 3); the boot ROM, CLINT and RAM accept every
 # access size (SizeValid_0, row 7)
