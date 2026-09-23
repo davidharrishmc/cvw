@@ -335,7 +335,11 @@ module testbench;
     if (P.ZICSR_SUPPORTED & TEST == "coremark")
       if (EcallFaultM) begin
         $display("Benchmark: coremark is done.");
+`ifdef QUESTA
         $stop;
+`else
+        $finish;  // $stop would abort a Verilator run with a nonzero exit code
+`endif
       end
     if(SelectTest) begin
       if(TEST == "buildroot") begin

@@ -18,6 +18,7 @@ import argparse
 import fcntl
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -265,13 +266,40 @@ def targetMtime(target):
     return target.stat().st_mtime if target.exists() else None
 
 
+def successPattern(args):
+    """Regex for the summary line a passing run prints, or None if the run's output is not checked."""
+    if args.gui:
+        return None
+    if args.tb == "testbench_fp":
+        return r"All Tests completed with\s+0 errors"
+    if not args.test:  # ELF runs; special modes such as buildroot have their own pass criteria
+        return r"All tests ran without failures"
+    return None
+
+
+def shell(cmd, success=None):
+    """Run a shell command and return its exit code.
+
+    The simulators exit 0 even when tests fail, so when success is given the output is echoed and
+    scanned, and a run that exits 0 without printing a matching line returns 1."""
+    if success is None:
+        return os.waitstatus_to_exitcode(os.system(cmd))
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
+    passed = False
+    for line in proc.stdout:
+        print(line, end="", flush=True)
+        passed = passed or re.search(success, line) is not None
+    code = proc.wait()
+    return code if code else (0 if passed else 1)
+
+
 def runSim(args, flags, prefix):
     if args.sim == "questa":
-        runQuesta(args, flags, prefix)
+        return runQuesta(args, flags, prefix)
     elif args.sim == "verilator":
-        runVerilator(args)
+        return runVerilator(args)
     elif args.sim == "vcs":
-        runVCS(args, flags, prefix)
+        return runVCS(args, flags, prefix)
 
 
 def runQuesta(args, flags, prefix):
@@ -301,8 +329,9 @@ def runQuesta(args, flags, prefix):
         if needs_compile and current_mtime == target_mtime:
             compile_cmd = f'do wally-compile.do {args.config} {args.tb} {wkdir} {compile_flags}'
             compile_cmd = f'cd {sim_dir}; {prefix} vsim -c -do "{compile_cmd}"'
-            if os.system(compile_cmd):
-                return
+            code = shell(compile_cmd)
+            if code:
+                return code
 
     # Phase 2: Run the simulation
     run_flags = flags
@@ -310,7 +339,7 @@ def runQuesta(args, flags, prefix):
         run_flags += rf" --args \"{args.args}\""
     run_cmd = f'do wally-run.do {args.config} {args.testsuite} {args.tb} {wkdir} {run_flags}'
     run_cmd = f'cd {sim_dir}; {prefix} vsim {"-c" if not args.gui else ""} -do "{run_cmd}"'
-    os.system(run_cmd)
+    return shell(run_cmd, successPattern(args))
 
 
 def runVerilator(args):
@@ -334,8 +363,9 @@ def runVerilator(args):
     with compileLock("verilator", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
-            if os.system(compile_cmd):
-                return
+            code = shell(compile_cmd)
+            if code:
+                return code
 
     # Phase 2: Run the simulation (parallel safe)
     # Run from sim/verilator/ so relative paths (e.g. logs/buildroot_uart.out) resolve correctly
@@ -345,7 +375,7 @@ def runVerilator(args):
         runtime_args += f" +TEST={args.testsuite}"
     if args.args.strip():
         runtime_args += f" {args.args.strip()}"
-    os.system(f"cd {sim_dir} && {binary}{runtime_args}")
+    return shell(f"cd {sim_dir} && {binary}{runtime_args}", successPattern(args))
 
 
 def runVCS(args, flags, prefix):
@@ -369,15 +399,16 @@ def runVCS(args, flags, prefix):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
             compile_cmd = f'cd {sim_dir}; {prefix} ./run_vcs compile {args.config} {args.testsuite} --wkdir {wkdir} {compile_flags}'
-            if os.system(compile_cmd):
-                return
+            code = shell(compile_cmd)
+            if code:
+                return code
 
     # Phase 2: Run the simulation
     run_flags = f"--tb {args.tb} {flags}"
     if args.args.strip():
         run_flags += f' --args "{args.args}"'
     run_cmd = f'cd {sim_dir}; {prefix} ./run_vcs run {args.config} {args.testsuite} --wkdir {wkdir} {run_flags}'
-    os.system(run_cmd)
+    return shell(run_cmd, successPattern(args))
 
 
 def main(args):
