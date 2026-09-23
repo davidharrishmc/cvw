@@ -85,7 +85,7 @@ module ahbcacheinterface import cvw::*; #(
   genvar                      index;
 
   // fetch buffer is made of BEATSPERLINE flip-flops
-  for (index = 0; index < BEATSPERLINE; index++) begin : fetchbuffer
+  for (index = 0; index < BEATSPERLINE; index++) begin : fetchbufferbeat
     logic [BEATSPERLINE-1:0] CaptureBeat;
     assign CaptureBeat[index] = CaptureEn & (index == BeatCountDelayed);
     flopen #(P.AHBW) fb(.clk(HCLK), .en(CaptureBeat[index]), .d(HRDATA),

@@ -588,7 +588,7 @@ coverage exclude -scope /dut/core/ifu/immu -linerange $line-$line -item e 1 -fec
 # (the D$ reaches CaptureEn=0 via writeback beats, which the I$ never does).  Beat 0 is covered (idle/reset).
 set fbline [GetLineNum ${SRC}/ebu/ahbcacheinterface.sv "index == BeatCountDelayed"]
 for {set i 1} {$i < 8} {incr i} {
-    coverage exclude -scope /dut/core/ifu/bus/icache/ahbcacheinterface/fetchbuffer[$i] -linerange $fbline-$fbline -item e 1 -fecexprrow 1
+    coverage exclude -scope /dut/core/ifu/bus/icache/ahbcacheinterface/fetchbufferbeat[$i] -linerange $fbline-$fbline -item e 1 -fecexprrow 1
 }
 
 # FlushDCache = FlushDCacheM & ~SelHPTW : the SelHPTW=1 input-term (Row 4) is unreachable.  fence.i is the

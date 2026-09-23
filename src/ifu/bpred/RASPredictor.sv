@@ -84,7 +84,7 @@ module RASPredictor import cvw::*;  #(parameter cvw_t P)(
     assign NextPtr = Sum;
   //assign NextPtr = Ptr + IncDecPtr;
 
-  flopenr #(Depth) PTR(clk, reset, CounterEn, NextPtr, Ptr);
+  flopenr #(Depth) ptrreg(clk, reset, CounterEn, NextPtr, Ptr);
 
   // RAS must be reset.
   always_ff @ (posedge clk) begin
