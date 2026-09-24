@@ -150,7 +150,7 @@ def prepareElfs(args, elfs):
     """Generate the .memfile for every ELF (in parallel, only if out of date) and write the ELF list.
     Each line of the list holds the ELF path followed by the hex addresses of ELF_SYMBOLS."""
     memfiles = " ".join(f"{elf}.memfile" for elf in elfs)
-    if os.system(f"make -s -j -f {WALLY}/testbench/Makefile WALLY={WALLY} {memfiles}"):
+    if subprocess.run(f"make -s -j -f {WALLY}/testbench/Makefile WALLY={WALLY} {memfiles}", shell=True).returncode:
         print("Error: could not generate memfiles")
         sys.exit(1)
     symbols = elfSymbols(elfs)
@@ -283,7 +283,7 @@ def shell(cmd, success=None):
     The simulators exit 0 even when tests fail, so when success is given the output is echoed and
     scanned, and a run that exits 0 without printing a matching line returns 1."""
     if success is None:
-        return os.waitstatus_to_exitcode(os.system(cmd))
+        return subprocess.run(cmd, shell=True).returncode
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
     passed = False
     for line in proc.stdout:
@@ -293,6 +293,14 @@ def shell(cmd, success=None):
     return code if code else (0 if passed else 1)
 
 
+def checkCompiled(target, sim):
+    """Report an error if compilation did not leave a design behind."""
+    if not target.exists():
+        print(f"Error: {sim} compiled design not found: {target}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def runSim(args, flags, prefix):
     if args.sim == "questa":
         return runQuesta(args, flags, prefix)
@@ -300,6 +308,8 @@ def runSim(args, flags, prefix):
         return runVerilator(args)
     elif args.sim == "vcs":
         return runVCS(args, flags, prefix)
+    print(f"Error: unknown simulator {args.sim}", file=sys.stderr)
+    return 1
 
 
 def runQuesta(args, flags, prefix):
@@ -329,9 +339,12 @@ def runQuesta(args, flags, prefix):
         if needs_compile and current_mtime == target_mtime:
             compile_cmd = f'do wally-compile.do {args.config} {args.tb} {wkdir} {compile_flags}'
             compile_cmd = f'cd {sim_dir}; {prefix} vsim -c -do "{compile_cmd}"'
-            code = shell(compile_cmd)
-            if code:
-                return code
+            rc = shell(compile_cmd)
+            if rc:
+                print(f"Error: Questa compilation failed for {args.config} {args.tb}", file=sys.stderr)
+                return rc
+    if checkCompiled(target, "Questa"):
+        return 1
 
     # Phase 2: Run the simulation
     run_flags = flags
@@ -363,9 +376,12 @@ def runVerilator(args):
     with compileLock("verilator", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
-            code = shell(compile_cmd)
-            if code:
-                return code
+            rc = shell(compile_cmd)
+            if rc:
+                print(f"Error: Verilator compilation failed for {args.config} {args.tb}", file=sys.stderr)
+                return rc
+    if checkCompiled(binary, "Verilator"):
+        return 1
 
     # Phase 2: Run the simulation (parallel safe)
     # Run from sim/verilator/ so relative paths (e.g. logs/buildroot_uart.out) resolve correctly
@@ -399,9 +415,12 @@ def runVCS(args, flags, prefix):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
             compile_cmd = f'cd {sim_dir}; {prefix} ./run_vcs compile {args.config} {args.testsuite} --wkdir {wkdir} {compile_flags}'
-            code = shell(compile_cmd)
-            if code:
-                return code
+            rc = shell(compile_cmd)
+            if rc:
+                print(f"Error: VCS compilation failed for {args.config} {args.tb}", file=sys.stderr)
+                return rc
+    if checkCompiled(binary, "VCS"):
+        return 1
 
     # Phase 2: Run the simulation
     run_flags = f"--tb {args.tb} {flags}"

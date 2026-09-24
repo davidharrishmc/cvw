@@ -701,13 +701,15 @@ module testbench;
 
   DCacheFlushFSM #(P) DCacheFlushFSM(.clk, .start(DCacheFlushStart), .done(DCacheFlushDone));
 
-  logic [P.XLEN-1:0] Minstret;
-  if (P.ZICSR_SUPPORTED) assign Minstret = testbench.dut.core.priv.priv.csr.counters.HPMCOUNTER_REGW[2];
-  else                   assign Minstret = '0; // no CSRs, so no counters: INSTR_LIMIT is unavailable
-  always @(negedge clk) begin
-    if (INSTR_LIMIT > 0) begin
-      if((Minstret != 0) & (Minstret % 'd100000 == 0)) $display("Reached %d instructions", Minstret);
-      if((Minstret == INSTR_LIMIT) & (INSTR_LIMIT!=0)) begin $finish; end
+  // The privileged unit, and with it minstret, only exists when ZICSR is supported
+  if (P.ZICSR_SUPPORTED) begin : instrlimit
+    logic [P.XLEN-1:0] Minstret;
+    assign Minstret = testbench.dut.core.priv.priv.csr.counters.HPMCOUNTER_REGW[2];
+    always @(negedge clk) begin
+      if (INSTR_LIMIT > 0) begin
+        if((Minstret != 0) & (Minstret % 'd100000 == 0)) $display("Reached %d instructions", Minstret);
+        if((Minstret == INSTR_LIMIT) & (INSTR_LIMIT!=0)) begin $finish; end
+      end
     end
   end
 
@@ -895,9 +897,9 @@ module testbench;
       always @(dut.core.priv.priv.csr.csri.MIP_REGW[5])   void'(rvvi.net_push("STimerInterrupt",    dut.core.priv.priv.csr.csri.MIP_REGW[5]));
       always @(dut.core.priv.priv.csr.csri.MIP_REGW[9])   void'(rvvi.net_push("SExternalInterrupt", dut.core.priv.priv.csr.csri.MIP_REGW[9]));
       // when ImperasDV is updated, restore the MIP-based logic commented out below and remove the ValidIntsM-based logic
-      // See Fixed https://github.com/openhwgroup/cvw-arch-verif/issues/670
+      // See Fixed https://github.com/openhwfoundation/cvw-arch-verif/issues/670
       //always @(dut.core.priv.priv.csr.csri.MIP_REGW[1])   void'(rvvi.net_push("SSWInterrupt",       dut.core.priv.priv.csr.csri.MIP_REGW[1]));
-      always @(dut.core.priv.priv.trap.ValidIntsM[1])   void'(rvvi.net_push("SSWInterrupt",       dut.core.priv.priv.trap.ValidIntsM[1])); // dh 6/29/25 temporarily use ValidInts until Synopsys fixes level sensitive  https://github.com/openhwgroup/cvw-arch-verif/issues/670
+      always @(dut.core.priv.priv.trap.ValidIntsM[1])   void'(rvvi.net_push("SSWInterrupt",       dut.core.priv.priv.trap.ValidIntsM[1])); // dh 6/29/25 temporarily use ValidInts until Synopsys fixes level sensitive  https://github.com/openhwfoundation/cvw-arch-verif/issues/670
     end
   end
 
