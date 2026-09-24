@@ -44,7 +44,7 @@ rvcp_summary = "RVCP-SUMMARY" # search string for RVCP summary line in logs
 # Standard regression: every configuration listed here has an ACT test-generation configuration in
 # config/<cfg>/act/ (cvw owns these; actconfig-sync keeps ACT's copies matching).  Its self-checking
 # ELFs are built into addins/riscv-arch-test/work/<name>/elfs and run one leaf directory per simulation.
-standard_configs = ["rv32imc", "rv32gc", "rv64gc"]
+standard_configs = ["rv32i", "rv64i", "rv32imc", "rv32gc", "rv64gc"]
 
 # Self-checking peripheral tests (tests/periph), run as one group per configuration.
 # rv32imc lacks supervisor mode and PMP, so it only runs the machine-mode peripheral test.

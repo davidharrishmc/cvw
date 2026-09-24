@@ -140,6 +140,10 @@ module testbench;
   logic SelectTest;
   logic TestComplete;
   logic TohostWrite;             // the test is storing its result to tohost
+  logic TohostStore, TohostHiStore; // a store to tohost / to its upper word (tohost+4)
+  logic HtifPutchar;             // the store to tohost is an HTIF console putchar
+  logic [31:0] TohostHi;         // upper word of tohost, stored separately on RV32
+  logic [63:0] TohostWord;       // the 64-bit tohost value being stored
   logic [31:0] TohostValue;      // value stored to tohost: 1 = pass, (code << 1) | 1 = fail, 0 = never written
   logic PrevPCZero;
   logic RVVIStall;
@@ -677,14 +681,32 @@ module testbench;
   // Termination condition
   // Terminate on
   // 1. jump to self loop (0x0000006f)
-  // 2. a store word writes to the address "tohost"
+  // 2. a store word writes a test result (not an HTIF console putchar) to the address "tohost"
   // 3. or PC is stuck at 0
 
 
   logic [P.XLEN-1:0] PCM;
   // PCM is not valid for configurations without ZICSR or branch predictor
   flopenr #(P.XLEN) PCMReg(clk, reset, ~dut.core.StallM, dut.core.PCE, PCM);
-  assign TohostWrite = (dut.core.lsu.IEUAdrM == tohost_addr & tohost_addr != 0) & (InstrMName == "SW" | InstrMName == "SD");
+  // tohost follows HTIF: a store whose bits 63:48 are device 1, command 1 is a console putchar
+  // of bits 7:0, which configurations without a UART use for console output.  Any other store to
+  // tohost reports the test result.  RV32 stores the upper word to tohost+4 before the lower word.
+  assign TohostStore   = (dut.core.lsu.IEUAdrM == tohost_addr & tohost_addr != 0) & (InstrMName == "SW" | InstrMName == "SD");
+  assign TohostHiStore = (dut.core.lsu.IEUAdrM == tohost_addr + 4 & tohost_addr != 0) & (InstrMName == "SW");
+  assign TohostWord    = (InstrMName == "SD") ? 64'(dut.core.WriteDataM) : {TohostHi, dut.core.WriteDataM[31:0]};
+  assign HtifPutchar   = TohostStore & (TohostWord[63:48] == 16'h0101);
+  assign TohostWrite   = TohostStore & ~HtifPutchar;
+  always @(posedge clk) begin
+    if (SelectTest) TohostHi <= '0;
+    else if (TohostHiStore & dut.core.InstrValidM & ~dut.core.StallM) TohostHi <= dut.core.WriteDataM[31:0];
+    if (HtifPutchar & dut.core.InstrValidM & ~dut.core.StallM) begin
+      $write("%c", TohostWord[7:0]);
+      if (uartoutfile) begin
+        $fwrite(uartoutfile, "%c", TohostWord[7:0]);
+        $fflush(uartoutfile);
+      end
+    end
+  end
   always @(posedge clk) begin
     TestComplete <= ((InstrM == 32'h6f) & dut.core.InstrValidM ) | TohostWrite; // |
     // Capture the result as it is stored, so the check does not depend on the store reaching memory
