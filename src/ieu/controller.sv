@@ -71,6 +71,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   output logic        IFUPrefetchE,            // instruction prefetch
   output logic        LSUPrefetchM,            // data prefetch
   output logic [1:0]  ForwardAE, ForwardBE,    // Select signals for forwarding multiplexers
+  output logic        StoreDataFwdM,           // Store data comes from the load or SC now in Writeback
   // Memory stage control signals
   input  logic        StallM, FlushM,          // Stall, flush Memory stage
   output logic [1:0]  MemRWE,                  // Mem read/write: MemRWM[1] = 1 for read, MemRWM[0] = 1 for write
@@ -156,6 +157,8 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   logic        IFUPrefetchD;                   // instruction prefetch
   logic        LSUPrefetchD, LSUPrefetchE;     // data prefetch
   logic        MatchDE;                        // Match between a source register in Decode stage and destination register in Execute stage
+  logic        StoreDataOnlyD;                 // Decode-stage store depends on the Execute-stage result only through its data (rs2)
+  logic        StoreDataFwdE;                  // Execute-stage store takes its data from the load or SC in Memory
   logic        FCvtIntStallD, MDUStallD, CSRRdStallD; // Stall due to conversion, load, multiply/divide, CSR read
   logic        FunctCZeroD;                    // Funct7 and Funct3 indicate czero.* (not including Op check)
   logic        BUW64D;                         // Indicates if it is a .uw type B instruction in Decode Stage
@@ -447,6 +450,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
                          {RegWriteE, ResultSrcE, MemRWE, CSRReadE, CSRWriteE, PrivilegedE, Funct3E, FWriteIntE, AtomicE, InvalidateICacheE, FlushDCacheE, FenceE, InstrValidE, IntDivE, CMOpE, LSUPrefetchE},
                          {RegWriteM, ResultSrcM, MemRWM, CSRReadM, CSRWriteM, PrivilegedM, Funct3M, FWriteIntM, AtomicM, InvalidateICacheM, FlushDCacheM, FenceM, InstrValidM, IntDivM, CMOpM, LSUPrefetchM});
   flopenrc #(5)  RdMReg(clk, reset, FlushM, ~StallM, RdE, RdM);
+  flopenrc #(1)  StoreDataFwdMReg(clk, reset, FlushM, ~StallM, StoreDataFwdE, StoreDataFwdM);
 
   // Writeback stage pipeline control register
   flopenrc #(5) controlregW(clk, reset, FlushW, ~StallW,
@@ -473,7 +477,11 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   // Stall on dependent operations that finish in Mem Stage and can't bypass in time
   // Structural hazard causes stall if any of these events occur
   assign MatchDE = ((Rs1D == RdE) | (Rs2D == RdE)) & (RdE != 5'b0); // Decode-stage instruction source depends on result from execute stage instruction
-  assign LoadStallD = (MemReadE|SCE) & MatchDE;
+  // A store needs its data (rs2) only in the Memory stage, so a store that depends on a load or SC only through
+  // rs2 does not stall; its data is forwarded in the Memory stage from the load's result in Writeback.
+  assign StoreDataOnlyD = (InstrD[6:0] == 7'b0100011) & (Rs2D == RdE) & (Rs1D != RdE); // integer store (sb/sh/sw/sd)
+  assign LoadStallD = (MemReadE|SCE) & MatchDE & ~StoreDataOnlyD;
+  assign StoreDataFwdE = (MemRWE == 2'b01) & ~|CMOpE & (Rs2E == RdM) & (RdM != 5'b0) & RegWriteM & (MemRWM[1] | (ResultSrcM == 3'b100));
   assign StoreStallD = MemRWD[1] & MemRWE[0];   // Store or AMO followed by load or AMO
   assign CSRRdStallD = CSRReadE & MatchDE;
   assign MDUStallD = MDUE & MatchDE; // Int mult/div is at least two cycle latency, even when coming from the FDIV

@@ -101,6 +101,7 @@ module ieu import cvw::*;  #(parameter cvw_t P) (
   logic [4:0] Rs1D, Rs2D;
   logic [4:0] Rs2E;                                          // Source registers
   logic [1:0] ForwardAE, ForwardBE;                          // Select signals for forwarding multiplexers
+  logic       StoreDataFwdM;                                 // Store data comes from the load or SC now in Writeback
   logic       RegWriteW;                                     // Register will be written in Writeback stage
   logic       BranchSignedE;                                 // Branch does signed comparison on operands
   logic       BMUActiveE;                                    // Bit manipulation instruction being executed
@@ -114,7 +115,7 @@ module ieu import cvw::*;  #(parameter cvw_t P) (
     .PCSrcE, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE,
     .Funct3E, .Funct7E, .IntDivE, .W64E, .UW64E, .SubArithE, .BranchD, .BranchE, .JumpD, .JumpE,
     .BranchSignedE, .BSelectE, .ZBBSelectE, .BALUControlE, .BMUActiveE, .CZeroE, .MDUActiveE,
-    .FCvtIntE, .ForwardAE, .ForwardBE, .CMOpM, .IFUPrefetchE, .LSUPrefetchM,
+    .FCvtIntE, .ForwardAE, .ForwardBE, .StoreDataFwdM, .CMOpM, .IFUPrefetchE, .LSUPrefetchM,
     .StallM, .FlushM, .MemRWE, .MemRWM, .CSRReadM, .CSRWriteM, .PrivilegedM, .AtomicM, .Funct3M,
     .FlushDCacheM, .InstrValidM, .InstrValidE, .InstrValidD, .FWriteIntM,
     .StallW, .FlushW, .RegWriteW, .IntDivW, .ResultSrcW, .CSRWriteFenceM, .InvalidateICacheM,
@@ -124,7 +125,7 @@ module ieu import cvw::*;  #(parameter cvw_t P) (
     .clk, .reset, .ImmSrcD, .InstrD, .Rs1D, .Rs2D, .Rs2E, .StallE, .FlushE, .ForwardAE, .ForwardBE, .W64E, .UW64E, .SubArithE,
     .Funct3E, .Funct7E, .ALUSrcAE, .ALUSrcBE, .ALUResultSrcE, .ALUSelectE, .JumpE, .BranchSignedE,
     .PCE, .PCLinkE, .FlagsE, .IEUAdrE, .ForwardedSrcAE, .ForwardedSrcBE, .BSelectE, .ZBBSelectE, .BALUControlE, .BMUActiveE, .CZeroE,
-    .StallM, .FlushM, .FWriteIntM, .FIntResM, .SrcAM, .WriteDataM, .FCvtIntW,
+    .StallM, .FlushM, .FWriteIntM, .FIntResM, .SrcAM, .StoreDataFwdM, .WriteDataM, .FCvtIntW,
     .StallW, .FlushW, .RegWriteW, .IntDivW, .SquashSCW, .ResultSrcW, .ReadDataW, .FCvtIntResW,
     .CSRReadValW, .MDUResultW, .FIntDivResultW, .RdW);
 endmodule

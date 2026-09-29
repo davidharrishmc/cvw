@@ -61,6 +61,7 @@ module datapath import cvw::*;  #(parameter cvw_t P) (
   input  logic              FWriteIntM, FCvtIntW,    // FPU writes integer register file, FPU converts float to int
   input  logic [P.XLEN-1:0] FIntResM,                // FPU integer result
   output logic [P.XLEN-1:0] SrcAM,                   // ALU's Source A in Memory stage to privilege unit for CSR writes
+  input  logic              StoreDataFwdM,           // Store data comes from the load or SC now in Writeback
   output logic [P.XLEN-1:0] WriteDataM,              // Write data in Memory stage
   // Writeback stage signals
   input  logic              StallW, FlushW,          // Stall, flush Writeback stage
@@ -92,6 +93,7 @@ module datapath import cvw::*;  #(parameter cvw_t P) (
   // Writeback stage signals
   logic [P.XLEN-1:0] SCResultW;                      // Store Conditional result
   logic [P.XLEN-1:0] ResultW;                        // Result to write to register file
+  logic [P.XLEN-1:0] WriteDataEM;                    // Store data captured from the Execute stage
   logic [P.XLEN-1:0] IFResultW;                      // Result from either IEU or single-cycle FPU op writing an integer register
   logic [P.XLEN-1:0] IFCvtResultW;                   // Result from IEU, signle-cycle FPU op, or 2-cycle FCVT float to int
   logic [P.XLEN-1:0] MulDivResultW;                  // Multiply always comes from MDU.  Divide could come from MDU or FPU (when using fdivsqrt for integer division)
@@ -120,7 +122,8 @@ module datapath import cvw::*;  #(parameter cvw_t P) (
   // Memory stage pipeline register
   flopenrc #(P.XLEN) SrcAMReg(clk, reset, FlushM, ~StallM, SrcAE, SrcAM);
   flopenrc #(P.XLEN) IEUResultMReg(clk, reset, FlushM, ~StallM, IEUResultE, IEUResultM);
-  flopenrc #(P.XLEN) WriteDataMReg(clk, reset, FlushM, ~StallM, ForwardedSrcBE, WriteDataM);
+  flopenrc #(P.XLEN) WriteDataMReg(clk, reset, FlushM, ~StallM, ForwardedSrcBE, WriteDataEM);
+  mux2     #(P.XLEN) storedatamux(WriteDataEM, ResultW, StoreDataFwdM, WriteDataM);
 
   // Writeback stage pipeline register and logic
   flopenrc #(P.XLEN) IFResultWReg(clk, reset, FlushW, ~StallW, IFResultM, IFResultW);
