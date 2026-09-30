@@ -190,7 +190,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
   // The sticky window is narrow because a single precision source reaches Mf with at most S_NF+1
   // significand bits, plus BF16_NF of denormalization.
   localparam BF16STICKYLSB = P.NORMSHIFTSZ - (P.S_NF+1) - P.BF16_NF - 1;
-  assign DstSticky = Bf16Dst ? |Mf[P.NORMSHIFTSZ-P.BF16_NF-2:BF16STICKYLSB] : NormSticky;
+  assign DstSticky = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? |Mf[P.NORMSHIFTSZ-P.BF16_NF-2:BF16STICKYLSB] : NormSticky;
 
   // only add the Addend sticky if doing an FMA operation
   //      - the shifter shifts too far left when there's an underflow (shifting out all possible sticky bits)
@@ -259,9 +259,9 @@ module round import cvw::*;  #(parameter cvw_t P) (
   end
 
   // a BF16 result rounds at its own fraction width
-  assign DstGuard  = Bf16Dst ? Mf[P.NORMSHIFTSZ-P.BF16_NF-1] : FpGuard;
-  assign DstLsbRes = Bf16Dst ? Mf[P.NORMSHIFTSZ-P.BF16_NF]   : FpLsbRes;
-  assign DstRound  = Bf16Dst ? Mf[P.NORMSHIFTSZ-P.BF16_NF-2] : FpRound;
+  assign DstGuard  = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? Mf[P.NORMSHIFTSZ-P.BF16_NF-1] : FpGuard;
+  assign DstLsbRes = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? Mf[P.NORMSHIFTSZ-P.BF16_NF]   : FpLsbRes;
+  assign DstRound  = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? Mf[P.NORMSHIFTSZ-P.BF16_NF-2] : FpRound;
 
   assign Guard  = CvtToInt ? Mf[P.NORMSHIFTSZ-P.XLEN-1] : DstGuard;
   assign LsbRes = CvtToInt ? Mf[P.NORMSHIFTSZ-P.XLEN] : DstLsbRes;
@@ -312,7 +312,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
       assign RoundAdd = {(P.Q_NE+1+P.H_NF)'(0), FpPlus1&(OutFmt==P.H_FMT), (P.S_NF-P.H_NF-1)'(0), FpPlus1&(OutFmt==P.S_FMT), (P.D_NF-P.S_NF-1)'(0), FpPlus1&(OutFmt==P.D_FMT), (P.Q_NF-P.D_NF-1)'(0), FpPlus1&(OutFmt==P.Q_FMT)};
 
   // place Plus1 at the BF16 lsb for a BF16 result
-  assign DstRoundAdd = Bf16Dst ? {(P.NE+1+P.BF16_NF)'(0), FpPlus1, (P.NF-P.BF16_NF)'(0)} : RoundAdd;
+  assign DstRoundAdd = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? {(P.NE+1+P.BF16_NF)'(0), FpPlus1, (P.NF-P.BF16_NF)'(0)} : RoundAdd;
 
   // trim unneeded bits from fraction
   assign RoundFrac = Mf[P.NORMSHIFTSZ-1:P.NORMSHIFTSZ-P.NF];

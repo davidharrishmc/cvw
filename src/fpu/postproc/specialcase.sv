@@ -268,13 +268,13 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
       else if(ZNaN&FmaOp)         PostProcResPreBox = ZNaNRes;
       else if(Invalid)            PostProcResPreBox = InvalidRes;
       else if(SelOfRes)           PostProcResPreBox = OfRes;
-      else if(KillRes)            PostProcResPreBox = Bf16Dst ? Bf16UfRes : UfRes;
+      else if(KillRes)            PostProcResPreBox = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? Bf16UfRes : UfRes;
       else                        PostProcResPreBox = NormRes;
   else
     always_comb
       if(NaNIn|Invalid)           PostProcResPreBox = InvalidRes;
       else if(SelOfRes)           PostProcResPreBox = OfRes;
-      else if(KillRes)            PostProcResPreBox = Bf16Dst ? Bf16UfRes : UfRes;
+      else if(KillRes)            PostProcResPreBox = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? Bf16UfRes : UfRes;
       else                        PostProcResPreBox = NormRes;
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -380,6 +380,6 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
 
   // BF16 shares single's exponent field and the fraction was rounded to BF16 precision, so a BF16
   // result is the top half of the single precision one
-  assign PostProcRes = Bf16Dst ? {{P.FLEN-P.S_LEN+BF16LSB{1'b1}}, PostProcResPreBox[P.S_LEN-1:BF16LSB]} : PostProcResPreBox;
+  assign PostProcRes = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? {{P.FLEN-P.S_LEN+BF16LSB{1'b1}}, PostProcResPreBox[P.S_LEN-1:BF16LSB]} : PostProcResPreBox;
 
 endmodule

@@ -55,7 +55,7 @@ module unpack import cvw::*;  #(parameter cvw_t P) (
   // A BF16 value is bit-identical to the top half of a single, so widening it lets the single
   // precision path unpack it unchanged.  unpackinput cannot check the box itself because single
   // is the widest format when FLEN is 32, so an improperly boxed source becomes the canonical NaN here.
-  assign XIn = Bf16Src ? {{P.FLEN-P.S_LEN{1'b1}}, (&X[P.FLEN-1:BF16LEN] ? {X[BF16LEN-1:0], {P.S_LEN-BF16LEN{1'b0}}} : 32'h7FC00000)} : X;
+  assign XIn = (P.ZFBFMIN_SUPPORTED & Bf16Src) ? {{P.FLEN-P.S_LEN{1'b1}}, (&X[P.FLEN-1:BF16LEN] ? {X[BF16LEN-1:0], {P.S_LEN-BF16LEN{1'b0}}} : 32'h7FC00000)} : X;
 
   unpackinput #(P) unpackinputX (.A(XIn), .Fmt, .Sgn(Xs), .Exp(Xe), .Man(Xm), .En(XEn), .FPUActive,
                           .NaN(XNaN), .SNaN(XSNaN),

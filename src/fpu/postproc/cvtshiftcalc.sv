@@ -99,7 +99,7 @@ module cvtshiftcalc import cvw::*;  #(parameter cvw_t P) (
   end
 
   // a BF16 result has its own fraction length, which is not one of the formats above
-  assign DstNegNF = Bf16Dst ? -($clog2(P.NF)+1)'(P.BF16_NF) : ResNegNF;
+  assign DstNegNF = (P.ZFBFMIN_SUPPORTED & Bf16Dst) ? -($clog2(P.NF)+1)'(P.BF16_NF) : ResNegNF;
 
   // determine if the result underflows ??? -> fp
   //      - if the first 1 is shifted out of the result then the result underflows
