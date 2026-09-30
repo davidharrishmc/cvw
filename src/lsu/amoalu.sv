@@ -92,7 +92,7 @@ module amoalu import cvw::*;  #(parameter cvw_t P) (
   // comparison says so, and amocas keeps it when the compare operand did not match.  An unmatched
   // amocas therefore writes the loaded value back, which the spec permits and which leaves the
   // ordinary AMO store path untouched.
-  assign SelA = (LSUFunct7M[6:2] == 5'b00101) ? ~CASMatchM : cmp;
+  assign SelA = (P.ZACAS_SUPPORTED & (LSUFunct7M[6:2] == 5'b00101)) ? ~CASMatchM : cmp;
 
   // AMO ALU
   always_comb
