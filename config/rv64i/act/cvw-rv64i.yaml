@@ -13,6 +13,10 @@ implemented_extensions:
   - { name: I, version: "= 2.1" }
   - { name: Sm, version: "= 1.11.0" }
 params:
+  NON_STANDARD_EXTENSION_IMPLEMENTED: false
+  # WFI in U mode and whether WFI waits a finite time, as on the other cvw configurations
+  WFI_U_MODE: true
+  WFI_FINITE: true
   # XLEN / address width
   MXLEN: 64
   # 32-bit AXI address bus: "output [31:0] mem_axi_awaddr".
