@@ -120,8 +120,8 @@ localparam CVTLEN = (ZFA_SUPPORTED & D_SUPPORTED) ? `max(BASECVTLEN, 32'd84) : B
 localparam LLEN = `max($unsigned(FLEN), $unsigned(XLEN));
 localparam LOGCVTLEN = $unsigned($clog2(CVTLEN+1));
 
-// size of FMA output in U(NF+4).(3NF+2) format
-localparam FMALEN = 3*NF + 6;
+// size of FMA sum in U(NF+4.2NF+1) format
+localparam FMALEN = 3*NF + 5;
 
 // NORMSHIFTSIZE is the bits out of the normalization shifter
 localparam NORMSHIFTSZ = `max(`max((CVTLEN+NF+1), (DIVb + 1 + NF + 1)), (FMALEN + 2));

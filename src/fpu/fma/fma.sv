@@ -54,11 +54,23 @@ module fma import cvw::*;  #(parameter cvw_t P) (
   //        111 - sub
 
   logic [2*P.NF+1:0]   Pm;         // the product's significand in U(2.2Nf) format
-  logic [P.FMALEN-1:0] Am;         // addend aligned's mantissa for addition in U(NF+4.2NF)
+  logic [P.FMALEN-1:0] Am;         // addend aligned's mantissa for addition in U(NF+4.2NF+1)
   logic [P.FMALEN-1:0] AmInv;      // aligned addend's mantissa possibly inverted
   logic [2*P.NF+1:0]   PmKilled;   // the product's mantissa possibly killed U(2.2Nf)
   logic                KillProd;   // set the product to zero before addition if the product is too small to matter
   logic [P.NE+1:0]     Pe;         // the product's exponent B(NE+2.0) format; adds 2 bits to allow for size of number and negative sign
+  logic                XMinSub, YMinSub; // multiplicand is the smallest subnormal
+  logic [P.NE-1:0]     XeM, YeM;   // multiplicand exponents
+  logic [P.NF:0]       XmM, YmM;   // multiplicand significands
+
+  // Present the smallest subnormal multiplicand as 2^-(NF-1) with biased exponent 0 rather than 2^-NF with exponent 1,
+  // so the product has at most NF-1 leading zeros and the adder needs only one bit below the product (issue #970).
+  assign XMinSub = ~Xm[P.NF] & ~|Xm[P.NF-1:1] & Xm[0];
+  assign YMinSub = ~Ym[P.NF] & ~|Ym[P.NF-1:1] & Ym[0];
+  assign XmM = {Xm[P.NF:2], Xm[1] | XMinSub, Xm[0] & ~XMinSub};
+  assign YmM = {Ym[P.NF:2], Ym[1] | YMinSub, Ym[0] & ~YMinSub};
+  assign XeM = {Xe[P.NE-1:1], Xe[0] & ~XMinSub};
+  assign YeM = {Ye[P.NE-1:1], Ye[0] & ~YMinSub};
 
   ///////////////////////////////////////////////////////////////////////////////
   // Calculate the product
@@ -69,10 +81,10 @@ module fma import cvw::*;  #(parameter cvw_t P) (
   ///////////////////////////////////////////////////////////////////////////////
 
   // calculate the product's exponent
-  fmaexpadd #(P) expadd(.Xe, .Ye, .XZero, .YZero, .Pe);
+  fmaexpadd #(P) expadd(.Xe(XeM), .Ye(YeM), .XZero, .YZero, .Pe);
 
   // multiplication of the mantissa's
-  fmamult #(P) mult(.Xm, .Ym, .Pm);
+  fmamult #(P) mult(.Xm(XmM), .Ym(YmM), .Pm);
 
   // calculate the signs and take the operation into account
   fmasign sign(.OpCtrl, .Xs, .Ys, .Zs, .Ps, .As, .InvA);
@@ -81,7 +93,7 @@ module fma import cvw::*;  #(parameter cvw_t P) (
   // Alignment shifter
   ///////////////////////////////////////////////////////////////////////////////
 
-  fmaalign #(P) align(.Ze, .Zm, .XZero, .YZero, .ZZero, .Xe, .Ye, .Am, .ASticky, .KillProd);
+  fmaalign #(P) align(.Ze, .Zm, .XZero, .YZero, .ZZero, .Xe(XeM), .Ye(YeM), .Am, .ASticky, .KillProd);
 
   // ///////////////////////////////////////////////////////////////////////////////
   // // Addition/LZA
