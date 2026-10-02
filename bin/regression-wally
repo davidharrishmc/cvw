@@ -504,7 +504,9 @@ def buildTests(configs, periph=True, coverage=False):
             stampDir = os.path.dirname(actElfDir(c))
             if os.path.isdir(stampDir):
                 open(f"{stampDir}/.cvw_config_stamp", "w").close()
-    targets = (["periph"] if periph else []) + (["coverage"] if coverage else [])
+    # A 64-bit IROM (rv64i) is preloaded from fpga/src/boot.mem, which only the zsbl build produces;
+    # without it Verilator warns that the file is missing and the run counts as a failure
+    targets = (["zsbl"] if configs else []) + (["periph"] if periph else []) + (["coverage"] if coverage else [])
     if targets and os.system(f"make -C {WALLY} {' '.join(targets)}"):
         print(f"{bcolors.FAIL}Error: building {' '.join(targets)} tests failed{bcolors.ENDC}")
         sys.exit(1)
