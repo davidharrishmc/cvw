@@ -860,7 +860,8 @@ def main(args):
         # Merge only coverage that belongs to the tests selected now: drop the .ucdb of any test that
         # was renamed, removed, waived, or run by hand outside the regression.
         current = keptCoverage | {c.ucdb for c in configs if c.ucdb}
-        stale = [f for f in glob.glob(f"{regressionDir}/questa/ucdb/*.ucdb") if f not in current]
+        merged = f"{regressionDir}/questa/ucdb/cov.ucdb"  # the merged result sim/Makefile writes
+        stale = [f for f in glob.glob(f"{regressionDir}/questa/ucdb/*.ucdb") if f not in current and f != merged]
         for f in stale:
             os.remove(f)
         if stale:
