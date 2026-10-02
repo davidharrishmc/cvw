@@ -226,10 +226,8 @@ coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -f
 # initiating a new fetch, so that 1-cycle uncached request never coincides with an LSU grant.
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm HREADY0"] 1
 
-# bpred BPWrongE InstrValidD_0: unreachable single-issue invariant.  When a branch mispredicts in E the
-# next instruction in D is always valid, because no flush could invalidate D without also flushing the
-# branch in E.  So InstrValidD is always 1 when (PCCorrectE != PCD) & InstrValidE (FEC row 5 unreachable).
-coverage exclude -scope /core/ifu/bpred/bpred -fecexprrow [GetLineNum ${SRC}/ifu/bpred/bpred.sv "assign BPWrongE"] 5
+# (bpred BPWrongE InstrValidD_0, row 5, used to be excluded as a single-issue invariant; the regression with
+# the tests of #1900 and #1909 hits it, so it is counted.)
 
 ## D$ Exclusions.
 # InvalidateCache is I$ only:
@@ -332,6 +330,7 @@ coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/plicdec -fecexprr
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/spidec -fecexprrow $line 3
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/pwmdec -fecexprrow $line 3
 
+set line [GetLineNum ${SRC}/mmu/adrdec.sv "exclusion-tag: adrdecSel"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/clintdec -fecexprrow $line 3 7
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/uncoreramdec -fecexprrow $line 3 7
 
