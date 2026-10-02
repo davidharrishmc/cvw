@@ -468,8 +468,9 @@ def coverageDatabase(coverStr, config, name):
 
 def designMtime():
     """Newest mtime among everything that shapes a test's coverage: the design and testbench
-    sources, the ImperasDV configurations (.ic), and the Questa scripts that compile, run and
-    apply the coverage exclusions (exclusions are applied when each test saves its .ucdb)."""
+    sources, the ImperasDV configurations (.ic), and the Questa scripts that compile and run the
+    tests.  The coverage exclusions are applied to the merged database (sim/Makefile), so editing
+    them does not require rerunning the tests."""
     global _designMtime
     if _designMtime is None:
         _designMtime = 0
@@ -478,8 +479,8 @@ def designMtime():
                 for f in files:
                     if f.endswith((".sv", ".v", ".svh", ".vh", ".ic")):
                         _designMtime = max(_designMtime, os.path.getmtime(os.path.join(root, f)))
-        for f in glob.glob(f"{regressionDir}/questa/*.do"):
-            _designMtime = max(_designMtime, os.path.getmtime(f))
+        for f in ("wally-compile.do", "wally-run.do"):
+            _designMtime = max(_designMtime, os.path.getmtime(f"{regressionDir}/questa/{f}"))
     return _designMtime
 
 
@@ -882,11 +883,11 @@ def main(args):
         if missing:
             print(f"{bcolors.FAIL}The merged coverage leaves out the {len(missing)} runs above{bcolors.ENDC}")
 
-    # Coverage report
-    if args.ccov:
-        os.system(f"make -C {regressionDir} QuestaCodeCoverage")
-    if args.fcov:
-        os.system(f"make -C {regressionDir} QuestaFunctCoverage")
+    # Coverage report; a merge or exclusion failure means the report cannot be trusted
+    for enabled, target in ((args.ccov, "QuestaCodeCoverage"), (args.fcov, "QuestaFunctCoverage")):
+        if enabled and not args.dryrun and os.system(f"make -C {regressionDir} {target}"):
+            print(f"{bcolors.FAIL}make {target} failed{bcolors.ENDC}")
+            num_fail += 1
     # if args.fcov or args.fcov_act or args.breker:
     #     os.system(f"make -C {archVerifDir} merge")
     # Count the number of failures
