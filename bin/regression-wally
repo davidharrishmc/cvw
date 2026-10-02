@@ -80,6 +80,15 @@ tests_buildrootbootlockstep = [
                         "WallyHostname login: ", "buildroot_uart.out"]
     ]
 
+# Regression modes whose test lists below still name the old tests.vh suites.  Until they are
+# converted to run ACT directories filtered by the extensions each configuration supports, the
+# regression refuses them rather than failing every test with "Test not found".
+unmigratedModes = {
+    "nightly": "derivative configurations (derivconfigtests)",
+    "branch": "branch predictor tests (bpredtests)",
+    "cache": "cache tests (tests64gc_cache)",
+}
+
 # TODO: these derivative configurations still name the old tests.vh suites.  They need to be
 # converted to run ACT directories filtered by the extensions each configuration supports.
 derivconfigtests = [
@@ -836,6 +845,11 @@ def makeDirs(sims):
 
 
 def main(args):
+    unmigrated = [f"--{mode} ({what})" for mode, what in unmigratedModes.items() if getattr(args, mode)]
+    if unmigrated:
+        print(f"{bcolors.FAIL}Error: {', '.join(unmigrated)} not available yet: migration of these tests "
+              f"to riscv-arch-test is still in progress{bcolors.ENDC}", file=sys.stderr)
+        return 1
     startTime = time.time()
     sims, coverStr, TIMEOUT_DUR = process_args(args)
     makeDirs(sims)
