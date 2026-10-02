@@ -695,7 +695,7 @@ def process_args(args):
     elif args.fcov or args.breker:
         sims = [coveragesim]
         coverStr = "--fcov"
-        TIMEOUT_DUR = 30*60 # per simulation; functional coverage splits large directories (see selectTests)
+        TIMEOUT_DUR = 60*60 # per simulation; functional coverage splits large directories (see selectTests)
         shutil.rmtree(f"{regressionDir}/questa/fcov_ucdb", ignore_errors=True)
         os.makedirs(f"{regressionDir}/questa/fcov_ucdb", exist_ok=True)
     elif args.buildroot:
@@ -744,9 +744,10 @@ def selectTests(args, sims, coverStr):
     # copy would race it for the same log and testlist files.
     if args.fcov:
         buildTests(["rv64gc"], periph=False)
-        # Functional coverage slows the simulation to tens of seconds per ELF, so split each
-        # directory into simulations of at most 16 ELFs
-        addTestsByDir(actElfDir("rv64gc"), "rv64gc", coveragesim, coverStr, configs, chunk=16)
+        # Functional coverage slows the simulation to between half a minute and two minutes per
+        # ELF (the Ssstrict tests are the slowest), so split each directory into simulations of at
+        # most 8 ELFs
+        addTestsByDir(actElfDir("rv64gc"), "rv64gc", coveragesim, coverStr, configs, chunk=8)
      # run branch predictor tests
     if args.branch:
         addTests(bpredtests, defaultsim, coverStr, configs)
