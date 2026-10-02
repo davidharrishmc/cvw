@@ -33,9 +33,11 @@ actdir = f"{WALLY}/addins/riscv-arch-test"
 #          as Questa's focused expression coverage does, so that the two report the same holes and
 #          exclusions2el can carry Questa's row exclusions over.
 #   fsm    state machine states and transitions (f)
-# Toggle coverage (Questa's t) is not collected, as with Questa.
+# Toggle coverage (Questa's t) is not collected, as with Questa.  -cm_noconst leaves out what a constant,
+# such as a configuration parameter, makes unreachable (the XLEN=32 arm of an if (P.XLEN == 64)), which
+# Questa's optimizer removes before it counts coverage.
 CCOV_METRICS = "line+cond+branch+fsm"
-CCOV_COMPILE = f"-cm {CCOV_METRICS} -cm_line contassign -cm_cond obs -cm_hier {simdir}/coverage.hier"
+CCOV_COMPILE = f"-cm {CCOV_METRICS} -cm_line contassign -cm_cond obs -cm_noconst -cm_hier {simdir}/coverage.hier"
 
 # run a Linux command and return the result as a string in a form that VCS can use
 def runFindCommand(cmd):
