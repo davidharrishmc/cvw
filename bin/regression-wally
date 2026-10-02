@@ -664,7 +664,9 @@ def selectTests(args, sims, coverStr):
     # Unlike code coverage this cannot run in lockstep: the covergroups read the virtual memory
     # fields of riscv-arch-test's RVVI trace, while ImperasDV needs the RVVI API tasks of its own,
     # and only one of the two interfaces can be compiled in.  The tests still check themselves.
-    if args.fcov or args.nightly:
+    # Not in nightly: its standard block already runs these directories on Questa, and a second
+    # copy would race it for the same log and testlist files.
+    if args.fcov:
         buildTests(["rv64gc"], periph=False)
         addTestsByDir(actElfDir("rv64gc"), "rv64gc", coveragesim, coverStr, configs)
      # run branch predictor tests
