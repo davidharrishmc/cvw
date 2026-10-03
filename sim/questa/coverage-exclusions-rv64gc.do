@@ -67,7 +67,13 @@ coverage exclude -scope /core/fpu/fpu/postprocess/cvtshiftcalc -fecexprrow [GetL
 # without Q support, an instruction with FMT = 11 is rejected as an unsupported format before the case statement,
 # so the FMT field here is 00, 01, or 10.  Rows 1, 3 and 5 each need all three compares false (FMT = 11).
 coverage exclude -scope /core/fpu/fpu/fctrl -feccondrow [GetLineNum ${SRC}/fpu/fctrl.sv "fmv int to fp"] 1 3 5
+# fmvp.q.x (funct7 1011011) has FMT = 11, so without Q support it is rejected as an unsupported format
+# before the case statement and its case arm cannot be selected.
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "7'b1011011: if"] -item b 1
 coverage exclude -scope /core/fpu/fpu/fctrl -feccondrow [GetLineNum ${SRC}/fpu/fctrl.sv "fmv fp to int"] 1 3 5
+# The same FMT = 11 case is the implicit else of both ifs, so their all-false branches cannot be taken either.
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "fmv int to fp"] -code b -allfalse
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "fmv fp to int"] -code b -allfalse
 # j0 can only be 1 in iteration 0, j1 can only be 1 in iteration 1
 coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtiter/iterations[0]/stage/fdivsqrtstage/uslc4 -fecexprrow [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtuslc4cmp.sv "assign sqrtspecial"] 4 6
 coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtiter/iterations[1]/stage/fdivsqrtstage/uslc4 -fecexprrow [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtuslc4cmp.sv "assign sqrtspecial"] 6
