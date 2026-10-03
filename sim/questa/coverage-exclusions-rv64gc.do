@@ -295,10 +295,12 @@ set line [GetLineNum ${SRC}/mmu/adrdec.sv "exclusion-tag: adrdecSel"]
 # The instruction side drives the MMU with ReadAccessM and WriteAccessM tied low and ExecuteAccessF tied high (see
 # the mmu instantiation in ifu.sv), so AccessRW is 0 and AccessRX/AccessRWXC are 1 there, and the fetch size is fixed.
 # Peripherals qualified by AccessRW never select: every row except AccessValid_0 needs AccessValid = 1.  AccessValid_0
-# (row 5) is reachable by fetching from the peripheral's address range, so it is counted.
-foreach dec {clintdec gpiodec uartdec plicdec spidec pwmdec} {
+# (row 5) is reachable by fetching from the peripheral's address range (tests/coverage/fetchperiph.S), so it is
+# counted, except for the UART: it only accepts byte accesses, so SizeValid is 0 for the word-sized fetch.
+foreach dec {clintdec gpiodec plicdec spidec pwmdec} {
   coverage exclude -scope /core/ifu/immu/immu/pmachecker/adrdecs/$dec -fecexprrow $line 1-4 6-8
 }
+coverage exclude -scope /core/ifu/immu/immu/pmachecker/adrdecs/uartdec -fecexprrow $line 1-8
 # DTIM and SDC are not supported and qualified by AccessRW: no row can be reached.  IROM and external memory are not
 # supported: Supported_0 (row 3) is hit and every other row needs Supported = 1.
 coverage exclude -scope /core/ifu/immu/immu/pmachecker/adrdecs/dtimdec -fecexprrow $line 1-8
