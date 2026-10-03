@@ -62,6 +62,8 @@ coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtfsm -linerange [GetLineNu
 # (FpInexact row 14 and Underflow row 22 are the DivByZero_1 rows)
 coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign FpInexact"] 14
 coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign Underflow"] 22
+# Underflow row 5 needs FullRe other than 0 or 1 while Me == 0, but a subnormal (Me = 0) rounds to FullRe = 0 or 1
+coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign Underflow"] 5
 # Convert int to fp will never underflow
 coverage exclude -scope /core/fpu/fpu/postprocess/cvtshiftcalc -fecexprrow [GetLineNum ${SRC}/fpu/postproc/cvtshiftcalc.sv "assign CvtResUf"] 4
 # without Q support, an instruction with FMT = 11 is rejected as an unsupported format before the case statement,
