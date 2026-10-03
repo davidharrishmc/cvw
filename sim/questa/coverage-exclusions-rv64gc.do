@@ -597,6 +597,10 @@ coverage exclude -scope /core/priv/priv/csr/csru/csru -fecexprrow [GetLineNum ${
 coverage exclude -scope /core/priv/priv/csr/counters/cntr[1] -fecexprrow [GetLineNum ${SRC}/privileged/csrc.sv "MTIME traps"] 2 4
 coverage exclude -scope /core/priv/priv/csr/counters/cntr[1] -linerange [GetLineNum ${SRC}/privileged/csrc.sv "assign NextHPMCOUNTERM"] -item b 1
 
+# rv64gc divides integers in the FPU (IDIV_ON_FPU), so the integer divider never runs and DivBusyE is never
+# asserted: row 2 (DivBusyE_1) of the division-cycles event cannot be reached.  FDivBusyE's rows are hit.
+coverage exclude -scope /core/priv/priv/csr/counters -fecexprrow [GetLineNum ${SRC}/privileged/csrc.sv "division cycles"] 2
+
 # CounterEvent[0] is tied high because MCYCLE always increments, so the FEC row that needs it low
 # cannot be reached.
 coverage exclude -scope /core/priv/priv/csr/counters/cntr[0] -fecexprrow [GetLineNum ${SRC}/privileged/csrc.sv "MCYCLE, CYCLE, and MINSTRET are always incremented"] 1
