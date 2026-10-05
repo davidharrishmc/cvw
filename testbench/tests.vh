@@ -83,6 +83,7 @@ string coverage64gc[] = '{
   "btbthrash",
   "fpuReservedRM",
   "decompReserved",
+  "wfiForward",
   "pmpTOR7",
   "cacheInval",
   "wfitimeout"

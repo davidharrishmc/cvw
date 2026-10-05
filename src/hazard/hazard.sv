@@ -89,7 +89,7 @@ module hazard (
   // Need to gate IFUStallF when the equivalent FlushFCause = FlushDCause = 1.
   // assign StallWCause = ((IFUStallF & ~FlushDCause) | LSUStallM) & ~FlushWCause;
   // Because FlushWCause is a strict subset of FlushDCause, FlushWCause is factored out.
-  assign StallWCause = (IFUStallF & ~FlushDCause) | (LSUStallM & ~FlushWCause) | ExternalStall;
+  assign StallWCause = (IFUStallF & ~FlushDCause) | (LSUStallM & ~FlushWCause) | ExternalStall | (WFIStallM & ~FlushMCause);
 
   // Stall each stage for cause or if the next stage is stalled
   // coverage off: StallFCause is always 0
