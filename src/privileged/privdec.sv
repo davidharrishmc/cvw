@@ -95,7 +95,7 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
     logic [P.WFI_TIMEOUT_BIT:0] WFICount, WFICountPlus1;
     logic                       WFICountEn, WFICountRst;
     // Clear counter when reset or when trap is taken
-    assign WFICountRst = reset | TrapM;
+    assign WFICountRst = reset | TrapM & ~StallW;
     // Stop incrementing the counter once reach the timeout limit
     assign WFICountEn = ~WFITimeoutM;
     assign WFICountPlus1 = wfiM ? WFICount + 1 : '0; // Count while WFI
