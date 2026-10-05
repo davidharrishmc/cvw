@@ -54,6 +54,7 @@ string coverage64gc[] = '{
   "fpu",
   "lsu",
   "vm64check",
+  "noncanonical",
   "tlbmisc",
   "tlbNAPOT",
   "tlbASID",
