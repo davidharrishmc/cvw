@@ -425,7 +425,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
 
   if (P.F_SUPPORTED)
     if (P.FLEN >= P.XLEN)
-      mux2 #(P.LLEN) datamux({{{P.LLEN-P.XLEN}{1'b0}}, IMAWriteDataM}, FWriteDataM, FpLoadStoreM, IMAFWriteDataM);
+      mux2 #(P.LLEN) datamux({{{P.LLEN-P.XLEN}{1'b0}}, IMAWriteDataM}, FWriteDataM, FpLoadStoreM & ~SelHPTW, IMAFWriteDataM);
     else
       mux2 #(P.LLEN) datamux(IMAWriteDataM, {{{P.XLEN-P.FLEN}{1'b0}}, FWriteDataM}, FpLoadStoreM, IMAFWriteDataM);
 

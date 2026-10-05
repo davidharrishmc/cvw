@@ -73,6 +73,7 @@ string coverage64gc[] = '{
   "ifuCamlineWrite",
   "dcache1",
   "dcache2",
+  "fpADUpdate",
   "pmp",
   "pmpcfg",
   "pmpcfg1",
