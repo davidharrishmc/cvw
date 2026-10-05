@@ -70,6 +70,7 @@ string coverage64gc[] = '{
   "nonleafpbmtfault",
   "amoAccessFault",
   "floatmisc",
+  "divflushstall",
   "ifuCamlineWrite",
   "dcache1",
   "dcache2",

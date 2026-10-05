@@ -706,9 +706,7 @@ module testbench;
     rvvitbwrapper #(P, MAX_CSRS, RVVI_INIT_TIME_OUT, RVVI_PACKET_DELAY)
     rvvitbwrapper(.clk, .reset, .RVVIStall, .mii_tx_clk(clk), .mii_txd, .mii_tx_en, .mii_tx_er,
                   .mii_rx_clk(clk), .mii_rxd('0), .mii_rx_dv('0), .mii_rx_er('0));
-  end else begin
-    assign RVVIStall = '0;
-  end
+  end // otherwise RVVIStall comes from stallinjector below
 
 
   /*
@@ -728,6 +726,20 @@ module testbench;
   logic [31:0] NextInstrE, InstrM;
   mux2    #(32)     FlushInstrMMux(dut.core.ifu.InstrE, dut.core.ifu.nop, dut.core.ifu.FlushM, NextInstrE);
   flopenr #(32)     InstrMReg(clk, reset, ~dut.core.ifu.StallM, NextInstrE, InstrM);
+
+  // Optional ExternalStall injector for directed tests of stall/flush interactions.  Inactive unless the
+  // program retires the custom-use HINT slti x0, x0, imm with imm = {length[5:0], delay[5:0]}: delay cycles
+  // later, ExternalStall is held for length cycles.
+  if (!RVVI_SYNTH_SUPPORTED) begin : stallinjector
+    logic [5:0] StallDelay, StallLength;
+    always_ff @(posedge clk)
+      if (reset) {StallLength, StallDelay} <= '0;
+      else if (dut.core.InstrValidM & ~dut.core.StallW & ~dut.core.FlushW & InstrM[19:0] == 20'h02013)
+                                 {StallLength, StallDelay} <= InstrM[31:20];
+      else if (StallDelay != 0)  StallDelay <= StallDelay - 1;
+      else if (StallLength != 0) StallLength <= StallLength - 1;
+    assign RVVIStall = (StallDelay == 0) & (StallLength != 0);
+  end
 
   // Track names of instructions
   string InstrFName, InstrDName, InstrEName, InstrMName, InstrWName;

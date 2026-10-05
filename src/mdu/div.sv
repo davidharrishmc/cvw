@@ -125,8 +125,9 @@ module div import cvw::*;  #(parameter cvw_t P) (
   // Divider FSM to sequence Busy and Done
   //////////////////////////////
 
+ // Flush only when Execute advances: a finished divide held by StallM keeps its result even if mispredicted (BPWrongE)
  always_ff @(posedge clk)
-    if (reset | FlushE) begin
+    if (reset | FlushE & ~StallM) begin
         state <= IDLE;
     end else if (DivStartE) begin
         step <= 1;

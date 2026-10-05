@@ -61,8 +61,9 @@ module fdivsqrtfsm import cvw::*;  #(parameter cvw_t P) (
   else               assign SpecialCaseE = FSpecialCaseE;
   flopenr #(1) SpecialCaseReg(clk, reset, IFDivStartE, SpecialCaseE, SpecialCaseM); // save SpecialCase for checking in fdivsqrtpostproc
 
+  // Flush only when Execute advances: a finished divide held by StallM keeps its result even if mispredicted (BPWrongE)
   always_ff @(posedge clk) begin
-      if (reset | FlushE) begin
+      if (reset | FlushE & ~StallM) begin
           state <= IDLE;
       end else if (IFDivStartE) begin // IFDivStartE implies stat is IDLE
           step <= CyclesE;
@@ -71,8 +72,8 @@ module fdivsqrtfsm import cvw::*;  #(parameter cvw_t P) (
       end else if (state == BUSY) begin
           if (step == 1 | WZeroE) state <= DONE; // finished steps or terminate early on zero residual
           step <= step - 1;
-      end else if (state == DONE) begin // Can't still be stalled in configs tested, but keep this check for paranoia
-        if (StallM) state <= DONE; // exclusion-tag: fdivsqrtfsm stallm
+      end else if (state == DONE) begin
+        if (StallM) state <= DONE;
         else        state <= IDLE;
       end
   end
