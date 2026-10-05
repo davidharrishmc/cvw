@@ -85,7 +85,8 @@ string coverage64gc[] = '{
   "decompReserved",
   "pmpTOR7",
   "cacheInval",
-  "wfitimeout"
+  "wfitimeout",
+  "wfitimeoutnext"
 };
 
 string buildroot[] = '{

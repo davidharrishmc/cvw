@@ -100,9 +100,10 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
     assign WFICountEn = ~WFITimeoutM;
     assign WFICountPlus1 = wfiM ? WFICount + 1 : '0; // Count while WFI
     flopenr #(P.WFI_TIMEOUT_BIT+1) wficountreg(clk, WFICountRst, WFICountEn, WFICountPlus1, WFICount);
+    // Gate with wfiM: a wfi woken on its last cycle leaves the count at the limit when the next instruction reaches M
   // coverage off -item e 1 -fecexprrow 1
   // WFI Timeout trap will not occur when STATUS_TW is low while in supervisor mode, so the system gets stuck waiting for an interrupt and triggers a watchdog timeout.
-    assign WFITimeoutM = ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE)) & WFICount[P.WFI_TIMEOUT_BIT];
+    assign WFITimeoutM = ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE)) & WFICount[P.WFI_TIMEOUT_BIT] & wfiM;
   // coverage on
   end else assign WFITimeoutM = 1'b0;
 
