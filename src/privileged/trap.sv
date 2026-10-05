@@ -28,12 +28,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module trap import cvw::*;  #(parameter cvw_t P) (
-  input  logic                 reset,
+  input  logic                 clk, reset,
   input  logic                 InstrMisalignedFaultM, InstrAccessFaultM, HPTWInstrAccessFaultM, HPTWInstrPageFaultM, IllegalInstrFaultM,
   input  logic                 BreakpointFaultM, LoadMisalignedFaultM, StoreAmoMisalignedFaultM,
   input  logic                 LoadAccessFaultM, StoreAmoAccessFaultM, EcallFaultM, InstrPageFaultM,
   input  logic                 LoadPageFaultM, StoreAmoPageFaultM,              // various trap sources
-  input  logic                 wfiM, wfiW,                                      // wait for interrupt instruction
+  input  logic                 wfiM,                                            // wait for interrupt instruction
+  input  logic                 StallM,                                          // Memory stage stalled
   input  logic [1:0]           PrivilegeModeW,                                  // current privilege mode
   input  logic [11:0]          MIP_REGW, MIE_REGW, MIDELEG_REGW,                // interrupt pending, enabled, and delegate CSRs
   input  logic [15:0]          MEDELEG_REGW,                                    // exception delegation SR
@@ -52,6 +53,7 @@ module trap import cvw::*;  #(parameter cvw_t P) (
   logic                        Committed;                                       // LSU or IFU has committed to a bus operation that can't be interrupted
   logic                        BothInstrAccessFaultM, BothInstrPageFaultM;      // instruction or HPTW ITLB fill caused an Instruction Access Fault
   logic [11:0]                 PendingIntsM, ValidIntsM, EnabledIntsM;          // interrupts are pending, valid, or enabled
+  logic                        WFIWaitedM;                                      // wfi in the M stage has waited for an interrupt
 
   ///////////////////////////////////////////
   // Determine pending enabled interrupts
@@ -66,9 +68,11 @@ module trap import cvw::*;  #(parameter cvw_t P) (
   assign IntPendingM   = |PendingIntsM;
   assign Committed     = CommittedM | CommittedF;
   assign EnabledIntsM  = (MIntGlobalEnM ? PendingIntsM & ~MIDELEG_REGW : '0) | (SIntGlobalEnM ? PendingIntsM & MIDELEG_REGW : '0);
-  assign ValidIntsM    = Committed ? '0 : EnabledIntsM;
-  assign InterruptM    = (|ValidIntsM) & InstrValidM & (~wfiM | wfiW); // suppress interrupt if the memory system has partially processed a request. Delay interrupt until wfi is in the W stage.
-  // wfiW is to support possible but unlikely back to back wfi instructions. wfiM would be high in the M stage, while also in the W stage.
+  // A wfi that stalled in M waiting for an interrupt retires before the interrupt is taken (mepc = wfi+4, 3.3.3).
+  // An interrupt already pending and enabled when the wfi reaches M (e.g. just enabled by a CSR write, 3.1.9) is taken on the wfi.
+  flopr #(1) wfiwaitedreg(clk, reset, StallM & (wfiM & ~IntPendingM | WFIWaitedM), WFIWaitedM); // held while the wfi stays in M
+  assign ValidIntsM    = (Committed | WFIWaitedM) ? '0 : EnabledIntsM;
+  assign InterruptM    = (|ValidIntsM) & InstrValidM; // suppress interrupt if the memory system has partially processed a request or a wfi has waited
   assign DelegateM     = P.S_SUPPORTED & (InterruptM ? MIDELEG_REGW[CauseM[3:0]] : MEDELEG_REGW[CauseM[3:0]]) &
                      (PrivilegeModeW == P.U_MODE | PrivilegeModeW == P.S_MODE);
 
