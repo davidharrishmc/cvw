@@ -76,6 +76,7 @@ string coverage64gc[] = '{
   "pmp",
   "pmpcfg",
   "pmpcfg1",
+  "icacheITLBUpdate",
   "pmpcfg2",
   "pmppriority",
   "pmpcbo",
