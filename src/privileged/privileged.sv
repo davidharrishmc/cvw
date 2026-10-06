@@ -98,6 +98,7 @@ module privileged import cvw::*;  #(parameter cvw_t P) (
   input  logic              InvalidateICacheM,                              // fence instruction
   output logic              BigEndianM,                                     // Use big endian in current privilege mode
   // Fault outputs
+  input  logic              ReservationValidW,                              // a reservation is held; Zawrs wrs only waits while this is set
   output logic              WaitM                                           // a wait instruction is waiting: stall the pipeline
 );
 
@@ -131,7 +132,7 @@ module privileged import cvw::*;  #(parameter cvw_t P) (
   // decode privileged instructions
   privdec #(P) pmd(.clk, .reset, .StallM, .InstrM(InstrM[31:7]),
     .PrivilegedM, .IllegalIEUFPUInstrM, .IllegalCSRAccessM,
-    .PrivilegeModeW, .STATUS_TSR, .STATUS_TVM, .STATUS_TW, .IntPendingM, .IllegalInstrFaultM,
+    .PrivilegeModeW, .STATUS_TSR, .STATUS_TVM, .STATUS_TW, .ReservationValidW, .IntPendingM, .IllegalInstrFaultM,
     .EcallFaultM, .BreakpointFaultM, .sretM, .mretM, .RetM, .WaitM, .WaitedM, .sfencevmaM, .sfencevmaAllM);
 
   // Control and Status Registers
