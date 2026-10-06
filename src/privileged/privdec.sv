@@ -30,30 +30,30 @@
 
 module privdec import cvw::*;  #(parameter cvw_t P) (
   input  logic         clk, reset,
-  input  logic         StallW, FlushW,
+  input  logic         StallM,                              // Memory stage stalled: the wait instruction stays in M
   input  logic [31:7 ] InstrM,                              // privileged instruction function field
   input  logic         PrivilegedM,                         // is this a privileged instruction (from IEU controller)
   input  logic         IllegalIEUFPUInstrM,                 // Not a legal IEU instruction
   input  logic         IllegalCSRAccessM,                   // Not a legal CSR access
   input  logic [1:0]   PrivilegeModeW,                      // current privilege level
   input  logic         STATUS_TSR, STATUS_TVM, STATUS_TW,   // status bits
-  input  logic         TrapM,                               // Trap is occurring
   input  logic         ReservationValidW,                   // a reservation is held; Zawrs wrs only waits while this is set
+  input  logic         IntPendingM,                         // a locally enabled interrupt is pending: ends any wait
   output logic         IllegalInstrFaultM,                  // Illegal instruction
   output logic         EcallFaultM, BreakpointFaultM,       // Ecall or breakpoint; must retire, so don't flush it when the trap occurs
   output logic         sretM, mretM, RetM,                  // return instructions
-  output logic         wfiM, wfiW, sfencevmaM,              // wfi or Zawrs wrs / sfence.vma / sinval.vma instructions
+  output logic         WaitM,                               // wfi or Zawrs wrs is waiting: stall the pipeline
+  output logic         WaitedM,                             // the instruction in M has waited; it retires before an interrupt is taken
+  output logic         sfencevmaM,                          // sfence.vma / sinval.vma instructions
   output logic         sfencevmaAllM                        // sfence.vma with rs2=x0: flush all TLB entries including global
 );
 
   logic                rs1zeroM;                            // rs1 field = 0
   logic                IllegalPrivilegedInstrM;             // privileged instruction isn't a legal one or in legal mode
-  logic                wfiInstrM;                           // wfi instruction
-  logic                wrsntoM, wrsstoM, wrsM;              // Zawrs wrs.nto / wrs.sto instructions
-  logic                wrsWaitM;                            // wrs is waiting: reservation still valid and not yet timed out
-  logic                WaitTimeoutM;                        // wfi or wrs has waited long enough to reach the timeout threshold
-  logic                WFITimeoutM;                         // WFI reaches timeout threshold
-  logic                WRSTimeoutM;                         // wrs.nto reaches timeout threshold with mstatus.TW set
+  logic                wfiM, wrsntoM, wrsstoM;              // wfi, Zawrs wrs.nto / wrs.sto instructions
+  logic                TWLimitM;                            // wait is bounded by the mstatus.TW time limit
+  logic                TWTimeoutM;                          // TW time limit reached: illegal instruction
+  logic                STOTimeoutM;                         // wrs.sto short timeout reached: complete
   logic                ebreakM, ecallM;                     // ebreak / ecall instructions
   logic                sinvalvmaM;                          // sinval.vma
   logic                presfencevmaM;                       // sfence.vma before checking privilege mode
@@ -84,18 +84,9 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   assign RetM =       sretM | mretM;
   assign ecallM =     PrivilegedM & (InstrM[31:20] == 12'b000000000000) & rs1zeroM;
   assign ebreakM =    PrivilegedM & (InstrM[31:20] == 12'b000000000001) & rs1zeroM;
-  assign wfiInstrM =  PrivilegedM & (InstrM[31:20] == 12'b000100000101) & rs1zeroM;
-  // Zawrs: with a single hart only an interrupt, an invalid reservation, or a timeout ends the wait, so wrs shares the wfi stall path
+  assign wfiM =       PrivilegedM & (InstrM[31:20] == 12'b000100000101) & rs1zeroM;
   assign wrsntoM =    P.ZAWRS_SUPPORTED & PrivilegedM & (InstrM[31:20] == 12'b000000001101) & rs1zeroM;
   assign wrsstoM =    P.ZAWRS_SUPPORTED & PrivilegedM & (InstrM[31:20] == 12'b000000011101) & rs1zeroM;
-  assign wrsM =       wrsntoM | wrsstoM;
-  // wrs may only wait while the reservation set is valid.  ReservationValidW is the committed
-  // reservation: the lr that set it is in W when the wrs reaches M, and it holds during the wait
-  // because a wrs in M is not a memory operation and a wait stall does not disable its flop.
-  // wrs.nto has no timeout, so like wfi it waits for an interrupt; below M mode with mstatus.TW set
-  // its time limit raises an illegal instruction rather than completing.  wrs.sto completes instead.
-  assign wrsWaitM =   ReservationValidW & (wrsntoM | (wrsstoM & ~WaitTimeoutM));
-  assign wfiM =       wfiInstrM | wrsWaitM;
 
   // all of sinval.vma, sfence.w.inval, sfence.inval.ir are treated as sfence.vma
   assign sfencevmaM = PrivilegedM & P.VIRTMEM_SUPPORTED &
@@ -106,34 +97,35 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   assign sfencevmaAllM = sfencevmaM & ~|InstrM[24:20];
 
   ///////////////////////////////////////////
-  // WFI timeout Privileged Spec 3.1.6.5; wrs timeout Zawrs
+  // Wait: wfi (Privileged Spec 3.3.3, mstatus.TW 3.1.6.6) and Zawrs wrs.nto / wrs.sto
+  // The waiting instruction stays in M while WaitM stalls the whole pipeline, so the instruction
+  // in W keeps forwarding.  The wait ends when a locally enabled interrupt is pending (any
+  // privilege level, regardless of global enables), when a wrs has no reservation (with one hart
+  // only an interrupt or a timeout can end a wrs wait once it holds one), when wrs.sto reaches its
+  // short timeout (it then completes), or when the mstatus.TW time limit raises an illegal
+  // instruction.  wfi and wrs.nto share that limit; wrs.nto, unlike wfi, does not trap in U mode
+  // when TW = 0.
   ///////////////////////////////////////////
 
-  if (P.U_SUPPORTED | P.ZAWRS_SUPPORTED) begin : wfi
-    logic [P.WAIT_TIMEOUT_BIT:0] WFICount, WFICountPlus1;
-    logic                        WFICountEn, WFICountRst;
-    // Clear counter when reset, when trap is taken, or when no wfi or wrs is waiting
-    assign WFICountRst = reset | TrapM | ~(wfiInstrM | wrsM);
-    // Stop incrementing the counter once reach the timeout limit
-    assign WFICountEn = ~WaitTimeoutM;
-    assign WFICountPlus1 = WFICount + 1; // Count while wfi or wrs waits
-    flopenr #(P.WAIT_TIMEOUT_BIT+1) wficountreg(clk, WFICountRst, WFICountEn, WFICountPlus1, WFICount);
-    // One counter, but each waiting instruction taps its own timeout threshold.  With Zawrs
-    // disabled the wrs terms are constant zero and this collapses to the wfi bit.
-    assign WaitTimeoutM = wrsntoM ? WFICount[P.WRSNTO_TIMEOUT_BIT] :
-                          wrsstoM ? WFICount[P.WRSSTO_TIMEOUT_BIT] :
-                                    WFICount[P.WFI_TIMEOUT_BIT];
-  end else assign WaitTimeoutM = 1'b0;
+  assign TWLimitM = wfiM    & ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE)) |
+                    wrsntoM &   STATUS_TW & PrivilegeModeW != P.M_MODE;
+  assign WaitM    = (wfiM | (wrsntoM | wrsstoM) & ReservationValidW) & ~IntPendingM & ~TWTimeoutM & ~STOTimeoutM;
 
-  // coverage off -item e 1 -fecexprrow 1
-  // WFI Timeout trap will not occur when STATUS_TW is low while in supervisor mode, so the system gets stuck waiting for an interrupt and triggers a watchdog timeout.
-  assign WFITimeoutM = ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE)) & WaitTimeoutM & wfiInstrM;
-  // coverage on
-  // wrs.nto traps below M mode when mstatus.TW is set.  Unlike wfi it does not trap in U mode when
-  // TW is clear, and wrs.sto never traps; both simply complete when the timeout expires.
-  assign WRSTimeoutM = wrsntoM & WaitTimeoutM & STATUS_TW & (PrivilegeModeW != P.M_MODE);
+  // One counter of waiting cycles, held while the instruction stays in M and cleared when M advances,
+  // so it never outlives its instruction.  It saturates at its top bit.
+  if (P.U_SUPPORTED | P.ZAWRS_SUPPORTED) begin : waitcnt
+    localparam TWBIT  = P.U_SUPPORTED     ? P.WFI_TIMEOUT_BIT    : 0;
+    localparam STOBIT = P.ZAWRS_SUPPORTED ? P.WRSSTO_TIMEOUT_BIT : 0;
+    localparam CB     = (TWBIT > STOBIT) ? TWBIT : STOBIT;
+    logic [CB:0] WaitCount;
+    flopr #(CB+1) waitcountreg(clk, reset, StallM ? WaitCount + {{CB{1'b0}}, WaitM & ~WaitCount[CB]} : '0, WaitCount);
+    assign TWTimeoutM  = TWLimitM & WaitCount[TWBIT];
+    assign STOTimeoutM = wrsstoM  & WaitCount[STOBIT];
+  end else assign {TWTimeoutM, STOTimeoutM} = '0;
 
-  flopenrc #(1) wfiWReg(clk, reset, FlushW, ~StallW, wfiM, wfiW);
+  // Set once the instruction in M has waited; an interrupt that ends the wait is then taken on the
+  // next instruction (mepc = pc + 4), while one already enabled and pending is taken on the wfi itself.
+  flopr #(1) waitedreg(clk, reset, StallM & (WaitM | WaitedM), WaitedM);
 
   ///////////////////////////////////////////
   // Extract exceptions by name and handle them
@@ -146,7 +138,6 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   // Fault on illegal instructions
   ///////////////////////////////////////////
 
-  assign IllegalPrivilegedInstrM = PrivilegedM & ~(sretM|mretM|ecallM|ebreakM|wfiInstrM|wrsM|sfencevmaM);
-  assign IllegalInstrFaultM = IllegalIEUFPUInstrM | IllegalPrivilegedInstrM | IllegalCSRAccessM |
-                              WFITimeoutM | WRSTimeoutM;
+  assign IllegalPrivilegedInstrM = PrivilegedM & ~(sretM|mretM|ecallM|ebreakM|wfiM|wrsntoM|wrsstoM|sfencevmaM);
+  assign IllegalInstrFaultM = IllegalIEUFPUInstrM | IllegalPrivilegedInstrM | IllegalCSRAccessM | TWTimeoutM;
 endmodule

@@ -42,7 +42,7 @@ add wave -noupdate -group HDU -group Stall -color Orange /testbench/dut/core/Sta
 add wave -noupdate -group HDU -group interrupts /testbench/dut/core/priv/priv/trap/PendingIntsM
 add wave -noupdate -group HDU -group interrupts /testbench/dut/core/priv/priv/trap/InstrValidM
 add wave -noupdate -group HDU -group interrupts /testbench/dut/core/priv/priv/trap/ValidIntsM
-add wave -noupdate -group HDU -group interrupts /testbench/dut/core/hzu/WFIInterruptedM
+add wave -noupdate -group HDU -group interrupts /testbench/dut/core/hzu/WaitM
 add wave -noupdate -group {instruction pipeline} /testbench/InstrFName
 add wave -noupdate -group {instruction pipeline} /testbench/dut/core/ifu/PostSpillInstrRawF
 add wave -noupdate -group {instruction pipeline} /testbench/dut/core/ifu/InstrD
@@ -434,7 +434,6 @@ add wave -noupdate -expand -group lsu -group ptwalker -expand -group faults /tes
 add wave -noupdate -expand -group lsu -group ptwalker -expand -group faults /testbench/dut/core/lsu/hptw/hptw/NonLeafReservedFaultM
 add wave -noupdate -group {WriteBack stage} /testbench/InstrW
 add wave -noupdate -group {WriteBack stage} /testbench/InstrWName
-add wave -noupdate -group {WriteBack stage} /testbench/dut/core/priv/priv/pmd/wfiW
 add wave -noupdate -group AHB -group multicontroller /testbench/dut/core/ebu/ebu/IFUReq
 add wave -noupdate -group AHB -group multicontroller /testbench/dut/core/ebu/ebu/LSUReq
 add wave -noupdate -group AHB -group multicontroller /testbench/dut/core/ebu/ebu/IFUSave
@@ -658,7 +657,8 @@ add wave -noupdate -group FPU /testbench/dut/core/fpu/fpu/unpack/Z
 add wave -noupdate -group FPU /testbench/dut/core/fpu/fpu/fregfile/rf
 add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/STATUS_TW
 add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/PrivilegeModeW
-add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/wfi/WFICount
+add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/waitcnt/WaitCount
+add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/WaitedM
 add wave -noupdate -group wfi /testbench/dut/core/priv/priv/pmd/WFITimeoutM
 add wave -noupdate -group testbench /testbench/DCacheFlushStart
 add wave -noupdate /testbench/dut/core/lsu/hptw/hptw/HPTWLoadPageFault
