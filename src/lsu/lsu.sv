@@ -158,7 +158,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   logic [P.XLEN-1:0]     WriteDataZM;
   logic                  LSULoadPageFaultM, LSUStoreAmoPageFaultM;
   logic                  DTLBMissOrUpdateDAM;
-  logic                  LSUFpLoadStoreM;                        // FpLoadStoreM gated by HPTW
+  logic                  LSUFpLoadStoreM;                        // FpLoadStoreM muxed with the HPTW
 
   /////////////////////////////////////////////////////////////////////////////////////////////
   // Pipeline for IEUAdr E to M
@@ -188,10 +188,6 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
     assign IEUAdrxTvalM = IEUAdrM;
   end
 
-  // During a walk the LSU datapath carries the walker's PTE access, not the instruction in M: never select
-  // the FPU's store data or apply FP load/size handling to it
-  assign LSUFpLoadStoreM = FpLoadStoreM & ~SelHPTW;
-
     if(P.ZICBOZ_SUPPORTED) begin : cboz
       assign WriteDataZM = LSUCMOpM[3] ? 0 : WriteDataM;
    end else begin : cboz
@@ -211,7 +207,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
       .ReadDataM(ReadDataM[P.XLEN-1:0]), // ReadDataM is LLEN, but HPTW only needs XLEN
       .WriteDataM(WriteDataZM), .Funct3M, .LSUFunct3M, .Funct7M, .LSUFunct7M,
       .IEUAdrExtM, .PTE, .IHWriteDataM, .PageType, .PreLSURWM, .LSUAtomicM,
-      .IHAdrM, .CMOpM, .LSUCMOpM, .HPTWStall, .SelHPTW,
+      .IHAdrM, .CMOpM, .LSUCMOpM, .FpLoadStoreM, .LSUFpLoadStoreM, .HPTWStall, .SelHPTW,
       .HPTWFlushW, .LSULoadAccessFaultM, .LSUStoreAmoAccessFaultM,
       .LoadAccessFaultM, .StoreAmoAccessFaultM, .HPTWInstrAccessFaultF,
       .LoadPageFaultM, .StoreAmoPageFaultM, .LSULoadPageFaultM, .LSUStoreAmoPageFaultM, .HPTWInstrPageFaultF
@@ -236,6 +232,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
     assign LSUFunct7M = Funct7M;
     assign LSUAtomicM = AtomicM;
     assign LSUCMOpM = CMOpM;
+    assign LSUFpLoadStoreM = FpLoadStoreM;
     assign IHWriteDataM = WriteDataZM;
     assign LoadAccessFaultM = LSULoadAccessFaultM;
     assign StoreAmoAccessFaultM = LSUStoreAmoAccessFaultM;
