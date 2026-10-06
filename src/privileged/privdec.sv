@@ -40,7 +40,7 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   input  logic         ReservationValidW,                   // a reservation is held; Zawrs wrs only waits while this is set
   input  logic         IntPendingM,                         // a locally enabled interrupt is pending: ends any wait
   output logic         IllegalInstrFaultM,                  // Illegal instruction
-  output logic         EcallFaultM, BreakpointFaultM,       // Ecall or breakpoint; must retire, so don't flush it when the trap occurs
+  output logic         EcallFaultM, BreakpointFaultM,       // Ecall or breakpoint; traps without retiring
   output logic         sretM, mretM, RetM,                  // return instructions
   output logic         WaitM,                               // wfi or Zawrs wrs is waiting: stall the pipeline
   output logic         WaitedM,                             // the instruction in M has waited; it retires before an interrupt is taken

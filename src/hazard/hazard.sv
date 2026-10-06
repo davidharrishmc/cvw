@@ -56,8 +56,8 @@ module hazard (
   // If any stages are stalled, the first stage that isn't stalled must flush.
 
   // Flush causes
-  // Traps (TrapM) flush the entire pipeline.
-  //   However, breakpoint and ecall traps must finish the writeback stage (commit their results) because these instructions complete before trapping.
+  // Traps (TrapM) flush the entire pipeline, including W: the trapping instruction does not retire.
+  //   This includes ecall and ebreak, which are not considered to retire (privileged spec, Environment Call and Breakpoint).
   // Trap returns (RetM) also flush the entire pipeline after the RetM (all stages except W) because all the subsequent instructions must be discarded.
   // Similarly, CSR writes and fences flush all subsequent instructions and refetch them in light of the new operating modes and cache/TLB contents
   // Branch misprediction is found in the Execute stage and must flush the next two instructions.
