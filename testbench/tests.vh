@@ -90,7 +90,13 @@ string coverage64gc[] = '{
   "decompReserved",
   "pmpTOR7",
   "cacheInval",
-  "wfitimeout"
+  "wfitimeout",
+  "wfitimeoutnext",
+  "wfitimeoutint",
+  "wfiTW",
+  "wfiBackToBack",
+  "wfiForward",
+  "csrwfiInt"
 };
 
 string coverage32gc[] = '{

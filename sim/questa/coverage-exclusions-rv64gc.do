@@ -47,6 +47,9 @@ coverage exclude -scope /dut/core/fpu/fpu/fdivsqrt/fdivsqrtfsm -ftrans state DON
 # DH 4/22/23: The busy->idle transition only occurs if a FlushE occurs while the divider is busy.  The flush is caused by a trap or return,
 # which won't happen while the divider is busy.
 coverage exclude -scope /dut/core/fpu/fpu/fdivsqrt/fdivsqrtfsm -ftrans state BUSY->IDLE
+# All Memory-stage stalls have resolved by time fdivsqrt finishes regular operation in this configuration, so can't test StallM
+coverage exclude -scope /dut/core/fpu/fpu/fdivsqrt/fdivsqrtfsm -linerange [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtfsm.sv "exclusion-tag: fdivsqrtfsm stallm"] -item b 1
+coverage exclude -scope /dut/core/fpu/fpu/fdivsqrt/fdivsqrtfsm -linerange [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtfsm.sv "exclusion-tag: fdivsqrtfsm stallm"] -item s 1
 # Division by zero never sets sticky/guard/overflow/round to cause inexact or underflow result, but check out of paranoia
 coverage exclude -scope /dut/core/fpu/fpu/postprocess/flags -linerange [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign FpInexact"] -item e 1 -fecexprrow 15
 coverage exclude -scope /dut/core/fpu/fpu/postprocess/flags -linerange [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign Underflow"] -item e 1 -fecexprrow 22
@@ -239,7 +242,7 @@ for {set i 0} {$i < $numcacheways} {incr i} {
     coverage exclude -scope /dut/core/lsu/bus/dcache/dcache/CacheWays[$i] -linerange [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: dcache HitWay"] -item 3 1 -fecexprrow 2
 
     # FlushStage=1 will never happen when SetValidWay=1 since a pipeline stall is asserted by the cache in the fetch stage, which happens before
-    # going into the WRITE_LINE state (and asserting SetValidWay). No TrapM can fire and since StallW is high, a stallM caused by WFIStallM would not cause a flushW.
+    # going into the WRITE_LINE state (and asserting SetValidWay). No TrapM can fire, and FlushW is asserted only by TrapM.
     coverage exclude -scope /dut/core/lsu/bus/dcache/dcache/CacheWays[$i] -linerange [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: cache SetValidEN"] -item e 1 -fecexprrow 4
     coverage exclude -scope /dut/core/lsu/bus/dcache/dcache/CacheWays[$i] -linerange [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: cache ClearValidEN"] -item e 1 -fecexprrow 4
 # Not right; other ways can get flushed and dirtied simultaneously    coverage exclude -scope /dut/core/lsu/bus/dcache/dcache/CacheWays[$i] -linerange [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: cache UpdateDirty"] -item c 1 -feccondrow 6
