@@ -51,7 +51,7 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   logic                rs1zeroM;                            // rs1 field = 0
   logic                IllegalPrivilegedInstrM;             // privileged instruction isn't a legal one or in legal mode
   logic                wfiM, wrsntoM, wrsstoM;              // wfi, Zawrs wrs.nto / wrs.sto instructions
-  logic                TWLimitM;                            // wait is bounded by the mstatus.TW time limit
+  logic                wfiTWM, wrsntoTWM;                   // wfi / wrs.nto wait is bounded by the mstatus.TW time limit
   logic                TWTimeoutM;                          // TW time limit reached: illegal instruction
   logic                STOTimeoutM;                         // wrs.sto short timeout reached: complete
   logic                ebreakM, ecallM;                     // ebreak / ecall instructions
@@ -103,24 +103,22 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   // privilege level, regardless of global enables), when a wrs has no reservation (with one hart
   // only an interrupt or a timeout can end a wrs wait once it holds one), when wrs.sto reaches its
   // short timeout (it then completes), or when the mstatus.TW time limit raises an illegal
-  // instruction.  wfi and wrs.nto share that limit; wrs.nto, unlike wfi, does not trap in U mode
-  // when TW = 0.
+  // instruction (WFI_TIMEOUT_BIT for wfi, WRSNTO_TIMEOUT_BIT for wrs.nto).  wrs.nto, unlike wfi,
+  // does not trap in U mode when TW = 0.
   ///////////////////////////////////////////
 
-  assign TWLimitM = wfiM    & ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE)) |
-                    wrsntoM &   STATUS_TW & PrivilegeModeW != P.M_MODE;
+  assign wfiTWM    = wfiM    & ((STATUS_TW & PrivilegeModeW != P.M_MODE) | (P.S_SUPPORTED & PrivilegeModeW == P.U_MODE));
+  assign wrsntoTWM = wrsntoM &   STATUS_TW & PrivilegeModeW != P.M_MODE;
   assign WaitM    = (wfiM | (wrsntoM | wrsstoM) & ReservationValidW) & ~IntPendingM & ~TWTimeoutM & ~STOTimeoutM;
 
   // One counter of waiting cycles, held while the instruction stays in M and cleared when M advances,
-  // so it never outlives its instruction.  It saturates at its top bit.
+  // so it never outlives its instruction.  It saturates at its top bit, the largest limit in use.
   if (P.U_SUPPORTED | P.ZAWRS_SUPPORTED) begin : waitcnt
-    localparam TWBIT  = P.U_SUPPORTED     ? P.WFI_TIMEOUT_BIT    : 0;
-    localparam STOBIT = P.ZAWRS_SUPPORTED ? P.WRSSTO_TIMEOUT_BIT : 0;
-    localparam CB     = (TWBIT > STOBIT) ? TWBIT : STOBIT;
+    localparam CB = P.WAIT_TIMEOUT_BIT;
     logic [CB:0] WaitCount;
     flopr #(CB+1) waitcountreg(clk, reset, StallM ? WaitCount + {{CB{1'b0}}, WaitM & ~WaitCount[CB]} : '0, WaitCount);
-    assign TWTimeoutM  = TWLimitM & WaitCount[TWBIT];
-    assign STOTimeoutM = wrsstoM  & WaitCount[STOBIT];
+    assign TWTimeoutM  = wfiTWM & WaitCount[P.WFI_TIMEOUT_BIT] | wrsntoTWM & WaitCount[P.WRSNTO_TIMEOUT_BIT];
+    assign STOTimeoutM = wrsstoM & WaitCount[P.WRSSTO_TIMEOUT_BIT];
   end else assign {TWTimeoutM, STOTimeoutM} = '0;
 
   // Set once the instruction in M has waited; an interrupt that ends the wait is then taken on the

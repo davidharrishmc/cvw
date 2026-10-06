@@ -30,7 +30,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Short timeout 2^WRSSTO_TIMEOUT_BIT = 2^12 cycles; TW limit 2^WFI_TIMEOUT_BIT = 2^14 cycles (rv64gc).
+// Short timeout 2^WRSSTO_TIMEOUT_BIT = 2^12 cycles; wrs.nto TW limit 2^WRSNTO_TIMEOUT_BIT = 2^13 cycles (rv64gc).
 // The handler records mcause, mepc and the minstret it reads as its third instruction; that count
 // minus the instret read just before the wrs is 3 if the wrs trapped and 4 if it retired first.
 
