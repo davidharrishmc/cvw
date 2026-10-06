@@ -141,7 +141,7 @@ module privileged import cvw::*;  #(parameter cvw_t P) (
     .MTimerInt, .MExtInt, .SExtInt, .MSwInt,
     .MTIME_CLINT, .InstrValidM, .FRegWriteM, .LoadStallD, .StoreStallD,
     .BPDirWrongM, .BTAWrongM, .RASPredPCWrongM, .BPWrongM,
-    .sfencevmaM, .ExceptionM, .InvalidateICacheM, .ICacheStallF, .DCacheStallM, .DivBusyE, .FDivBusyE,
+    .sfencevmaM, .InvalidateICacheM, .ICacheStallF, .DCacheStallM, .DivBusyE, .FDivBusyE,
     .IClassWrongM, .IClassM, .DCacheMiss, .DCacheAccess, .ICacheMiss, .ICacheAccess,
     .NextPrivilegeModeM, .PrivilegeModeW, .CauseM, .SelHPTW,
     .STATUS_MPP, .STATUS_SPP, .STATUS_TSR, .STATUS_TVM,
