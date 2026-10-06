@@ -40,7 +40,7 @@ module fdivsqrt import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.NE-2:0]      BiasE,                               // Bias of exponent
   input  logic [P.LOGFLEN-1:0] NfE,                          // Number of fractional bits in selected format
   input  logic                 FDivStartE, IDivStartE,
-  input  logic                 StallE, StallM,
+  input  logic                 StallM,
   input  logic                 FlushE,
   input  logic                 SqrtE, SqrtM,
   input  logic [P.XLEN-1:0]    ForwardedSrcAE, ForwardedSrcBE, // these are the src A/B outputs before the mux choosing between them and PCE to put in srcA/B
@@ -81,7 +81,7 @@ module fdivsqrt import cvw::*;  #(parameter cvw_t P) (
 
   fdivsqrtfsm #(P) fdivsqrtfsm(                                  // FSM
     .clk, .reset, .XInfE, .YInfE, .XZeroE, .YZeroE, .XNaNE, .YNaNE,
-    .FDivStartE, .XsE, .SqrtE, .WZeroE, .FlushE, .StallE, .StallM,
+    .FDivStartE, .XsE, .SqrtE, .WZeroE, .FlushE, .StallM,
     .FDivBusyE, .IFDivStartE, .FDivDoneE, .SpecialCaseM, .CyclesE,
     // Int-specific
     .IDivStartE, .ISpecialCaseE, .IntDivE);
