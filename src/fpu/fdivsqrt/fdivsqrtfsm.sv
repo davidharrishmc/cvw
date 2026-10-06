@@ -35,7 +35,7 @@ module fdivsqrtfsm import cvw::*;  #(parameter cvw_t P) (
   input  logic                FDivStartE, IDivStartE,
   input  logic                XsE, WZeroE,
   input  logic                SqrtE,
-  input  logic                StallM, FlushE,
+  input  logic                StallE, StallM, FlushE,
   input  logic                IntDivE,
   input  logic                ISpecialCaseE,
   input  logic [P.DURLEN-1:0] CyclesE,
@@ -61,9 +61,10 @@ module fdivsqrtfsm import cvw::*;  #(parameter cvw_t P) (
   else               assign SpecialCaseE = FSpecialCaseE;
   flopenr #(1) SpecialCaseReg(clk, reset, IFDivStartE, SpecialCaseE, SpecialCaseM); // save SpecialCase for checking in fdivsqrtpostproc
 
-  // Flush only when Execute advances: a finished divide held by StallM keeps its result even if mispredicted (BPWrongE)
+  // Reset only when the Execute pipeline register clears (flopenrc clears only when enabled, ~StallE), so a
+  // finished divide held in Execute by StallM keeps its result even if mispredicted (BPWrongE)
   always_ff @(posedge clk) begin
-      if (reset | FlushE & ~StallM) begin
+      if (reset | FlushE & ~StallE) begin
           state <= IDLE;
       end else if (IFDivStartE) begin // IFDivStartE implies stat is IDLE
           step <= CyclesE;

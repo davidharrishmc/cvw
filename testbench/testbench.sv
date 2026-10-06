@@ -260,6 +260,7 @@ module testbench;
         "wally32periph":                          tests = wally32periph;
         "wally32periph_imc":                      tests = wally32periph_imc;
         "ahb32" :                                 tests = ahb32;
+        "coverage32gc" :                          tests = coverage32gc;
         "embench":                                tests = embench;
         "coremark":                               tests = coremark;
         "arch32zba":     if (P.ZBA_SUPPORTED)     tests = arch32zba;

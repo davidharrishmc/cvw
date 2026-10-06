@@ -30,7 +30,7 @@
 module div import cvw::*;  #(parameter cvw_t P) (
   input  logic              clk,
   input  logic              reset,
-  input  logic              StallM,
+  input  logic              StallE, StallM,
   input  logic              FlushE,
   input  logic              IntDivE,                        // integer division/remainder instruction of any type
   input  logic              DivSignedE,                     // signed division
@@ -125,9 +125,10 @@ module div import cvw::*;  #(parameter cvw_t P) (
   // Divider FSM to sequence Busy and Done
   //////////////////////////////
 
- // Flush only when Execute advances: a finished divide held by StallM keeps its result even if mispredicted (BPWrongE)
+ // Reset only when the Execute pipeline register clears (flopenrc clears only when enabled, ~StallE), so a
+ // finished divide held in Execute by StallM keeps its result even if mispredicted (BPWrongE)
  always_ff @(posedge clk)
-    if (reset | FlushE & ~StallM) begin
+    if (reset | FlushE & ~StallE) begin
         state <= IDLE;
     end else if (DivStartE) begin
         step <= 1;

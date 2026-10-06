@@ -750,7 +750,7 @@ module testbench_fp;
       .XInfE(XInf), .YInfE(YInf), .XZeroE(XZero), .YZeroE(YZero),
       .XNaNE(XNaN), .YNaNE(YNaN), .NfE, .BiasE,
       .FDivStartE(DivStart), .IDivStartE(1'b0), .W64E(1'b0),
-      .StallM(1'b0), .DivStickyM(DivSticky), .FDivBusyE, .UeM(DivCalcExp),
+      .StallE(1'b0), .StallM(1'b0), .DivStickyM(DivSticky), .FDivBusyE, .UeM(DivCalcExp),
       .UmM(Quot),
       .FlushE(1'b0), .ForwardedSrcAE('0), .ForwardedSrcBE('0), .Funct3M(Funct3M),
       .Funct3E(Funct3E), .IntDivE(1'b0), .FIntDivResultM(FIntDivResultM),
