@@ -19,6 +19,7 @@ import fcntl
 import hashlib
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -150,8 +151,8 @@ def elfSymbols(elfs):
 def prepareElfs(args, elfs):
     """Generate the .memfile for every ELF (in parallel, only if out of date) and write the ELF list.
     Each line of the list holds the ELF path followed by the hex addresses of ELF_SYMBOLS."""
-    memfiles = " ".join(f"{elf}.memfile" for elf in elfs)
-    if subprocess.run(f"make -s -j -f {WALLY}/testbench/Makefile WALLY={WALLY} {memfiles}", shell=True).returncode:
+    memfiles = [f"{elf}.memfile" for elf in elfs]
+    if subprocess.run(["make", "-s", "-j", "-f", f"{WALLY}/testbench/Makefile", f"WALLY={WALLY}", *memfiles]).returncode:
         print("Error: could not generate memfiles")
         sys.exit(1)
     symbols = elfSymbols(elfs)
@@ -163,7 +164,8 @@ def prepareElfs(args, elfs):
 
 
 def prepSim(args, elfs):
-    prefix = ""
+    """Return the simulator flags and the environment variables the simulator needs."""
+    env = {}
     paramsList = []
     argsList = []
     flagsList = []
@@ -175,7 +177,7 @@ def prepSim(args, elfs):
     if args.rvvi:
         paramsList.append("RVVI_SYNTH_SUPPORTED=1")
     if args.tb == "testbench_fp":
-        paramsList.append(f'TEST="{args.testsuite}"')
+        paramsList.append(f"TEST={args.testsuite}")
     if elfs:
         argsList.append(f"+ElfList={prepareElfs(args, elfs)}")
     if args.gui and args.tb == "testbench":
@@ -189,7 +191,7 @@ def prepSim(args, elfs):
         flagsList.append("--gui")
     if args.lockstep or args.lockstepverbose:
         flagsList.append("--lockstep")
-        prefix += lockstepSetup(args)
+        env.update(lockstepSetup(args))
         defineList.append("+define+USE_IMPERAS_DV")
     if "breker" in args.config and args.sim != "verilator":  # Requires a license for the breker tool. See tests/breker/README.md for details
         ElfFileNoExtension = os.path.splitext(elfs[0])[0]
@@ -197,13 +199,13 @@ def prepSim(args, elfs):
         defineList.append("+define+USE_TREK_DV")
         argsList.append(f"+TREK_TBX_FILE={ElfFileNoExtension}.tbx")
         if "WALLY_UVM_PKG" not in os.environ:
-            prefix += f"WALLY_UVM_PKG={WALLY}/testbench/trek_files/{'rv64' if args.config == 'rv64breker' else 'rv32'}/uvm_output/trek_uvm_pkg.sv"
+            env["WALLY_UVM_PKG"] = f"{WALLY}/testbench/trek_files/{'rv64' if args.config == 'rv64breker' else 'rv32'}/uvm_output/trek_uvm_pkg.sv"
     # Combine into a single string
     args.args += " " + " ".join(argsList)
     args.params += " " + " ".join(paramsList)
     args.define += " " + " ".join(defineList)
     flags = " ".join(flagsList)
-    return flags, prefix
+    return flags, env
 
 
 def lockstepSetup(args):
@@ -215,8 +217,7 @@ def lockstepSetup(args):
         if not imperasicPath.is_file():
             print("Error: imperas.ic not found")
             sys.exit(1)
-    prefix = f"IMPERAS_TOOLS={imperasicSharedPath}:{imperasicPath}{f':{imperasicVerbosePath}' if args.lockstepverbose else ''}"
-    return prefix
+    return {"IMPERAS_TOOLS": f"{imperasicSharedPath}:{imperasicPath}{f':{imperasicVerbosePath}' if args.lockstepverbose else ''}"}
 
 
 def createDirs(sim: str):
@@ -296,14 +297,15 @@ def successPattern(args):
     return None
 
 
-def shell(cmd, success=None):
-    """Run a shell command and return its exit code.
+def run(cmd, cwd, env=None, success=None):
+    """Run cmd (an argument list, no shell) in cwd with env added to the environment; return its exit code.
 
     The simulators exit 0 even when tests fail, so when success is given the output is echoed and
     scanned, and a run that exits 0 without printing a matching line returns 1."""
+    env = {**os.environ, **(env or {})}
     if success is None:
-        return subprocess.run(cmd, shell=True).returncode
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
+        return subprocess.run(cmd, cwd=cwd, env=env).returncode
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
     passed = False
     for line in proc.stdout:
         print(line, end="", flush=True)
@@ -320,21 +322,21 @@ def checkCompiled(target, sim):
     return 0
 
 
-def runSim(args, flags, prefix):
+def runSim(args, flags, env):
     if args.sim == "questa":
-        return runQuesta(args, flags, prefix)
+        return runQuesta(args, flags, env)
     elif args.sim == "verilator":
         return runVerilator(args)
     elif args.sim == "vcs":
-        return runVCS(args, flags, prefix)
+        return runVCS(args, flags, env)
     print(f"Error: unknown simulator {args.sim}", file=sys.stderr)
     return 1
 
 
-def runQuesta(args, flags, prefix):
+def runQuesta(args, flags, env):
     # Force Questa to use 64-bit mode, sometimes it defaults to 32-bit even on 64-bit machines
-    prefix = "MTI_VCO_MODE=64 " + prefix
-    sim_dir = "$WALLY/sim/questa"
+    env = {"MTI_VCO_MODE": "64", **env}
+    sim_dir = WALLY / "sim" / "questa"
 
     # Compute build hash from all compile-time parameters (flags, params, defines), and for --fcov
     # the covergroups compiled in, which follow the set of built ACT test directories
@@ -342,12 +344,12 @@ def runQuesta(args, flags, prefix):
     bhash = buildHash(flags, args.params, args.define, *fcovKey)
     wkdir = f"wkdir/{args.config}_{args.tb}{'_' + bhash if bhash else ''}"
 
-    # Build compile-time flag arguments
+    # Build compile-time flag arguments; the -do script is Tcl, which groups each quoted value
     compile_flags = flags
     if args.params.strip():
-        compile_flags += rf" --params \"{args.params}\""
+        compile_flags += f' --params "{args.params}"'
     if args.define.strip():
-        compile_flags += rf" --define \"{args.define}\""
+        compile_flags += f' --define "{args.define}"'
 
     # Phase 1: Compile (only once per config/flags/params/defines combo)
     print(f"Running Questa on {args.config} {args.testsuite}")
@@ -358,9 +360,8 @@ def runQuesta(args, flags, prefix):
     with compileLock("questa", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(target)
         if needs_compile and current_mtime == target_mtime:
-            compile_cmd = f'do wally-compile.do {args.config} {args.tb} {wkdir} {compile_flags}'
-            compile_cmd = f'cd {sim_dir}; {prefix} vsim -c -do "{compile_cmd}"'
-            rc = shell(compile_cmd)
+            compile_do = f"do wally-compile.do {args.config} {args.tb} {wkdir} {compile_flags}"
+            rc = run(["vsim", "-c", "-do", compile_do], sim_dir, env)
             if rc:
                 print(f"Error: Questa compilation failed for {args.config} {args.tb}", file=sys.stderr)
                 return rc
@@ -370,10 +371,9 @@ def runQuesta(args, flags, prefix):
     # Phase 2: Run the simulation
     run_flags = flags
     if args.args.strip():
-        run_flags += rf" --args \"{args.args}\""
-    run_cmd = f'do wally-run.do {args.config} {args.testsuite} {args.tb} {wkdir} {run_flags}'
-    run_cmd = f'cd {sim_dir}; {prefix} vsim {"-c" if not args.gui else ""} -do "{run_cmd}"'
-    return shell(run_cmd, successPattern(args))
+        run_flags += f' --args "{args.args}"'
+    run_do = f"do wally-run.do {args.config} {args.testsuite} {args.tb} {wkdir} {run_flags}"
+    return run(["vsim", *([] if args.gui else ["-c"]), "-do", run_do], sim_dir, env, successPattern(args))
 
 
 def runVerilator(args):
@@ -384,20 +384,20 @@ def runVerilator(args):
     binary = workdir / f"V{args.tb}"
 
     # Phase 1: Compile (only once per config/params/defines combo)
-    compile_cmd = (
-        f'make -C {sim_dir}'
-        f' WALLYCONF={args.config}'
-        f' TESTBENCH={args.tb}'
-        f' PARAM_ARGS="{args.params}"'
-        f' DEFINE_ARGS="{args.define}"'
-        f' BUILD_HASH="{bhash}"'
-    )
+    compile_cmd = [
+        "make", "-C", str(sim_dir),
+        f"WALLYCONF={args.config}",
+        f"TESTBENCH={args.tb}",
+        f"PARAM_ARGS={args.params}",
+        f"DEFINE_ARGS={args.define}",
+        f"BUILD_HASH={bhash}",
+    ]
     target_mtime = targetMtime(binary)
     needs_compile = target_mtime is None or not isDesignUpToDate(binary)
     with compileLock("verilator", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
-            rc = shell(compile_cmd)
+            rc = run(compile_cmd, sim_dir)
             if rc:
                 print(f"Error: Verilator compilation failed for {args.config} {args.tb}", file=sys.stderr)
                 return rc
@@ -407,27 +407,24 @@ def runVerilator(args):
     # Phase 2: Run the simulation (parallel safe)
     # Run from sim/verilator/ so relative paths (e.g. logs/buildroot_uart.out) resolve correctly
     (sim_dir / "logs").mkdir(parents=True, exist_ok=True)
-    runtime_args = ""
-    if args.tb == "testbench":
-        runtime_args += f" +TEST={args.testsuite}"
-    if args.args.strip():
-        runtime_args += f" {args.args.strip()}"
-    return shell(f"cd {sim_dir} && {binary}{runtime_args}", successPattern(args))
+    runtime_args = [f"+TEST={args.testsuite}"] if args.tb == "testbench" else []
+    runtime_args += shlex.split(args.args)
+    return run([str(binary), *runtime_args], sim_dir, success=successPattern(args))
 
 
-def runVCS(args, flags, prefix):
+def runVCS(args, flags, env):
     print(f"Running VCS on {args.config} {args.testsuite}")
-    sim_dir = "$WALLY/sim/vcs"
+    sim_dir = WALLY / "sim" / "vcs"
     bhash = buildHash(flags, args.params, args.define)
     wkdir = f"{WALLY}/sim/vcs/wkdir/{args.config}_{args.tb}{'_' + bhash if bhash else ''}"
     binary = Path(wkdir) / "sim_out"
 
     # Build compile-time flag arguments (flags already contains --lockstep, --breker, etc. from prepSim)
-    compile_flags = f"--tb {args.tb} {flags}"
+    compile_flags = ["--tb", args.tb, *flags.split()]
     if args.params.strip():
-        compile_flags += f' --params "{args.params}"'
+        compile_flags += ["--params", args.params.strip()]
     if args.define.strip():
-        compile_flags += f' --define "{args.define}"'
+        compile_flags += ["--define", args.define.strip()]
 
     # Phase 1: Compile (only once per config/flags/params/defines combo)
     target_mtime = targetMtime(binary)
@@ -435,8 +432,8 @@ def runVCS(args, flags, prefix):
     with compileLock("vcs", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
-            compile_cmd = f'cd {sim_dir}; {prefix} ./run_vcs compile {args.config} {args.testsuite} --wkdir {wkdir} {compile_flags}'
-            rc = shell(compile_cmd)
+            compile_cmd = ["./run_vcs", "compile", args.config, args.testsuite, "--wkdir", wkdir, *compile_flags]
+            rc = run(compile_cmd, sim_dir, env)
             if rc:
                 print(f"Error: VCS compilation failed for {args.config} {args.tb}", file=sys.stderr)
                 return rc
@@ -444,11 +441,11 @@ def runVCS(args, flags, prefix):
         return 1
 
     # Phase 2: Run the simulation
-    run_flags = f"--tb {args.tb} {flags}"
+    run_flags = ["--tb", args.tb, *flags.split()]
     if args.args.strip():
-        run_flags += f' --args "{args.args}"'
-    run_cmd = f'cd {sim_dir}; {prefix} ./run_vcs run {args.config} {args.testsuite} --wkdir {wkdir} {run_flags}'
-    return shell(run_cmd, successPattern(args))
+        run_flags += ["--args", args.args.strip()]
+    run_cmd = ["./run_vcs", "run", args.config, args.testsuite, "--wkdir", wkdir, *run_flags]
+    return run(run_cmd, sim_dir, env, successPattern(args))
 
 
 def main(args):
@@ -461,9 +458,9 @@ def main(args):
         # The testbench receives this as +TEST; it is the special mode when one is set, else the run name
         args.testsuite = args.test if args.test else runName(args, elfs, names)
     print(f"Config={args.config} test={args.testsuite} elfs={len(elfs)} sim={args.sim} gui={args.gui} args='{args.args}' params='{args.params}' define='{args.define}'")
-    flags, prefix = prepSim(args, elfs)
+    flags, env = prepSim(args, elfs)
     createDirs(args.sim)
-    sys.exit(runSim(args, flags, prefix))
+    sys.exit(runSim(args, flags, env))
 
 
 if __name__ == "__main__":
