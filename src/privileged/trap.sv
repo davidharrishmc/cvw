@@ -107,8 +107,8 @@ module trap import cvw::*;  #(parameter cvw_t P) (
                        ((PrivilegeModeW == P.U_MODE) | (PrivilegeModeW == P.S_MODE));
   end
   // Trap target one-hots.
-  // With H: select M/HS/VS trap entry. Without H: TrapToHSM/TrapToVSM are tied low,
-  // and TrapToM marks only non-delegated traps (delegated traps are S traps via DelegateM).
+  // With H: select M/HS/VS trap entry. Without H: TrapToVSM is tied low, a delegated trap is an
+  // S-mode trap (TrapToHSM), and TrapToM marks the traps that are not delegated.
   if (P.H_SUPPORTED) begin: trapto_vs_h
     /* verilator lint_off WIDTHTRUNC */
     assign HidelegHitM   = (CauseM < 16) ? HIDELEG_REGW[CauseM] : 1'b0;
@@ -123,8 +123,8 @@ module trap import cvw::*;  #(parameter cvw_t P) (
     assign HedelegHitM   = 1'b0;
     assign DelegateToVSM = 1'b0;
     assign TrapToVSM     = 1'b0;
-    assign TrapToHSM     = 1'b0;
-    assign TrapToM       = TrapM & ~DelegateM; // TrapToM is not consumed in non-H paths, but keep it semantically correct for observability/future reuse.
+    assign TrapToHSM     = TrapM & DelegateM;
+    assign TrapToM       = TrapM & ~DelegateM;
   end
 
   ///////////////////////////////////////////
