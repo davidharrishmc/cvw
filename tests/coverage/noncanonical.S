@@ -29,8 +29,10 @@
 // page table access.  The page table makes the walk of each truncated address fault on a PTE read:
 //   VPN2=3     (0xC0000000):  non-leaf PTE pointing to nonexistent memory (PA 0x40000000)
 //   VPN2=4     (0x100000000): non-leaf PTE pointing to pt_deny, which PMP entry 0 denies to S mode
-//   VPN2=0x100 (0x4000000000, the alias of the second half of the spilled fetch): nonexistent memory
+//   VPN2=0x100 (0x4000000000, the alias of the second half of the spilled fetch, load and store): nonexistent memory
 // The canonical addresses take the access fault (1/5/7) as controls.
+// Sv48 (root48) and Sv57 (root57) reuse pt_root below their top levels, so their aliases reach the same PTEs,
+// and the canonical range follows satp.MODE: 0x80C0000000 is non-canonical in Sv39 but must be walked in Sv48.
 
 #include "WALLY-init-lib.h"
 #include "WALLY-selfcheck.h"
@@ -50,6 +52,54 @@
     SC_CHECK_EQ s9, t2, \idx+1
 .endm
 
+// TRY_MPRV: TRY from M mode with mstatus.MPRV=1 and MPP=S, so the access is translated as in S mode.
+// MPRV is cleared before the checks so that a failure record is not translated.
+.macro TRY_MPRV insn, adr, cause, tval, idx
+    li s0, \adr
+    li s8, -1
+    li s9, -1
+    la s11, 1f
+    li t0, 0x1000
+    csrc mstatus, t0
+    li t0, 0x20800                  # MPRV, MPP = S
+    csrs mstatus, t0
+    \insn
+1:
+    li t0, 0x20000
+    csrc mstatus, t0
+    li t2, \cause
+    SC_CHECK_EQ s8, t2, \idx
+    li t2, \tval
+    SC_CHECK_EQ s9, t2, \idx+1
+.endm
+
+// SETSATP mode, root: from S mode, go to M, point satp at root in the given mode, and return to S
+.macro SETSATP mode, root
+    li a0, 3
+    ecall                           # M mode
+    la t0, \root
+    srli t0, t0, 12
+    li t1, \mode
+    slli t1, t1, 60
+    or t0, t0, t1
+    csrw satp, t0
+    sfence.vma
+    li a0, 1
+    ecall                           # S mode
+.endm
+
+// PTE_PTR table, idx, next: table[idx] = non-leaf PTE pointing to next (clobbers t0-t2)
+.macro PTE_PTR table, idx, next
+    la t0, \next
+    srli t0, t0, 12
+    slli t0, t0, 10
+    ori t0, t0, 1
+    la t1, \table
+    li t2, \idx*8
+    add t1, t1, t2
+    sd t0, 0(t1)
+.endm
+
 main:
     # PMP: entry 0 denies S/U access to pt_deny, entry 1 allows everything else
     li t0, -1
@@ -63,7 +113,8 @@ main:
 
     li t0, 1
     slli t0, t0, 61
-    csrs menvcfg, t0                # menvcfg.ADUE = 1: hardware A/D updates
+    ori t0, t0, 0xF0
+    csrs menvcfg, t0                # menvcfg.ADUE = 1: hardware A/D updates; CBIE, CBCFE, CBZE: CBOs allowed in S mode
 
     # First half of a 32-bit nop at the last halfword of the megapage that VA 0x3FFFFFF000 maps
     li t0, 0x801FFFFE
@@ -83,6 +134,12 @@ main:
     slli t1, t1, 10
     ori t1, t1, 1
     sd t1, 0xFF*8(t0)               # VPN2=0xFF -> pt_spill
+    PTE_PTR root48, 0, pt_root      # Sv48 VPN3=0, 1, 0x100 -> pt_root
+    PTE_PTR root48, 1, pt_root
+    PTE_PTR root48, 0x100, pt_root
+    PTE_PTR root57, 0, root48       # Sv57 VPN4=0, 0x100 -> root48
+    PTE_PTR root57, 0x100, root48
+    la t0, pt_root
 
     srli t0, t0, 12
     li t1, 8
@@ -93,6 +150,12 @@ main:
 
     la t0, nc_trap_handler
     csrw mtvec, t0
+
+    # M mode with MPRV=1 and MPP=S: loads and stores are translated and checked as in S mode
+    TRY_MPRV "ld s1, 0(s0)",        0x00000000C0000000,  5, 0x00000000C0000000, 0x60
+    TRY_MPRV "ld s1, 0(s0)",        0x00000080C0000000, 13, 0x00000080C0000000, 0x62
+    TRY_MPRV "sd s1, 0(s0)",        0x00000080C0000000, 15, 0x00000080C0000000, 0x64
+
     li a0, 1
     ecall                           # S mode
 
@@ -121,6 +184,16 @@ main:
 
     # Spilled fetch: first half at the top of the canonical range, second half at non-canonical 0x4000000000
     TRY "jalr zero, 0(s0)",         0x0000003FFFFFFFFE, 12, 0x0000004000000000, 0x40
+
+    # Misaligned load/store from 0x3FFFFFFFFC spilling into non-canonical 0x4000000000; mtval is the address of the
+    # portion of the access that faulted
+    TRY "ld s1, 0(s0)",             0x0000003FFFFFFFFC, 13, 0x0000004000000000, 0x46
+    TRY "sd s1, 0(s0)",             0x0000003FFFFFFFFC, 15, 0x0000004000000000, 0x48
+
+    # CBOs take store/AMO faults
+    TRY "cbo.zero (s0)",            0x00000000C0000000,  7, 0x00000000C0000000, 0x4A
+    TRY "cbo.zero (s0)",            0x00000080C0000000, 15, 0x00000080C0000000, 0x4C
+    TRY "cbo.clean (s0)",           0x00000080C0000000, 15, 0x00000080C0000000, 0x4E
 
     # Non-canonical alias of a mapping already in the TLB (hit path)
     li t0, 0x80000000
@@ -156,6 +229,24 @@ main:
     li t2, 0x200000C7
     SC_CHECK_EQ s3, t2, 0x54
 
+    # Sv48: bits 63:48 must equal bit 47
+    SETSATP 9, root48
+    TRY "ld s1, 0(s0)",             0x00000080C0000000,  5, 0x00000080C0000000, 0x70  # canonical in Sv48
+    TRY "ld s1, 0(s0)",             0xFFFF8000C0000000,  5, 0xFFFF8000C0000000, 0x72
+    TRY "ld s1, 0(s0)",             0x00008000C0000000, 13, 0x00008000C0000000, 0x74
+    TRY "ld s1, 0(s0)",             0x00018000C0000000, 13, 0x00018000C0000000, 0x76
+    TRY "sd s1, 0(s0)",             0x00008000C0000000, 15, 0x00008000C0000000, 0x78
+    TRY "jalr zero, 0(s0)",         0x00008000C0000000, 12, 0x00008000C0000000, 0x7A
+
+    # Sv57: bits 63:57 must equal bit 56
+    SETSATP 10, root57
+    TRY "ld s1, 0(s0)",             0x00008000C0000000,  5, 0x00008000C0000000, 0x80  # canonical in Sv57
+    TRY "ld s1, 0(s0)",             0xFF000000C0000000,  5, 0xFF000000C0000000, 0x82
+    TRY "ld s1, 0(s0)",             0x01000000C0000000, 13, 0x01000000C0000000, 0x84
+    TRY "ld s1, 0(s0)",             0x02000000C0000000, 13, 0x02000000C0000000, 0x86
+    TRY "sd s1, 0(s0)",             0x01000000C0000000, 15, 0x01000000C0000000, 0x88
+    TRY "jalr zero, 0(s0)",         0x01000000C0000000, 12, 0x01000000C0000000, 0x8A
+
     SC_PASS
     j done
 
@@ -190,8 +281,12 @@ pt_root:
     .fill 0x1FF-0x100, 8, 0
 pt_spill:
     .fill 0x1FF, 8, 0
-    .dword 0x200000CB               # VPN1=0x1FF: megapage 0x80000000, V R X A D
+    .dword 0x200000CF               # VPN1=0x1FF: megapage 0x80000000, V R W X A D
 pt_deny:
+    .fill 512, 8, 0
+root48:                             # Sv48 root, filled in at run time
+    .fill 512, 8, 0
+root57:                             # Sv57 root, filled in at run time
     .fill 512, 8, 0
 scratch:
     .dword 0
