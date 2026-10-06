@@ -474,7 +474,11 @@ module testbench;
         $fclose(outputFilePointer);
         $display("Embench Benchmark: created output file: %s", outputfile);
       end else if (TEST == "coverage64gc") begin
-        $display("%s ran. Coverage tests don't get checked", tests[test]);
+        // Coverage tests pass by running to completion; self-checking ones also check their result record
+        if (selfcheck_record_addr != 0) begin
+          CheckSelfCheck(tests[test], selfcheck_record_addr, errors);
+          if (errors > 0) totalerrors = totalerrors + 1;
+        end else $display("%s ran. Coverage tests without a self-check record are not checked", tests[test]);
       end else if (ElfFile != "none") begin
         `ifdef USE_TREK_DV
           $display("Breker test is done.");
@@ -1099,15 +1103,15 @@ module testbench;
       1: $display("%s succeeded.  Brilliant!!!", TestName);
       2: begin
         errors = 1;
-        $display("  Error on test %s result %0d: adr = %h sim (D$) %h signature = %h", TestName, index, adr, actual, expected);
+        $display("  Error: test %s result %0d: adr = %h sim (D$) %h signature = %h", TestName, index, adr, actual, expected);
       end
       3: begin
         errors = 1;
-        $display("  Error on test %s: wrote %0d signature entries but expected %0d (next adr = %h)", TestName, actual, expected, adr);
+        $display("  Error: test %s wrote %0d signature entries but expected %0d (next adr = %h)", TestName, actual, expected, adr);
       end
       default: begin
         errors = 1;
-        $display("  Error on test %s: halted without completing its self-check (status = %h)", TestName, status);
+        $display("  Error: test %s halted without completing its self-check (status = %h)", TestName, status);
       end
     endcase
     if (errors) begin
