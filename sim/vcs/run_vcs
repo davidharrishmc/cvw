@@ -44,8 +44,13 @@ def parseArgs():
     parser.add_argument("--breker", "-b", help="Run Breker test", action="store_true")
     return parser.parse_args()
 
-def generateFileList(testbench):
-    return [f"{tbdir}/{testbench}.sv", *svFiles(srcdir), *svFiles(f"{tbdir}/common")]
+def generateFileList(testbench, params):
+    files = [f"{tbdir}/{testbench}.sv", *svFiles(srcdir), *svFiles(f"{tbdir}/common")]
+    # Only the synthesizable RVVI interface (wsim --rvvi) uses the verilog-ethernet MAC
+    if "RVVI_SYNTH_SUPPORTED=1" in params.split():
+        for pattern in ("*/*.sv", "*/*/*/*.sv"):
+            files += sorted(glob.glob(f"{WALLY}/addins/verilog-ethernet/{pattern}"))
+    return files
 
 def getCompileOptions(wkdir, args):
     """Build compile-time options for VCS."""
@@ -97,7 +102,7 @@ def compileDesign(wkdir, args):
     """Compile the design with VCS."""
     os.makedirs(wkdir, exist_ok=True)
     os.makedirs(logdir, exist_ok=True)
-    rtlFiles = generateFileList(args.tb)
+    rtlFiles = generateFileList(args.tb, args.params)
     compileOptions = getCompileOptions(wkdir, args)
     includePath = [f"+incdir+{cfgdir}/{args.config}", f"+incdir+{cfgdir}/deriv/{args.config}", f"+incdir+{cfgdir}/shared",
                    f"+incdir+{WALLY}/tests", f"+incdir+{tbdir}", f"+incdir+{srcdir}"]

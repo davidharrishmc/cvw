@@ -228,7 +228,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
 
     assign EffectivePrivilegeMode = DTLBWalk ? (STATUS_MPRV ? STATUS_MPP : PrivilegeModeW) : PrivilegeModeW; // DTLB uses MPP mode when MPRV is 1
     assign ImproperPrivilege = ((EffectivePrivilegeMode == P.U_MODE) & ~PTE_U) |
-                               ((EffectivePrivilegeMode == P.S_MODE) & PTE_U & (~STATUS_SUM & DTLBWalk));
+                               ((EffectivePrivilegeMode == P.S_MODE) & PTE_U & (~STATUS_SUM | ~DTLBWalk));
 
     // Check for page faults
     vm64check #(P) vm64check(.SATP_MODE(SATP_REGW[P.XLEN-1:P.XLEN-P.SVMODE_BITS]), .VAdr(TranslationVAdr),
@@ -308,7 +308,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   if (P.XLEN == 32) begin
     assign InitialWalkerState = L1_ADR;
     assign MegapageMisaligned = |(CurrentPPN[9:0]); // must have zero PPN0
-    assign Misaligned = ((WalkerState == L0_ADR) & MegapageMisaligned);
+    assign Misaligned = (WalkerState == LEAF) & (PageType == 3'b001) & MegapageMisaligned;
   end else begin
     logic  PetapageMisaligned, GigapageMisaligned, TerapageMisaligned;
     assign InitialWalkerState = (P.SV57_SUPPORTED & SvMode == P.SV57) ? L4_ADR :
@@ -318,10 +318,11 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     assign TerapageMisaligned = P.SV48_SUPPORTED & |(CurrentPPN[26:0]); // Must have zero PPN2, PPN1, PPN0
     assign GigapageMisaligned =                    |(CurrentPPN[17:0]); // Must have zero PPN1 and PPN0
     assign MegapageMisaligned = |(CurrentPPN[8:0]);  // Must have zero PPN0
-    assign Misaligned = (P.SV57_SUPPORTED & (WalkerState == L3_ADR) & PetapageMisaligned) |
-                        (P.SV48_SUPPORTED & (WalkerState == L2_ADR) & TerapageMisaligned) |
-                                           ((WalkerState == L1_ADR) & GigapageMisaligned) |
-                                           ((WalkerState == L0_ADR) & MegapageMisaligned);
+    assign Misaligned = (WalkerState == LEAF) &
+                        ((P.SV57_SUPPORTED & (PageType == 3'b100) & PetapageMisaligned) |
+                         (P.SV48_SUPPORTED & (PageType == 3'b011) & TerapageMisaligned) |
+                                            ((PageType == 3'b010) & GigapageMisaligned) |
+                                            ((PageType == 3'b001) & MegapageMisaligned));
   end
 
   // Page Table Walker FSM
