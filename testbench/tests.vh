@@ -53,6 +53,7 @@ string coverage64gc[] = '{
   "ebu",
   "csrwrites",
   "trapcsrstall",
+  "hpmtrapcount",
   "ifu",
   "fpu",
   "lsu",

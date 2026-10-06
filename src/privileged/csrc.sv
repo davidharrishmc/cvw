@@ -48,7 +48,7 @@ module csrc  import cvw::*;  #(parameter cvw_t P) (
   input  logic              DCacheStallM,
   input  logic              sfencevmaM,
   input  logic              InterruptM,
-  input  logic              ExceptionM,
+  input  logic              TrapTakenM,                                // trap is taken this cycle
   input  logic              InvalidateICacheM,
   input  logic              DivBusyE,                                  // integer divide busy
   input  logic              FDivBusyE,                                 // floating point divide busy
@@ -125,8 +125,8 @@ module csrc  import cvw::*;  #(parameter cvw_t P) (
     assign CounterEvent[19] = CSRWriteM & InstrValidNotFlushedM;                         // CSR writes
     assign CounterEvent[20] = InvalidateICacheM & InstrValidNotFlushedM;                 // fence.i
     assign CounterEvent[21] = sfencevmaM & InstrValidNotFlushedM;                        // sfence.vma
-    assign CounterEvent[22] = InterruptM;                                                // interrupt, InstrValidNotFlushedM will be low
-    assign CounterEvent[23] = ExceptionM;                                                // exceptions, InstrValidNotFlushedM will be low
+    assign CounterEvent[22] = TrapTakenM & InterruptM;                                   // interrupts taken, counted once; InstrValidNotFlushedM will be low
+    assign CounterEvent[23] = TrapTakenM & ~InterruptM;                                  // exceptions taken, counted once; InstrValidNotFlushedM will be low
     // coverage off
     // DivBusyE will never be asserted high because the RV64GC configuration uses the FPU to do integer division
     assign CounterEvent[24] = DivBusyE | FDivBusyE;                                      // division cycles

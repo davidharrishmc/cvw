@@ -117,11 +117,15 @@ module privileged import cvw::*;  #(parameter cvw_t P) (
   logic                     DelegateM;                                      // trap should be delegated
   logic                     InterruptM;                                     // interrupt occurring
   logic                     ExceptionM;                                     // Memory stage instruction caused a fault
+  logic                     TrapTakenM;                                     // trap is taken this cycle (not held by a stall)
   logic                     HPTWInstrAccessFaultM;                          // Hardware page table access fault while fetching instruction PTE
   logic                     HPTWInstrPageFaultM;                            // Hardware page table page fault while fetching instruction PTE
   logic                     BreakpointFaultM, EcallFaultM;                  // breakpoint and Ecall traps should retire
 
   logic                     wfiW;
+
+  // A trap updates architectural state only when it is taken; TrapM can change while the pipeline is stalled
+  assign TrapTakenM = TrapM & ~StallW;
 
   // track the current privilege level
   privmode #(P) privmode(.clk, .reset, .StallW, .TrapM, .mretM, .sretM, .DelegateM,
@@ -130,17 +134,17 @@ module privileged import cvw::*;  #(parameter cvw_t P) (
   // decode privileged instructions
   privdec #(P) pmd(.clk, .reset, .StallW, .FlushW, .InstrM(InstrM[31:7]),
     .PrivilegedM, .IllegalIEUFPUInstrM, .IllegalCSRAccessM,
-    .PrivilegeModeW, .STATUS_TSR, .STATUS_TVM, .STATUS_TW, .TrapM, .IllegalInstrFaultM,
+    .PrivilegeModeW, .STATUS_TSR, .STATUS_TVM, .STATUS_TW, .TrapTakenM, .IllegalInstrFaultM,
     .EcallFaultM, .BreakpointFaultM, .sretM, .mretM, .RetM, .wfiM, .wfiW, .sfencevmaM, .sfencevmaAllM);
 
   // Control and Status Registers
   csr #(P) csr(.clk, .reset, .FlushM, .FlushW, .StallE, .StallM, .StallW,
     .InstrM, .InstrOrigM, .PCM, .PCSpillM, .SrcAM, .IEUAdrxTvalM,
-    .CSRReadM, .CSRWriteM, .TrapM, .mretM, .sretM, .InterruptM,
+    .CSRReadM, .CSRWriteM, .TrapM, .TrapTakenM, .mretM, .sretM, .InterruptM,
     .MTimerInt, .MExtInt, .SExtInt, .MSwInt,
     .MTIME_CLINT, .InstrValidM, .FRegWriteM, .LoadStallD, .StoreStallD,
     .BPDirWrongM, .BTAWrongM, .RASPredPCWrongM, .BPWrongM,
-    .sfencevmaM, .ExceptionM, .InvalidateICacheM, .ICacheStallF, .DCacheStallM, .DivBusyE, .FDivBusyE,
+    .sfencevmaM, .InvalidateICacheM, .ICacheStallF, .DCacheStallM, .DivBusyE, .FDivBusyE,
     .IClassWrongM, .IClassM, .DCacheMiss, .DCacheAccess, .ICacheMiss, .ICacheAccess,
     .NextPrivilegeModeM, .PrivilegeModeW, .CauseM, .SelHPTW,
     .STATUS_MPP, .STATUS_SPP, .STATUS_TSR, .STATUS_TVM,
