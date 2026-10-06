@@ -32,6 +32,7 @@
 `define COVERAGE "5"
 `define BUILDROOT "6"
 `define PERIPH "7"
+`define COVERAGE32 "8"
 
 string tvpaths[] = '{
   "../../tests/riscof/work/riscv-arch-test/",
@@ -41,7 +42,8 @@ string tvpaths[] = '{
   "../../tests/custom/work/",
   "../../tests/coverage/",
   "",                          // buildroot: paths come from RISCV_DIR
-  "../../tests/periph/"
+  "../../tests/periph/",
+  "../../tests/coverage32/"
 };
 
 string coverage64gc[] = '{
@@ -72,6 +74,7 @@ string coverage64gc[] = '{
   "nonleafpbmtfault",
   "amoAccessFault",
   "floatmisc",
+  "divflushstall",
   "ifuCamlineWrite",
   "dcache1",
   "dcache2",
@@ -88,6 +91,11 @@ string coverage64gc[] = '{
   "pmpTOR7",
   "cacheInval",
   "wfitimeout"
+};
+
+string coverage32gc[] = '{
+  `COVERAGE32,
+  "divflushstall32"
 };
 
 string buildroot[] = '{
