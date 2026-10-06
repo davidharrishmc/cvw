@@ -63,6 +63,8 @@ string coverage64gc[] = '{
   "tlbGLBHIT",
   "tlbASIDMISS",
   "tlbMP",
+  "tlbADdup",
+  "tlbMultiMatch",
   "tlbGP",
   "tlbTP",
   "tlbMisaligned",
