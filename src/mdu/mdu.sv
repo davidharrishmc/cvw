@@ -29,7 +29,7 @@
 
 module mdu import cvw::*;  #(parameter cvw_t P) (
   input  logic              clk, reset,
-  input  logic              StallE, StallM, StallW,
+  input  logic              StallM, StallW,
   input  logic              FlushE, FlushM, FlushW,
   input  logic [P.XLEN-1:0] ForwardedSrcAE, ForwardedSrcBE, // inputs A and B from IEU forwarding mux output
   input  logic [2:0]        Funct3E, Funct3M,               // type of MDU operation
@@ -57,7 +57,7 @@ module mdu import cvw::*;  #(parameter cvw_t P) (
     assign RemM = '0;
     assign DivBusyE = 1'b0;
   end else begin : div
-    div #(P) div(.clk, .reset, .StallE, .StallM, .FlushE, .DivSignedE(~Funct3E[0]), .W64E, .IntDivE,
+    div #(P) div(.clk, .reset, .StallM, .FlushE, .DivSignedE(~Funct3E[0]), .W64E, .IntDivE,
         .ForwardedSrcAE, .ForwardedSrcBE, .DivBusyE, .QuotM, .RemM);
   end
 

@@ -320,7 +320,7 @@ module wallypipelinedcore import cvw::*; #(parameter cvw_t P) (
 
   // multiply/divide unit
   if (P.ZMMUL_SUPPORTED) begin : mdu
-    mdu #(P) mdu(.clk, .reset, .StallE, .StallM, .StallW, .FlushE, .FlushM, .FlushW,
+    mdu #(P) mdu(.clk, .reset, .StallM, .StallW, .FlushE, .FlushM, .FlushW,
       .ForwardedSrcAE, .ForwardedSrcBE,
       .Funct3E, .Funct3M, .IntDivE, .W64E, .MDUActiveE,
       .MDUResultW, .DivBusyE);
