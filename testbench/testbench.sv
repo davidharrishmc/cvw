@@ -204,6 +204,7 @@ module testbench;
         "fpga":                                   tests = fpga;
         "ahb64" :                                 tests = ahb64;
         "coverage64gc" :                          tests = coverage64gc;
+        "coverage64f":   if (P.F_SUPPORTED)       tests = coverage64f;
         "arch64zba":     if (P.ZBA_SUPPORTED)     tests = arch64zba;
         "arch64zbb":     if (P.ZBB_SUPPORTED)     tests = arch64zbb;
         "arch64zbc":     if (P.ZBC_SUPPORTED)     tests = arch64zbc;

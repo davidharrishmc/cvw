@@ -184,8 +184,8 @@ derivconfigtests = [
         ["fdh_rv32gc", ["arch32f", "arch32f_divsqrt", "arch32f_fma", "arch32d", "arch32d_divsqrt", "arch32d_fma", "arch32zfh", "arch32zfh_divsqrt", "arch32zfaf", "arch32zfad"]],
         ["fdq_rv32gc", ["arch32f", "arch32f_divsqrt", "arch32f_fma", "arch32d", "arch32d_divsqrt", "arch32d_fma", "arch32i", "arch32zfaf", "arch32zfad"]],
         ["fdqh_rv32gc", ["arch32f", "arch32f_divsqrt", "arch32f_fma", "arch32d", "arch32d_divsqrt", "arch32d_fma", "arch32zfh", "arch32zfh_divsqrt", "arch32i", "arch32zfaf", "arch32zfad"]],
-        ["f_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64zfaf"]],
-        ["fh_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64zfh", "arch64zfh_divsqrt", "arch64zfaf"]],
+        ["f_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64zfaf", "coverage64f"]],
+        ["fh_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64zfh", "arch64zfh_divsqrt", "arch64zfaf", "coverage64f"]],
         ["fdh_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64d", "arch64d_divsqrt", "arch64d_fma", "arch64zfh", "arch64zfh_divsqrt", "arch64zfaf", "arch64zfad"]],
         ["fdq_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64d", "arch64d_divsqrt", "arch64d_fma", "arch64i", "arch64zfaf", "arch64zfad"]],
         ["fdqh_rv64gc", ["arch64f", "arch64f_divsqrt", "arch64f_fma", "arch64d", "arch64d_divsqrt", "arch64d_fma", "arch64zfh", "arch64zfh_divsqrt", "arch64i",  "arch64zfaf", "arch64zfad"]], # "wally64q" when Q is supported again in riscof config file

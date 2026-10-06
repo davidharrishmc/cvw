@@ -89,6 +89,12 @@ string coverage64gc[] = '{
   "wfitimeout"
 };
 
+// Self-checking coverage tests for any config with F, including F-only configs where FLEN < XLEN
+string coverage64f[] = '{
+  `COVERAGE,
+  "fpADUpdate32"
+};
+
 string buildroot[] = '{
   `BUILDROOT,
   "buildroot"
