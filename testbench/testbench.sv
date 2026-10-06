@@ -135,7 +135,7 @@ module testbench;
   logic SelectTest;
   logic TestComplete;
   logic PrevPCZero;
-  logic RVVIStall;
+  logic ExternalStall;
 
   integer elfFD;
   byte header[0:4];
@@ -685,7 +685,7 @@ module testbench;
 
   end
 
-  wallypipelinedsoc  #(P) dut(.clk, .reset_ext, .reset, .ExternalStall(RVVIStall),
+  wallypipelinedsoc  #(P) dut(.clk, .reset_ext, .reset, .ExternalStall,
     .HRDATAEXT, .HREADYEXT, .HRESPEXT, .HSELEXT,
     .HCLK, .HRESETn, .HADDR, .HWDATA, .HWSTRB, .HWRITE, .HSIZE, .HBURST, .HPROT,
     .HTRANS, .HMASTLOCK, .HREADY, .TIMECLK(1'b0), .GPIOIN, .GPIOOUT, .GPIOEN,
@@ -705,9 +705,9 @@ module testbench;
     logic                                             mii_tx_en, mii_tx_er;
 
     rvvitbwrapper #(P, MAX_CSRS, RVVI_INIT_TIME_OUT, RVVI_PACKET_DELAY)
-    rvvitbwrapper(.clk, .reset, .RVVIStall, .mii_tx_clk(clk), .mii_txd, .mii_tx_en, .mii_tx_er,
+    rvvitbwrapper(.clk, .reset, .RVVIStall(ExternalStall), .mii_tx_clk(clk), .mii_txd, .mii_tx_en, .mii_tx_er,
                   .mii_rx_clk(clk), .mii_rxd('0), .mii_rx_dv('0), .mii_rx_er('0));
-  end // otherwise RVVIStall comes from stallinjector below
+  end // otherwise ExternalStall comes from stallinjector below
 
 
   /*
@@ -739,7 +739,7 @@ module testbench;
                                  {StallLength, StallDelay} <= InstrM[31:20];
       else if (StallDelay != 0)  StallDelay <= StallDelay - 1;
       else if (StallLength != 0) StallLength <= StallLength - 1;
-    assign RVVIStall = (StallDelay == 0) & (StallLength != 0);
+    assign ExternalStall = (StallDelay == 0) & (StallLength != 0);
   end
 
   // Track names of instructions
