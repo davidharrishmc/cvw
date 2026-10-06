@@ -37,7 +37,7 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
   input  logic         IllegalCSRAccessM,                   // Not a legal CSR access
   input  logic [1:0]   PrivilegeModeW,                      // current privilege level
   input  logic         STATUS_TSR, STATUS_TVM, STATUS_TW,   // status bits
-  input  logic         TrapTakenM,                          // Trap is taken
+  input  logic         TrapM,                               // Trap is occurring
   output logic         IllegalInstrFaultM,                  // Illegal instruction
   output logic         EcallFaultM, BreakpointFaultM,       // Ecall or breakpoint; must retire, so don't flush it when the trap occurs
   output logic         sretM, mretM, RetM,                  // return instructions
@@ -95,7 +95,7 @@ module privdec import cvw::*;  #(parameter cvw_t P) (
     logic [P.WFI_TIMEOUT_BIT:0] WFICount, WFICountPlus1;
     logic                       WFICountEn, WFICountRst;
     // Clear counter when reset or when trap is taken
-    assign WFICountRst = reset | TrapTakenM;
+    assign WFICountRst = reset | TrapM & ~StallW; // reset only when the trap is taken
     // Stop incrementing the counter once reach the timeout limit
     assign WFICountEn = ~WFITimeoutM;
     assign WFICountPlus1 = wfiM ? WFICount + 1 : '0; // Count while WFI
