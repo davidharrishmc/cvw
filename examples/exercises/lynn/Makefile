@@ -15,8 +15,7 @@ INC_DIR       		?= $(CURDIR)/sample_processor/incdir/  # Optional directory for 
 PROCESSOR_TOP 		?= riscvsingle # top-level module name
 PROCESSOR_CONFIG 	?= $(CURDIR)/sample_processor/config
 
-#--trace-all
-SAIL_TRACE_FLAGS 	?= --trace-all
+SAIL_TRACE_FLAGS 	?= --trace-instr --trace-reg --trace-mem --trace-csr --trace-exception --trace-interrupt
 
 # ----    Synthesis Configuration ---- #
 SYNTH_TECH 			?= sky130 #tsmc28 #tsmc28psyn

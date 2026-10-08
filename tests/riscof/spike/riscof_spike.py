@@ -145,6 +145,8 @@ class spike(pluginTemplate):
           self.isa += '_Zvl512b'
       if "Zfhmin" in ispec["ISA"]:
           self.isa += '_Zfhmin'
+      if "Svnapot" in ispec["ISA"]:
+          self.isa += '_Svnapot'
 
 
       #TODO: The following assumes you are using the riscv-gcc toolchain. If
