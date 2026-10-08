@@ -222,9 +222,9 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     mux2 #(P.PA_BITS) HPTWWriteAdrMux(HPTWReadAdr, HPTWWriteAdr, SelHPTWWriteAdr, HPTWAdr);
 
     assign {Dirty, Accessed} = PTE[7:6];
-    assign WriteAccess = MemRWM[0]; // implies | (|AtomicM);
-    assign SetDirty = ~Dirty & DTLBWalk & (WriteAccess | CMOpM[3]);
-    assign ReadAccess = MemRWM[1];
+    assign WriteAccess = MemRWM[0] | CMOpM[3]; // implies | (|AtomicM); cbo.zero needs W and sets D, as in tlbcontrol
+    assign SetDirty = ~Dirty & DTLBWalk & WriteAccess;
+    assign ReadAccess = MemRWM[1] | (|CMOpM[2:0]); // cbo.clean/flush/inval need R (or X with MXR), as in tlbcontrol
 
     assign EffectivePrivilegeMode = DTLBWalk ? (STATUS_MPRV ? STATUS_MPP : PrivilegeModeW) : PrivilegeModeW; // DTLB uses MPP mode when MPRV is 1
     assign ImproperPrivilege = ((EffectivePrivilegeMode == P.U_MODE) & ~PTE_U) |

@@ -154,6 +154,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   logic [P.LLEN-1:0]     ReadDataHoldM;                          // Captured read data of a performed access awaiting retirement
   logic [P.LLEN-1:0]     ReadDataSelM;                           // Read data to the W stage (live or held)
   logic                  LSUFlushW;                              // HPTW or hazard unit flushes operation
+  logic                  SelfFaultM;                             // M-stage access has its own fault; squash it
   logic                  SelDTIM;                                // Select DTIM rather than bus or D$
   logic [P.XLEN-1:0]     WriteDataZM;
   logic                  LSULoadPageFaultM, LSUStoreAmoPageFaultM;
@@ -302,8 +303,11 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   // Pause IEU memory request if TLB miss.  After TLB fill, replay request.
-  // Discard memory request on pipeline flush
-  assign LSUFlushW = HPTWFlushW | FlushW;
+  // Discard memory request on pipeline flush or when the access itself faults: TrapM waits for a committed
+  // IFU fetch (~CommittedF, #412), so FlushW alone would let the faulting access proceed.  The walker's accesses are exempt.
+  assign SelfFaultM = ~SelHPTW & (LSULoadPageFaultM | LSUStoreAmoPageFaultM | LSULoadAccessFaultM |
+                      LSUStoreAmoAccessFaultM | LoadMisalignedFaultM | StoreAmoMisalignedFaultM);
+  assign LSUFlushW = HPTWFlushW | FlushW | SelfFaultM;
 
   if (P.DTIM_SUPPORTED) begin : dtim
     logic [P.PA_BITS-1:0] DTIMAdr;
