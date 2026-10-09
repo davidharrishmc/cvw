@@ -49,20 +49,15 @@ standard_configs = ["rv32i", "rv64i", "rv32imc", "rv32gc", "rv64gc"]
 
 # Self-checking peripheral tests (tests/periph), run as one group per configuration.
 # rv32imc lacks supervisor mode and PMP, so it only runs the machine-mode peripheral test.
-# WALLY-uart-timeout-01 is left out (see knownFailures).
 periph_tests = {
     "rv32imc": ["rv32/WALLY-periph-m-01"],
     "rv32gc":  ["rv32/WALLY-periph-01", "rv32/WALLY-gpio-01", "rv32/WALLY-clint-01", "rv32/WALLY-uart-01",
-                "rv32/WALLY-plic-01", "rv32/WALLY-plic-s-01", "rv32/WALLY-spi-01", "rv32/WALLY-pwm-01"],
+                "rv32/WALLY-plic-01", "rv32/WALLY-plic-s-01", "rv32/WALLY-spi-01", "rv32/WALLY-pwm-01",
+                "rv32/WALLY-uart-timeout-01"],
     "rv64gc":  ["rv64/WALLY-periph-01", "rv64/WALLY-clint-01", "rv64/WALLY-gpio-01", "rv64/WALLY-plic-01",
-                "rv64/WALLY-plic-s-01", "rv64/WALLY-uart-01", "rv64/WALLY-spi-01", "rv64/WALLY-pwm-01"],
+                "rv64/WALLY-plic-s-01", "rv64/WALLY-uart-01", "rv64/WALLY-spi-01", "rv64/WALLY-pwm-01",
+                "rv64/WALLY-uart-timeout-01"],
 }
-# ELFs that fail on their own and are left out wherever a whole directory is run one ELF at a time.
-# WALLY-uart-timeout-01 has never passed; it was added in 2022 as "Does not pass regression" and was never in a
-# regression.  The test is wrong, not the UART: it does not enable loopback, so no character is received and the
-# receive timeout never starts; it compares a sign-extended lb of IIR against 0xCC; on RV64 it writes 64-bit
-# signature entries with sw; and its expected signature lacks the ecall that ends the test.
-knownFailures = ["WALLY-uart-timeout-01.elf"]
 
 # The tests below are a list with one element for each configuration
 # The element consists of the configuration name, a list of test suites to run,
@@ -427,9 +422,6 @@ def addTestsByDir(testDir, config, sim, coverStr, configs, lockstepMode=0, breke
         if lockstepMode or brekerMode:
             for file in elfs:
                 shortelf = f"{leaf}_{file}"
-                if file in knownFailures:
-                    print(f"{bcolors.WARNING}Skipping known failure {shortelf}{bcolors.ENDC}")
-                    continue
                 elf = f"{dirpath}/{file}"
                 ucdb = coverageDatabase(coverStr, config, f"{leaf}_{file[:-4]}")
                 if coverageUpToDate(ucdb, [elf]):
