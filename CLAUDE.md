@@ -50,7 +50,7 @@ Key options: `--sim {questa,verilator,vcs}`, `--gui`, `--ccov` (code coverage), 
 regression-wally                        # rv32imc, rv32gc, rv64gc ACT + periph tests, Verilator by default
 regression-wally --nightly              # extended nightly suite
 ```
-`regression-wally` first builds the ACT ELFs it needs (`make -C addins/riscv-arch-test CONFIG_FILES=...`, incremental) and the periph/coverage tests, then runs each leaf directory of ACT ELFs as one `wsim` session, in parallel across directories. Compiled designs in `sim/<sim>/wkdir` are kept between regressions and recompiled only when a source file is newer. Set `ACTDIR` to use a different riscv-arch-test checkout.
+`regression-wally` first builds the tests it needs with the root Makefile (`make -C $WALLY act zsbl periph coverage`, incremental; `make act` discards a configuration's ELFs when its `config/<cfg>/act` files change), then runs each leaf directory of ACT ELFs as one `wsim` session, in parallel across directories. Compiled designs in `sim/<sim>/wkdir` are kept between regressions and recompiled only when a source file is newer. Set `ACTDIR` to use a different riscv-arch-test checkout.
 
 ### Run code coverage
 ```bash
@@ -135,6 +135,6 @@ There is no central test list; tests are ELF files passed to `wsim` by path or d
 Every test reports its result by storing to `tohost`: 1 = pass, `(exit code << 1) | 1` = fail. A test that halts without storing to `tohost` is reported as a failure.
 - `buildroot` — Linux boot from prebuilt memory images (`wsim buildroot buildroot`)
 
-`wsim` generates each ELF's `.memfile` (in parallel, via `testbench/Makefile`), looks up its `tohost` and `begin_signature` addresses with `riscv64-unknown-elf-nm`, writes the list (`path tohost begin_signature` per line) to `sim/<sim>/testlists/`, and passes it as `+ElfList=`. The testbench runs each ELF in turn, captures the value stored to `tohost`, and prints a single summary at the end. `.objdump.addr`/`.objdump.lab` label maps (`bin/extractFunctionRadix.sh`) are only built when the `functionName` debug tracer is enabled (`--gui`, `PrintHPMCounters`, `BPRED_LOGGER`).
+`wsim` writes the list of ELF paths to `sim/<sim>/testlists/` and passes it as `+ElfList=` (a single ELF can also be given to the testbench as `+ElfFile=`). The testbench runs each ELF in turn: it builds the ELF's `.memfile` and its `.objdump.addr`/`.objdump.lab` label maps (`testbench/Makefile`; the label maps list the ELF's symbols, from `riscv64-unknown-elf-nm` via `bin/extractFunctionRadix.sh`) if they are missing or out of date, finds `tohost` and `begin_signature` in the label maps, captures the value stored to `tohost`, and prints a single summary at the end. The `functionName` debug tracer (`--gui`, `PrintHPMCounters`, `BPRED_LOGGER`) uses the same label maps.
 
 The ACT submodule is `addins/riscv-arch-test` (upstream `act4` branch). To work on a fork, add it as a remote inside the submodule and check out its branch; keep the committed pointer on an upstream commit.
