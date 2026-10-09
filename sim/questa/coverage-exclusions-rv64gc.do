@@ -249,6 +249,11 @@ coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -feccondrow [GetLin
 # exclusion above resolves via GetLineNum to L95/AnyMiss; this anchor catches the L193 LoadMiss copy.)
 coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -fecexprrow [GetLineNum ${SRC}/cache/cachefsm.sv "assign LoadMiss"] 4
 
+# D$ cachefsm CacheMiss (STATE_ADDRESS_SETUP & ~Stall & ~FlushStage) FlushStage_1 (row 4): a trap that flushes the
+# M stage waits for the access to commit, and an access that faults on its own is squashed before it reaches the
+# cache (lsu.sv SelfFaultM), so the D$ is not flushed in ADDRESS_SETUP.
+coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -fecexprrow [GetLineNum ${SRC}/cache/cachefsm.sv "assign CacheMiss"] 4
+
 # D$ cachefsm L195 CacheBusRW[0] CacheCMOpM[1]/[2] terms (FEC rows 13-16): the writeback-CMO term
 # (STATE_WRITEBACK & (CMOpM[1]|CMOpM[2]) & ~CacheBusAck) is logically subsumed by the earlier OR term
 # (STATE_WRITEBACK & ~CacheBusAck), so CacheCMOpM[1]/[2] never independently drive CacheBusRW[0].
@@ -544,6 +549,12 @@ coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -f
 # the cache makes no request.
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign HTRANS"] 15
 
+# D$ AHBBuscachefsm HTRANS and HBURST (CacheAccess & |BeatCount) CacheAccess_0: as for the I$, BeatCount is only
+# nonzero outside a cache state if a burst was cut off by a flush, and a D$ burst is never flushed: a cache
+# instruction that faults on its own is squashed before its writeback starts (lsu.sv SelfFaultM).
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "CacheAccess & \\|BeatCount\\) ?"] 1
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign HBURST"] 5
+
 # D$ AHBBuscachefsm CaptureEn ((~Flush & DATA_PHASE) & BusRW[1]) Flush_1: unreachable for the D$ -- a
 # DATA_PHASE access with BusRW[1] is a committed, non-speculative uncached load read; the D$ Flush input
 # (LSUFlushW) has no branch-mispredict component, so Flush is always 0 here.
@@ -557,6 +568,11 @@ coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -l
 
 # these transitions will not happen
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -ftrans CurrState ATOMIC_READ_DATA_PHASE->ADR_PHASE ATOMIC_PHASE->ADR_PHASE CACHE_FETCH->CACHE_WRITEBACK
+
+# The bus FSM leaves DATA_PHASE for ADR_PHASE only on a flush, and the D$ bus is never flushed during a data phase:
+# a trap that flushes the M stage waits for the access to commit, and an access that faults on its own is squashed
+# before it reaches the bus (lsu.sv SelfFaultM).
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -ftrans CurrState DATA_PHASE->ADR_PHASE
 
 # TLB not recently used never has all RU bits = 1 because it will then clear all to 0, so the last bit of
 # the TLB NRU priority encoder never sees ~RUBits[31]_0 with every lower bit 1 (row 1 of poh[31]).
