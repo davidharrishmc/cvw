@@ -464,7 +464,8 @@ def addTestGroup(name, testDir, tests, config, sim, coverStr, configs, flags="")
     elfs = [f"{testDir}/{t}{'' if t.endswith('.elf') else '.elf'}" for t in tests]
     configs.append(TestCase(name=name, variant=config,
                             cmd=["wsim", "--sim", sim, *coverStr.split(), *shlex.split(flags), config, *elfs, "--name", name],
-                            log=f"{sim_logdir}{config}_{name}.log", grepstr="All tests ran without failures"))
+                            log=f"{sim_logdir}{config}_{name}.log", grepstr="All tests ran without failures",
+                            elfs=tuple(elfs)))
 
 
 # Coverage is collected one .ucdb per simulation and merged at the end, so a simulation whose .ucdb
@@ -678,7 +679,23 @@ def run_test_command(config, timeout):
                 print(f"{bcolors.FAIL}{cmd}: Failures detected in output. Check {config.log}.{bcolors.ENDC}", flush=True)
                 f.write("ERROR: There is a difference detected in the output\n")  # Write failure message to the log
                 return 1
-    return 1 if search_log_for_text(config.grepstr, grepfile) else 0
+    failed = search_log_for_text(config.grepstr, grepfile)
+    return 1 if unreported_elfs(config, grepfile) or failed else 0
+
+
+def unreported_elfs(config, logfile):
+    """In a simulation of several ELFs, the testbench reports each one as it finishes, so an ELF that
+    hangs ends the session and leaves it and the ELFs after it unreported.  Name them; True if any."""
+    if len(config.elfs or ()) < 2 or config.grepstr != "All tests ran without failures":
+        return False
+    with open(logfile, errors="ignore") as f:
+        reported = {os.path.basename(line.split()[-3]) for line in f
+                    if line.rstrip().endswith(("succeeded.  Brilliant!!!", "failed. :(")) and len(line.split()) >= 3}
+    missing = [elf for elf in config.elfs if os.path.basename(elf) not in reported]
+    if missing:
+        print(f"{bcolors.FAIL}{logfile}: {len(missing)} ELFs did not finish, starting with "
+              f"{os.path.basename(missing[0])}{bcolors.ENDC}", flush=True)
+    return bool(missing)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -767,14 +784,16 @@ def selectTests(args, sims, coverStr):
     if args.breker:
         addTestsByDir(f"{WALLY}/tests/breker/work", "rv64breker", "questa", coverStr, configs, brekerMode=1)
     # standard tests: build the ACT ELFs for every configuration, then run each leaf directory of
-    # ACT tests as one simulation, plus the peripheral tests for the configurations that have them
+    # ACT tests as one simulation, plus the peripheral tests for the configurations that have them.
+    # Directories of more than 25 ELFs are split so that the largest ones do not set the length of the
+    # run: one simulation per ELF finishes no sooner on a large host and takes far longer on a small one.
     if not(args.testfloat or args.ccov or args.fcov or args.cache or args.branch or args.benchmark or args.breker):
         buildTests()
         for sim in sims:
             if not (args.buildroot and sim == lockstepsim):  # skip short buildroot sim if running long one
                 addTests(tests_buildrootshort, sim, coverStr, configs)
             for config in standard_configs:
-                addTestsByDir(actElfDir(config), config, sim, coverStr, configs)
+                addTestsByDir(actElfDir(config), config, sim, coverStr, configs, chunk=25)
                 if config in periph_tests:
                     addTestGroup("periph", periphDir, periph_tests[config], config, sim, coverStr, configs)
     # run derivative configurations and lockstep tests in nightly regression
@@ -886,6 +905,9 @@ def main(args):
     ImperasDVLicenseCount = 16 if (args.nightly or args.ccov or args.fcov) else 10000
     with Pool(processes=min(len(configs),multiprocessing.cpu_count(), ImperasDVLicenseCount)) as pool:
         num_fail = 0
+        # Start the simulations of the most ELFs first, so that the longest ones do not start last; runs
+        # that are not lists of ELFs (lint, buildroot, testfloat) keep their place at the front
+        configs.sort(key=lambda c: -len(c.elfs) if c.elfs else -1e9)
         results = [pool.apply_async(run_test_case, (config, args.dryrun, TIMEOUT_DUR)) for config in configs]
         for result in results:
             num_fail += result.get() # each test enforces its own timeout
