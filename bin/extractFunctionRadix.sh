@@ -8,10 +8,12 @@
 ## Created: March 1, 2021
 ## Modified: March 10, 2021
 ##
-## Purpose: Processes all compiled object files into 2 types of files which assist in debugging applications.
-##          File 1: .addr: A sorted list of function starting addresses.
-##                  When a the PCE is greater than or equal to the function's starting address, the label will be associated with this address.
-##          File 2: .lab: A sorted list of function labels. The names of functions.  Modelsim will display these names rather than the function address.
+## Purpose: Lists the symbols of an ELF in 2 files, which the testbench uses to name the current function and to
+##          find where a test reports its result.
+##          File 1: <prefix>.addr: A sorted list of symbol addresses.
+##                  When the PC is greater than or equal to a symbol's address, the label will be associated with this address.
+##          File 2: <prefix>.lab: The symbol names, in the same order.  The simulator displays these names rather than the address.
+##          <prefix> defaults to <elf>.objdump.
 ##
 ## Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
 ##
@@ -30,43 +32,16 @@
 ################################################################################################
 
 
-function processProgram {
-    local objDumpFile=$1
-    local numBits=$2
-    local size=$(($numBits/4))
-    local index=$3
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    echo "Usage: $0 <elf> [<prefix>]" >&2
+    exit 1
+fi
+elf=$1
+prefix=${2:-$elf.objdump}
 
-    # when size = 16 => 64 bit
-    # when size = 8 => 32 bit
-    # labels from the disassembly: "<addr> <label>:"
-    local disasmLabels=$(grep -E -i "^[0-9a-f]{$size} <[0-9a-zA-Z_]+>" $objDumpFile | awk '{print $1, $2}' | tr -d '<>:')
-    # skip if the wrong bit width.
-    if [ -z "$disasmLabels" ]; then
-        return 0
-    fi
-    # Data labels the testbench looks for (tohost, begin_signature, selfcheck_record, ...) live in
-    # sections that objdump may not disassemble, so also take symbols from the symbol table, if present:
-    # "<addr> <flags> <section> <size> <name>", keeping only plain names (not section or file symbols)
-    local symbolLabels=$(awk -v size=$size 'length($1)==size && $1 ~ /^[0-9a-f]+$/ && NF>=5 && $2 !~ /^[0-9a-f]+$/ && $(NF-1) ~ /^[0-9a-f]+$/ && $NF ~ /^[0-9a-zA-Z_]+$/ {print $1, $NF}' $objDumpFile)
-    # merge, sorted by address so the testbench can binary search
-    local listOfAddr=$(printf "%s\n%s\n" "$disasmLabels" "$symbolLabels" | grep -v "^$" | sort -u)
-    # output per program address and label lists
-    echo "$listOfAddr" | awk '{print $1}' > $objDumpFile.addr
-    echo "$listOfAddr" | awk '{print $2}' > $objDumpFile.lab
-    return 0
-}
-
-
-index=0
-
-for objDumpFile in "$@";
-do
-
-    processProgram "$objDumpFile" 32 "$index"
-    processProgram "$objDumpFile" 64 "$index"
-
-    index=$(($index+1))
-
-done
-
-exit 0
+set -o pipefail
+# nm -n lists the symbol table sorted by address, so the testbench can binary search it.  Leave out
+# symbols without an address in the program: absolute constants and undefined references.
+symbols=$(riscv64-unknown-elf-nm -n "$elf" | awk 'NF == 3 && $2 !~ /^[aAUvw]$/') || exit 1
+echo "$symbols" | awk '{print $1}' > "$prefix.addr"
+echo "$symbols" | awk '{print $3}' > "$prefix.lab"

@@ -20,7 +20,6 @@ import hashlib
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -39,9 +38,6 @@ DESIGN_DIRS = ("src", "testbench", "config", "addins/verilog-ethernet")
 # The riscv-arch-test covergroups are compiled into the design only with --fcov
 ACT_DIR = "addins/riscv-arch-test"
 FCOV_DIRS = (f"{ACT_DIR}/coverpoints", f"{ACT_DIR}/framework/src/act/fcov", f"{ACT_DIR}/tests/env")
-
-# Symbols the testbench needs from each ELF: where the test reports its result, and (embench) its signature
-ELF_SYMBOLS = ("tohost", "begin_signature")
 
 
 def parseArgs():
@@ -129,37 +125,13 @@ def runName(args, elfs, names):
     return f"{names[0]}_plus{len(elfs) - 1}"
 
 
-def elfSymbols(elfs):
-    """Look up the address of each ELF_SYMBOLS entry in every ELF with nm (0 if absent).
-    One nm call covers all the ELFs; with several files nm prefixes each file's symbols with a "<path>:" line."""
-    symbols = {elf: dict.fromkeys(ELF_SYMBOLS, 0) for elf in elfs}
-    nm = shutil.which("riscv64-unknown-elf-nm")
-    if nm is None:
-        print("Warning: riscv64-unknown-elf-nm not found; tests cannot report results through tohost")
-        return symbols
-    current = elfs[0]
-    for line in subprocess.run([nm, *elfs], capture_output=True, text=True).stdout.splitlines():
-        if line.endswith(":") and line[:-1] in symbols:
-            current = line[:-1]
-            continue
-        fields = line.split()
-        if len(fields) == 3 and fields[2] in ELF_SYMBOLS:
-            symbols[current][fields[2]] = int(fields[0], 16)
-    return symbols
-
-
 def prepareElfs(args, elfs):
-    """Generate the .memfile for every ELF (in parallel, only if out of date) and write the ELF list.
-    Each line of the list holds the ELF path followed by the hex addresses of ELF_SYMBOLS."""
-    memfiles = [f"{elf}.memfile" for elf in elfs]
-    if subprocess.run(["make", "-s", "-j", "-f", f"{WALLY}/testbench/Makefile", f"WALLY={WALLY}", *memfiles]).returncode:
-        print("Error: could not generate memfiles")
-        sys.exit(1)
-    symbols = elfSymbols(elfs)
+    """Write the list of ELFs to run, one path per line.  The testbench builds each ELF's memory image
+    and label maps (testbench/Makefile) when it reaches it, and looks up tohost in the label maps."""
     listdir = WALLY / "sim" / args.sim / "testlists"
     listdir.mkdir(parents=True, exist_ok=True)
     listfile = listdir / f"{args.config}_{args.tb}_{args.testsuite}.txt"
-    listfile.write_text("".join(f"{elf} " + " ".join(f"{symbols[elf][name]:x}" for name in ELF_SYMBOLS) + "\n" for elf in elfs))
+    listfile.write_text("".join(f"{elf}\n" for elf in elfs))
     return listfile
 
 

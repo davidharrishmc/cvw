@@ -126,13 +126,8 @@ module testbench;
   string outputfile;
   integer outputFilePointer;
 
-  string  elfPaths[];    // ELF files run back-to-back in this simulation
-  longint elfTohost[];   // address of each ELF's tohost, where the test stores its result (0 if none)
-  longint elfBeginSig[]; // address of each ELF's begin_signature (0 if none); used by embench
-  string  elfQueue[$];
-  longint tohostQueue[$], sigQueue[$];
+  string  elfPaths[$];   // ELF files run back-to-back in this simulation
   string  elfPathLine;
-  longint tohostLine, sigLine;
   integer elfListFD;
   int     NumTests;
   logic DCacheFlushDone, DCacheFlushStart;
@@ -173,11 +168,9 @@ module testbench;
     if (!$value$plusargs("ElfList=%s", ElfList))
       ElfList = "none";
 
-    // Build the list of ELF files to run back-to-back in this simulation.  wsim writes one line per
-    // ELF into the ElfList file: the absolute path, then the hex addresses of tohost and
-    // begin_signature (0 if the ELF lacks the symbol).  A single ELF may also be named with +ElfFile,
-    // in which case no result can be read back.  buildroot and fpga instead load prebuilt memory
-    // images, so they have no ELF list.
+    // Build the list of ELF files to run back-to-back in this simulation.  wsim writes the path of
+    // each ELF on its own line of the ElfList file; a single ELF may also be named with +ElfFile.
+    // buildroot and fpga instead load prebuilt memory images, so they have no ELF list.
     if (TEST == "buildroot" | TEST == "fpga") begin
       NumTests = 1;
     end else begin
@@ -187,25 +180,11 @@ module testbench;
           $display("Error: Could not open ELF list file %s", ElfList);
           $finish;
         end
-        while ($fscanf(elfListFD, "%s %h %h", elfPathLine, tohostLine, sigLine) == 3) begin
-          elfQueue.push_back(elfPathLine);
-          tohostQueue.push_back(tohostLine);
-          sigQueue.push_back(sigLine);
-        end
+        while ($fscanf(elfListFD, "%s", elfPathLine) == 1)
+          elfPaths.push_back(elfPathLine);
         $fclose(elfListFD);
-      end else if (ElfFile != "none") begin
-        elfQueue.push_back(ElfFile);
-        tohostQueue.push_back(0);
-        sigQueue.push_back(0);
-      end
-      elfPaths = new[elfQueue.size()];
-      elfTohost = new[elfQueue.size()];
-      elfBeginSig = new[elfQueue.size()];
-      foreach (elfQueue[elfIdx]) begin
-        elfPaths[elfIdx] = elfQueue[elfIdx];
-        elfTohost[elfIdx] = tohostQueue[elfIdx];
-        elfBeginSig[elfIdx] = sigQueue[elfIdx];
-      end
+      end else if (ElfFile != "none")
+        elfPaths.push_back(ElfFile);
       NumTests = elfPaths.size();
       if (NumTests == 0) begin
         $display("Error: No ELF files to run.  Pass +ElfList=<listfile> or +ElfFile=<elf>.");
@@ -362,14 +341,15 @@ module testbench;
         memfilename = {elffilename, ".memfile"};
         ProgramAddrMapFile = {elffilename, ".objdump.addr"};
         ProgramLabelMapFile = {elffilename, ".objdump.lab"};
+        // build the memory image and the label maps from the ELF if they are missing or out of date
+        if ($system({"make -s -f ", WALLY_DIR, "/testbench/Makefile WALLY=", WALLY_DIR, " ", memfilename, " ", ProgramAddrMapFile}) != 0)
+          $display("Error: Could not build %s and the label maps of %s", memfilename, elffilename);
       end
       if (TEST == "buildroot" | TEST == "fpga") begin
         tohost_addr = 0;
         begin_signature_addr = 0;
-      end else begin
-        tohost_addr = elfTohost[test];
-        begin_signature_addr = elfBeginSig[test];
-      end
+      end else
+        findSymbols(ProgramAddrMapFile, ProgramLabelMapFile, tohost_addr, begin_signature_addr);
       // Open UART log file if enabled (buildroot defaults to on, override with +UART_LOG=1)
       if (UART_LOG) begin
         uartoutfilename = UART_LOG_FILE;
@@ -658,10 +638,6 @@ module testbench;
 
   // track the current function or global label
   if (DEBUG > 0 | ((PrintHPMCounters | BPRED_LOGGER) & P.ZICNTR_SUPPORTED)) begin : functionName
-    // build the .objdump.addr/.lab label maps from the ELF if they are missing or stale
-    always @(posedge clk)
-      if (SelectTest & TEST != "buildroot" & TEST != "fpga")
-        void'($system({"make -s -f ", WALLY_DIR, "/testbench/Makefile WALLY=", WALLY_DIR, " ", ProgramAddrMapFile}));
     functionName #(P) functionName(.reset(reset_ext | TestBenchReset),
             .clk(clk), .ProgramAddrMapFile(ProgramAddrMapFile), .ProgramLabelMapFile(ProgramLabelMapFile));
   end
@@ -937,6 +913,26 @@ module testbench;
     else
       return name;
   endfunction
+
+  // Look up, in the label maps built from an ELF's symbol table, where the test reports its result
+  // (tohost) and where its signature starts (begin_signature, used by embench); 0 if the ELF lacks one
+  task automatic findSymbols(input string addrFile, labFile, output logic [P.XLEN-1:0] tohost, beginSig);
+    integer addrFD, labFD;
+    longint adr;
+    string  label;
+    tohost = 0;
+    beginSig = 0;
+    addrFD = $fopen(addrFile, "r");
+    labFD = $fopen(labFile, "r");
+    if (addrFD == 0 | labFD == 0)
+      $display("Error: Could not open the label maps %s and %s", addrFile, labFile);
+    else
+      while ($fscanf(addrFD, "%h", adr) == 1 && $fscanf(labFD, "%s", label) == 1)
+        if (label == "tohost") tohost = adr[P.XLEN-1:0];
+        else if (label == "begin_signature") beginSig = adr[P.XLEN-1:0];
+    if (addrFD != 0) $fclose(addrFD);
+    if (labFD != 0) $fclose(labFD);
+  endtask
 
 `ifdef PMP_COVERAGE
 test_pmp_coverage #(P) pmp_inst(clk);
