@@ -19,8 +19,8 @@
 
 // Custom RVMODEL_BOOT_TO_MMODE overrides default RVTEST_BOOT_TO_MMODE
 // if defined.  For most DUTs, the default should work and this macro
-// should not be defined.  If no standard M-mode CSRs are implemented, leave
-// STANDARD_SM_SUPPORTED undefined instead.  If a nonconforming
+// should not be defined.  If the DUT has no standard M-mode CSRs, do not
+// define STANDARD_SM_SUPPORTED.  If a nonconforming
 // M-mode is implemented, define this macro to set up the necessary
 // state in a fashion similar to RVTEST_BOOT_TO_MMODE.
 //#define RVMODEL_BOOT_TO_MMODE
@@ -86,17 +86,6 @@
 
 #define RVMODEL_ACCESS_FAULT_ADDRESS 0x00000000
 
-##### Interrupt Latency #####
-
-#define RVMODEL_INTERRUPT_LATENCY 10
-
-// No CLINT, PLIC or interrupts in this configuration.
-// riscv-arch-test requires these until its check_defines.h gates them on STANDARD_SM_SUPPORTED
-// (riscv/riscv-arch-test#2503); they are never invoked.  Remove them once the submodule includes it.
-#define RVMODEL_TIMER_INT_SOON_DELAY 10000
-#define RVMODEL_SET_MEXT_INT(_R1, _R2) nop
-#define RVMODEL_CLR_MEXT_INT(_R1, _R2) nop
-#define RVMODEL_SET_MSW_INT(_R1, _R2) nop
-#define RVMODEL_CLR_MSW_INT(_R1, _R2) nop
+// No CLINT, PLIC or interrupts in this configuration, and no M-mode CSRs to take them, so no interrupt macros.
 
 #endif // _RVMODEL_MACROS_H
