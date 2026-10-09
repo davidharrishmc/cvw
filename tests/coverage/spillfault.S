@@ -11,11 +11,18 @@
 //          it gets back look like a 32-bit instruction, so each straddling line is executed
 //          once while it is still allowed, to bring it into the instruction cache, before the
 //          permission is revoked.  Both traps resume after the straddling instruction.
+//          Self-checking (WALLY-selfcheck.h): each straddling instruction is an addi that counts its
+//          executions, so the test checks that it ran once in the warm-up pass and was skipped by
+//          the handler when it faulted, and, from what record_trap logs, that exactly one instruction
+//          page fault and one instruction access fault were taken, each with mepc and mtval at the
+//          start of the straddling instruction (the faulting first half).  Failure indices: 1-2
+//          warm-up counts, 3-5 page fault, 6-8 access fault, 9-10 final counts, 0xF0 any other trap.
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ///////////////////////////////////////////
 
 #include "WALLY-init-lib.h"
+#include "WALLY-selfcheck.h"
 .option norvc
 
 // address of the level-0 PTE that maps a label, into reg (clobbers t6)
@@ -29,6 +36,9 @@
 .endm
 
 main:
+    la t0, record_trap
+    csrw mtvec, t0
+
     // Identity-map the first 2 MiB of RAM with 4 KiB pages (Sv39: root -> level 1 -> level 0),
     // built at run time so a single page can be marked non-executable.
     la t0, l0table
@@ -66,8 +76,11 @@ build_l0:
     ecall                       # supervisor mode
 
     // Warm-up pass: run through both straddling lines while they are still executable, so the
-    // instruction cache holds them.  s2 = 0 makes the code after each straddle return.
+    // instruction cache holds them.  s2 = 0 makes the code after each straddle return.  The
+    // straddling instructions count their executions in s3 (page) and s4 (grain).
     li s2, 0
+    li s3, 0
+    li s4, 0
     la t0, nx_page
     li t1, 0xFC0
     add t0, t0, t1
@@ -77,6 +90,9 @@ build_l0:
 
     li a0, 3
     ecall                       # machine mode to change the page table and the PMP
+    li t2, 1
+    SC_CHECK_EQ s3, t2, 1       # the page straddle ran once while executable
+    SC_CHECK_EQ s4, t2, 2       # the grain straddle ran once while executable
 
     // nx_page: readable but not executable
     L0_ENTRY nx_page, t0
@@ -119,10 +135,72 @@ pmp_resume:
 
     li a0, 3
     ecall
+
+    // One instruction page fault and one instruction access fault, each reported at the start of
+    // its straddling instruction, the half that faulted
+    la a1, pagefault
+    ld t2, 0(a1)
+    li t3, 1
+    SC_CHECK_EQ t2, t3, 3       # one instruction page fault
+    la t3, nx_page
+    li t4, 0xFFE
+    add t3, t3, t4
+    ld t2, 8(a1)
+    SC_CHECK_EQ t2, t3, 4       # mepc = straddling instruction
+    ld t2, 16(a1)
+    SC_CHECK_EQ t2, t3, 5       # mtval = its first half, the one that faulted
+    la a1, accessfault
+    ld t2, 0(a1)
+    li t3, 1
+    SC_CHECK_EQ t2, t3, 6       # one instruction access fault
+    la t3, nx_grain
+    addi t3, t3, 62
+    ld t2, 8(a1)
+    SC_CHECK_EQ t2, t3, 7       # mepc = straddling instruction
+    ld t2, 16(a1)
+    SC_CHECK_EQ t2, t3, 8       # mtval = its first half, the one that faulted
+    // the faulting straddles did not execute: the handler skipped them
+    li t2, 1
+    SC_CHECK_EQ s3, t2, 9
+    SC_CHECK_EQ s4, t2, 10
+
+    SC_PASS
     j done
 
+// Instruction page faults (12) and instruction access faults (1): count them and save mepc and mtval
+// in pagefault or accessfault, then let the library handler skip the straddling instruction.  Everything
+// else goes to sc_trap_handler, which passes ecalls to the library handler and fails the test on any
+// other trap.
+.align 4
+record_trap:
+    csrrw t0, mscratch, t0      # t0 = trap stack pointer, mscratch = saved t0
+    sd t1, -16(t0)
+    sd t2, -24(t0)
+    csrr t2, mcause
+    la t1, pagefault
+    addi t2, t2, -12
+    beqz t2, 1f
+    la t1, accessfault
+    addi t2, t2, 11
+    beqz t2, 1f
+    ld t2, -24(t0)
+    ld t1, -16(t0)
+    csrrw t0, mscratch, t0      # restore t0 and the trap stack pointer
+    j sc_trap_handler
+1:  ld t2, 0(t1)
+    addi t2, t2, 1
+    sd t2, 0(t1)                # count
+    csrr t2, mepc
+    sd t2, 8(t1)
+    csrr t2, mtval
+    sd t2, 16(t1)
+    ld t2, -24(t0)
+    ld t1, -16(t0)
+    csrrw t0, mscratch, t0
+    j trap_handler
+
 // The last 64 bytes of nx_page are real code so the warm-up pass can execute them: 15 nops, a
-// c.nop, and the low half of an addi x0, x0, 0 whose high half is the first halfword of x_page.
+// c.nop, and the low half of an addi s3, s3, 1 whose high half is the first halfword of x_page.
 .p2align 12
 nx_page:
     .fill 4032, 1, 0
@@ -130,22 +208,22 @@ nx_page:
     nop
     .endr
     .half 0x0001
-    .half 0x0013
+    .half 0x8993                # addi s3, s3, 1 = 0x00198993
 x_page:
-    .half 0x0000
+    .half 0x0019
     bnez s2, page_resume
     ret
 
-// The grain has the same shape: 15 nops, a c.nop, and the straddling addi into x_grain.
+// The grain has the same shape: 15 nops, a c.nop, and the straddling addi s4, s4, 1 into x_grain.
 .p2align 6
 nx_grain:
     .rept 15
     nop
     .endr
     .half 0x0001
-    .half 0x0013
+    .half 0x0A13                # addi s4, s4, 1 = 0x001A0A13
 x_grain:
-    .half 0x0000
+    .half 0x001A
     bnez s2, pmp_resume
     ret
 
@@ -157,3 +235,7 @@ l1table:
     .fill 512, 8, 0
 l0table:
     .fill 512, 8, 0
+pagefault:                      # instruction page faults: count, mepc, mtval
+    .fill 3, 8, 0
+accessfault:                    # instruction access faults: count, mepc, mtval
+    .fill 3, 8, 0
