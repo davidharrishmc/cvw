@@ -40,7 +40,7 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   input  logic [1:0]           PrivilegeModeW,     // Current privilege level of the processeor
   input  logic                 DisableTranslation, // virtual address translation disabled during D$ flush and HPTW walk that use physical addresses
   input  logic [P.XLEN+1:0]    VAdr,               // virtual/physical address from IEU or physical address from HPTW
-  input  logic [1:0]           Size,               // access size: 00 = 8 bits, 01 = 16 bits, 10 = 32 bits , 11 = 64 bits
+  input  logic [2:0]           Size,               // access size: 000 = 8 bits, 001 = 16 bits, 010 = 32 bits, 011 = 64 bits, 100 = 128 bits
   input  logic [P.XLEN-1:0]    PTE,                // page table entry
   input  logic [2:0]           PageTypeWriteVal,   // page type
   input  logic                 TLBWrite,           // write TLB entry
@@ -139,10 +139,12 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   localparam LINEOFFBITS = $clog2(P.DCACHE_LINELENINBITS/8); // bits of address within a cache line
   always_comb // exclusion-tag: immu-wordaccess
     case(Size)
-      2'b00:  begin DataMisalignedM = 1'b0;              CrossesLineM = 1'b0;                     end // lb, sb, lbu
-      2'b01:  begin DataMisalignedM = VAdr[0];           CrossesLineM = &VAdr[LINEOFFBITS-1:1];   end // lh, sh, lhu
-      2'b10:  begin DataMisalignedM = VAdr[1] | VAdr[0]; CrossesLineM = &VAdr[LINEOFFBITS-1:2];   end // lw, sw, flw, fsw, lwu
-      2'b11:  begin DataMisalignedM = |VAdr[2:0];        CrossesLineM = &VAdr[LINEOFFBITS-1:3];   end // ld, sd, fld, fsd
+      3'b000:  begin DataMisalignedM = 1'b0;              CrossesLineM = 1'b0;                   end // lb, sb, lbu
+      3'b001:  begin DataMisalignedM = VAdr[0];           CrossesLineM = &VAdr[LINEOFFBITS-1:1]; end // lh, sh, lhu
+      3'b010:  begin DataMisalignedM = VAdr[1] | VAdr[0]; CrossesLineM = &VAdr[LINEOFFBITS-1:2]; end // lw, sw, flw, fsw, lwu
+      3'b011:  begin DataMisalignedM = |VAdr[2:0];        CrossesLineM = &VAdr[LINEOFFBITS-1:3]; end // ld, sd, fld, fsd
+      3'b100:  begin DataMisalignedM = |VAdr[3:0];        CrossesLineM = 1'b1;                   end // flq, fsq, amocas.q; align.sv does not split a misaligned amocas.q, so Zama16b never excuses it
+      default: begin DataMisalignedM = 1'b0;              CrossesLineM = 1'b0;                   end // no other sizes exist
     endcase
 
   // When ZICCLSM_SUPPORTED, misaligned cacheable loads and stores are handled in hardware so they do not throw a misaligned fault
