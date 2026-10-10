@@ -10,7 +10,7 @@
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
-// https://github.com/openhwgroup/cvw
+// https://github.com/openhwfoundation/cvw
 //
 // Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
 //
@@ -127,10 +127,8 @@ module csrc  import cvw::*;  #(parameter cvw_t P) (
     assign CounterEvent[21] = sfencevmaM & InstrValidNotFlushedM;                        // sfence.vma
     assign CounterEvent[22] = InterruptM;                                                // interrupt, InstrValidNotFlushedM will be low
     assign CounterEvent[23] = ExceptionM;                                                // exceptions, InstrValidNotFlushedM will be low
-    // coverage off
-    // DivBusyE will never be asserted high because the RV64GC configuration uses the FPU to do integer division
+    // DivBusyE is never asserted on rv64gc, which divides integers in the FPU; coverage-exclusions-rv64gc.do excludes that row
     assign CounterEvent[24] = DivBusyE | FDivBusyE;                                      // division cycles
-    // coverage on
     assign CounterEvent[31:25] = '0; // eventually give these sources, including FP instructions, I$/D$ misses, branches and mispredictions
   end else begin : cevent
     assign CounterEvent[31:3] = '0;
@@ -162,7 +160,7 @@ module csrc  import cvw::*;  #(parameter cvw_t P) (
   // hpmevent update and write logic
   if (P.COUNTERS > 3) begin : mhpmeventgen
     for (i = 3; i < P.COUNTERS; i = i+1) begin : mhpmevent
-      assign WriteMHPMEVENTM[i] = CSRMWriteM & (CSRAdrM == MHPMEVENTBASE + i);
+      assign WriteMHPMEVENTM[i] = CSRMWriteM & (CSRAdrM == MHPMEVENTBASE + i - 3);
       assign NextMHPMEVENTM[i] = WriteMHPMEVENTM[i] ? CSRWriteValM : MHPMEVENT_REGW[i];
       always_ff @(posedge clk)
         if (reset) MHPMEVENT_REGW[i] <= '0;

@@ -62,6 +62,7 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   logic [NUM_REGS-1:0]   rf_wb;
   logic [4:0]            rf_a3;
   logic                  rf_we3;
+  logic                  rf_we3p;
   logic [P.FLEN-1:0]     frf[32];
   logic [31:0]           frf_wb;
   logic [4:0]            frf_a4;
@@ -70,7 +71,6 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   logic [11:0]           CSRAdrM, CSRAdrW;
   logic                  wfiM;
   logic                  InterruptM, InterruptW;
-  logic                  MExtInt, SExtInt, MTimerInt, MSwInt;
   logic                  valid;
   logic                  HPTWUpdateDA, DA_updated, capture_PTE;
 
@@ -116,20 +116,12 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
     assign STATUS_UXL     = testbench.dut.core.priv.priv.csr.csrsr.STATUS_UXL;
     assign wfiM           = testbench.dut.core.priv.priv.wfiM;
     assign InterruptM     = testbench.dut.core.priv.priv.InterruptM;
-    assign MExtInt        = testbench.dut.MExtInt;
-    assign SExtInt        = testbench.dut.SExtInt;
-    assign MTimerInt      = testbench.dut.MTimerInt;
-    assign MSwInt         = testbench.dut.MSwInt;
   end else begin
     assign PrivilegeModeW = 2'b11;
     assign STATUS_SXL     = 0;
     assign STATUS_UXL     = 0;
     assign wfiM           = 0;
     assign InterruptM     = 0;
-    assign MExtInt        = 0;
-    assign SExtInt        = 0;
-    assign MTimerInt      = 0;
-    assign MSwInt         = 0;
   end
 
   //For VM Verification
@@ -288,18 +280,29 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
     end
   end
 
-  // Integer register file
+  // Integer register file.  Zacas holds the registers as pairs, so reach into the matching half.
   assign rf[0] = 0;
-  for(genvar index = 1; index < NUM_REGS; index += 1)
-    assign rf[index] = testbench.dut.core.ieu.dp.regf.rf[index];
+  if (P.ZACAS_SUPPORTED) begin : tracerf
+    for(genvar index = 1; index < NUM_REGS; index += 1)
+      assign rf[index] = index[0] ? testbench.dut.core.ieu.dp.regf.pairedrf.rf[index/2][P.XLEN*2-1:P.XLEN]
+                                  : testbench.dut.core.ieu.dp.regf.pairedrf.rf[index/2][P.XLEN-1:0];
+  end else begin : tracerf
+    for(genvar index = 1; index < NUM_REGS; index += 1)
+      assign rf[index] = testbench.dut.core.ieu.dp.regf.simplerf.rf[index];
+  end
 
   assign rf_a3  = testbench.dut.core.ieu.dp.regf.a3;
   assign rf_we3 = testbench.dut.core.ieu.dp.regf.we3;
+  // A pair amocas writes rd and rd+1 through the same address port, so report both
+  if (P.ZACAS_SUPPORTED) assign rf_we3p = testbench.dut.core.ieu.dp.regf.we3p;
+  else                   assign rf_we3p = 1'b0;
 
   always_comb begin
     rf_wb <= 0;
-    if(rf_we3)
+    if(rf_we3) begin
       rf_wb[rf_a3] <= 1'b1;
+      if (rf_we3p) rf_wb[rf_a3 | 5'b1] <= 1'b1; // the pair's odd register
+    end
   end
 
   // Floating-point register file
@@ -403,6 +406,8 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   assign rvvi.halt[0][0]     = HaltW;
   assign rvvi.intr[0][0]     = InterruptW;
   assign rvvi.mode[0][0]     = PrivilegeModeW;
+  assign rvvi.mode_virt[0][0] = 1'b0;  // no hypervisor, so never in a virtual mode
+  assign rvvi.debug_mode[0][0] = 1'b0; // no debug mode
   assign rvvi.ixl[0][0]      = PrivilegeModeW == 2'b11 ? 2'b10 :
                                PrivilegeModeW == 2'b01 ? STATUS_SXL : STATUS_UXL;
   assign rvvi.pc_wdata[0][0] = ~FlushW ? PCM :
@@ -418,14 +423,6 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
     assign rvvi.f_wdata[0][0][index] = frf[index];
     assign rvvi.f_wb[0][0][index]    = frf_wb[index];
   end
-
-`ifdef FCOV
-  // Interrupts
-  assign rvvi.m_ext_intr[0][0]   = MExtInt;
-  assign rvvi.s_ext_intr[0][0]   = SExtInt;
-  assign rvvi.m_timer_intr[0][0] = MTimerInt;
-  assign rvvi.m_soft_intr[0][0]  = MSwInt;
-`endif
 
   // *** implementation only cancel? so sc does not clear?
   assign rvvi.lrsc_cancel[0][0] = 0;
@@ -504,16 +501,6 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
       //     end
       //   end
       // end
-    end
-    if(HaltW) begin
-`ifdef FCOV
-      $display("Functional coverage test complete.");
-`endif
-`ifdef QUESTA
-      $stop;  // if this is changed to $finish for Questa, wally.do does not go to the next step to run coverage and terminates without allowing GUI debug
-`else
-      $finish;
-`endif
     end
   end
 endmodule

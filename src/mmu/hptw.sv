@@ -16,7 +16,7 @@
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
-// https://github.com/openhwgroup/cvw
+// https://github.com/openhwfoundation/cvw
 //
 // Copyright (C) 2021 Harvey Mudd College & Oklahoma State University
 //
@@ -47,6 +47,8 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.XLEN-1:0] ReadDataM,              // page table entry from LSU
   input  logic [P.XLEN-1:0] WriteDataM,
   input  logic              DCacheBusStallM,           // stall from LSU
+  input  logic              MemAccessInFlightM,     // LSU has started (or performed and is holding) the M-stage memory access; do not pre-empt it
+  input  logic              MemAccessDoneM,         // LSU has performed and captured the M-stage memory access; it will not be re-issued
   input  logic [2:0]        Funct3M,
   input  logic [6:0]        Funct7M,
   input  logic              ITLBMissOrUpdateAF,
@@ -82,7 +84,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
 
   logic                     DTLBWalk; // current walk is for the DTLB (else ITLB)
   logic                     DTLBWalkPending, ITLBWalkPending; // requests recorded when the walker left IDLE, cleared as each completes
-  logic                     AcceptReq;
+  logic                     DTLBReq, ITLBReq, AcceptReq;
   logic                     WalkDone;
   logic [P.PPN_BITS-1:0]    BasePageTablePPN;
   logic [P.PPN_BITS-1:0]    CurrentPPN;
@@ -150,13 +152,15 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   // The walker records the translation requests present when it leaves IDLE and serves them in the order
   // DTLB walk, then ITLB walk.  The M-stage memory access itself is performed only after both complete,
   // because nothing but the M->W pipeline register can capture its result.
-  //   DTLBMissOrUpdateDAM: the M-stage access needs a DTLB fill or A/D update.  It has not started, so it is pre-empted
+  //   DTLBReq: the M-stage access needs a DTLB fill or A/D update.  It has not started, so it is pre-empted
   //            (HPTWFlushW) and replayed after the walk(s).
-  //   ITLBMissOrUpdateAF: the F-stage fetch needs an ITLB fill or A update.  It is deferred while the LSU has a memory
+  //   ITLBReq: the F-stage fetch needs an ITLB fill or A update.  It is deferred while the LSU has a memory
   //            access in flight, because an access that has started on the D$ or bus can be neither aborted
   //            (AHB transaction in progress) nor replayed (uncached loads/stores and AMOs are not idempotent).
   //            The IFU stalls the pipeline while its request is outstanding.
-  assign AcceptReq = (WalkerState == IDLE) & (DTLBMissOrUpdateDAM | ITLBMissOrUpdateAF);
+  assign DTLBReq   = DTLBMissOrUpdateDAM;
+  assign ITLBReq   = ITLBMissOrUpdateAF & ~MemAccessInFlightM;
+  assign AcceptReq = (WalkerState == IDLE) & (DTLBReq | ITLBReq);
 
   // Determine which address to translate
   mux2 #(P.XLEN) vadrmux(PCSpillF, IEUAdrExtM[P.XLEN-1:0], DTLBWalk, TranslationVAdr);
@@ -169,7 +173,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   assign WalkDone = ((WalkerState == LEAF) & ~UpdatePTE) | (WalkerState == FAULT);
   always_ff @(posedge clk)
     if (reset | FlushW)       {DTLBWalkPending, ITLBWalkPending} <= 2'b00;
-    else if (StartWalk)       {DTLBWalkPending, ITLBWalkPending} <= {DTLBMissOrUpdateDAM, ITLBMissOrUpdateAF};
+    else if (StartWalk)       {DTLBWalkPending, ITLBWalkPending} <= {DTLBReq, ITLBReq};
     else if (WalkDone)
       if (DTLBWalkPending) begin
         DTLBWalkPending <= 1'b0;
@@ -218,13 +222,13 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     mux2 #(P.PA_BITS) HPTWWriteAdrMux(HPTWReadAdr, HPTWWriteAdr, SelHPTWWriteAdr, HPTWAdr);
 
     assign {Dirty, Accessed} = PTE[7:6];
-    assign WriteAccess = MemRWM[0]; // implies | (|AtomicM);
-    assign SetDirty = ~Dirty & DTLBWalk & (WriteAccess | CMOpM[3]);
-    assign ReadAccess = MemRWM[1];
+    assign WriteAccess = MemRWM[0] | CMOpM[3]; // implies | (|AtomicM); cbo.zero needs W and sets D, as in tlbcontrol
+    assign SetDirty = ~Dirty & DTLBWalk & WriteAccess;
+    assign ReadAccess = MemRWM[1] | (|CMOpM[2:0]); // cbo.clean/flush/inval need R (or X with MXR), as in tlbcontrol
 
     assign EffectivePrivilegeMode = DTLBWalk ? (STATUS_MPRV ? STATUS_MPP : PrivilegeModeW) : PrivilegeModeW; // DTLB uses MPP mode when MPRV is 1
     assign ImproperPrivilege = ((EffectivePrivilegeMode == P.U_MODE) & ~PTE_U) |
-                               ((EffectivePrivilegeMode == P.S_MODE) & PTE_U & (~STATUS_SUM & DTLBWalk));
+                               ((EffectivePrivilegeMode == P.S_MODE) & PTE_U & (~STATUS_SUM | ~DTLBWalk));
 
     // Check for page faults
     vm64check #(P) vm64check(.SATP_MODE(SATP_REGW[P.XLEN-1:P.XLEN-P.SVMODE_BITS]), .VAdr(TranslationVAdr),
@@ -304,7 +308,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   if (P.XLEN == 32) begin
     assign InitialWalkerState = L1_ADR;
     assign MegapageMisaligned = |(CurrentPPN[9:0]); // must have zero PPN0
-    assign Misaligned = ((WalkerState == L0_ADR) & MegapageMisaligned);
+    assign Misaligned = (WalkerState == LEAF) & (PageType == 3'b001) & MegapageMisaligned;
   end else begin
     logic  PetapageMisaligned, GigapageMisaligned, TerapageMisaligned;
     assign InitialWalkerState = (P.SV57_SUPPORTED & SvMode == P.SV57) ? L4_ADR :
@@ -314,10 +318,11 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     assign TerapageMisaligned = P.SV48_SUPPORTED & |(CurrentPPN[26:0]); // Must have zero PPN2, PPN1, PPN0
     assign GigapageMisaligned =                    |(CurrentPPN[17:0]); // Must have zero PPN1 and PPN0
     assign MegapageMisaligned = |(CurrentPPN[8:0]);  // Must have zero PPN0
-    assign Misaligned = (P.SV57_SUPPORTED & (WalkerState == L3_ADR) & PetapageMisaligned) |
-                        (P.SV48_SUPPORTED & (WalkerState == L2_ADR) & TerapageMisaligned) |
-                                           ((WalkerState == L1_ADR) & GigapageMisaligned) |
-                                           ((WalkerState == L0_ADR) & MegapageMisaligned);
+    assign Misaligned = (WalkerState == LEAF) &
+                        ((P.SV57_SUPPORTED & (PageType == 3'b100) & PetapageMisaligned) |
+                         (P.SV48_SUPPORTED & (PageType == 3'b011) & TerapageMisaligned) |
+                                            ((PageType == 3'b010) & GigapageMisaligned) |
+                                            ((PageType == 3'b001) & MegapageMisaligned));
   end
 
   // Page Table Walker FSM
@@ -367,7 +372,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   // Pre-empt the M-stage memory access when a walk is accepted so it replays after the TLB fill (unless the LSU
   // has already performed and captured it), and squash the walker's own access when it faults.  A walk is only
   // accepted while no access is in flight, so this flush never abandons a bus transaction.
-  assign HPTWFlushW = AcceptReq | (WalkerState != IDLE & HPTWFaultM);
+  assign HPTWFlushW = (AcceptReq & ~MemAccessDoneM) | (WalkerState != IDLE & HPTWFaultM);
 
   assign SelHPTW = WalkerState != IDLE;
   // Stall the pipeline from the cycle a request is accepted until the walker returns to IDLE, including FAULT:
@@ -381,8 +386,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   // In the last cycle of a walk (TLB write or FAULT) switch back to the original data virtual address so the
   // data cache reads the tag/data/valid/dirty/LRU state of the M-stage access's set (the set index lies within
   // the page offset) and the access resumes at IDLE with a valid hit/miss decision.
-  //assign SelHPTWAdr = SelHPTW & ~(DTLBWriteM | ITLBWriteF | (WalkerState == FAULT));
-  assign SelHPTWAdr = SelHPTW & ~(((DTLBWalkPending & ~ITLBWalkPending & DTLBWriteM) | (ITLBWalkPending &ITLBWriteF)) | (WalkerState == FAULT));
+  assign SelHPTWAdr = SelHPTW & ~(DTLBWriteM | ITLBWriteF | (WalkerState == FAULT));
 
   // multiplex the outputs to LSU
   if (P.XLEN == 64) assign HPTWAdrExt = {{(P.XLEN+2-P.PA_BITS){1'b0}}, HPTWAdr}; // Extend to 66 bits

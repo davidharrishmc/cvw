@@ -54,6 +54,8 @@ localparam logic ZMMUL_SUPPORTED = 1;
 // A extension is Zaamo + Zalrsc
 localparam logic ZAAMO_SUPPORTED  = 1;
 localparam logic ZALRSC_SUPPORTED = 1;
+localparam logic ZABHA_SUPPORTED  = 1; // Byte and halfword AMOs
+localparam logic ZACAS_SUPPORTED  = 1; // Compare-and-swap AMOs
 
 // Bit manipulation extensions
 // B extension is Zba + Zbb + Zbs

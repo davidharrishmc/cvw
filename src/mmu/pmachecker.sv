@@ -11,7 +11,7 @@
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
-// https://github.com/openhwgroup/cvw
+// https://github.com/openhwfoundation/cvw
 //
 // Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
 //
@@ -31,7 +31,7 @@
 
 module pmachecker import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.PA_BITS-1:0] PhysicalAddress,
-  input  logic [1:0]           Size,
+  input  logic [2:0]           Size,
   input  logic [3:0]           CMOpM,
   input  logic                 AtomicAccessM,  // Atomic access
   input  logic                 ExecuteAccessF, // Execute access

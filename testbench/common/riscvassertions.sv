@@ -39,7 +39,7 @@ module riscvassertions import cvw::*; #(parameter cvw_t P);
     assert ((P.M_SUPPORTED == 0) | (P.ZMMUL_SUPPORTED == 1)) else $fatal(1, "M requires ZMMUL");
     assert ((P.ZICNTR_SUPPORTED == 0) | (P.ZICSR_SUPPORTED == 1)) else $fatal(1, "ZICNTR_SUPPORTED requires ZICSR_SUPPORTED");
     assert ((P.ZIHPM_SUPPORTED == 0) | (P.ZICNTR_SUPPORTED == 1)) else $fatal(1, "ZIPHM_SUPPORTED requires ZICNTR_SUPPORTED");
-    assert ((P.COUNTERS >= 3) & (P.COUNTERS <= 32)) else $fatal(1, "COUNTERS must be between 3 and 32");
+    assert ((P.ZICSR_SUPPORTED == 0) | ((P.COUNTERS >= 3) & (P.COUNTERS <= 32))) else $fatal(1, "COUNTERS must be between 3 and 32 when ZICSR is supported");
 
     assert (P.XLEN == 32 | P.SV32_SUPPORTED == 0) else $fatal(1, "SV32_SUPPORTED requires XLEN = 32");
     assert (P.XLEN == 64 | P.SV39_SUPPORTED == 0) else $fatal(1, "SV39_SUPPORTED requires XLEN = 64");
@@ -54,5 +54,7 @@ module riscvassertions import cvw::*; #(parameter cvw_t P);
     assert ((P.ZCF_SUPPORTED == 0) | ((P.F_SUPPORTED == 1) & (P.XLEN == 32))) else $fatal(1, "ZCF requires F and XLEN == 32");
     assert ((P.ZCD_SUPPORTED == 0) | (P.D_SUPPORTED == 1)) else $fatal(1, "ZCD requires D");
     assert ((P.ZCMOP_SUPPORTED == 0) | (P.ZCA_SUPPORTED == 1)) else $fatal(1, "ZCMOP requires ZCA");
+    assert ((P.ZABHA_SUPPORTED == 0) | (P.ZAAMO_SUPPORTED == 1)) else $fatal(1, "ZABHA requires ZAAMO");
+    assert ((P.ZACAS_SUPPORTED == 0) | (P.ZAAMO_SUPPORTED == 1)) else $fatal(1, "ZACAS requires ZAAMO");
   end
 endmodule
