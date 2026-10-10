@@ -29,9 +29,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module packoutput import cvw::*;  #(parameter cvw_t P) (
-  input  logic [P.FLEN-1:0]       Unpacked,
-  input  logic [P.FMTBITS-1:0]    Fmt,
-  output logic [P.FLEN-1:0]       Packed
+  input  logic [P.FLEN-1:0]       Unpacked,  // value in the largest format
+  input  logic [P.FMTBITS-1:0]    Fmt,       // output format
+  output logic [P.FLEN-1:0]       Packed     // value in format Fmt, NaN-boxed to FLEN
 );
 
   logic             Sign;
@@ -43,6 +43,8 @@ module packoutput import cvw::*;  #(parameter cvw_t P) (
   logic [P.H_NF-1:0] Fract3;
 
   // Pack exponent and fraction, with NaN-boxing to full FLEN
+  // A smaller exponent keeps the msb and low bits of the larger one; the dropped bits are copies of ~msb
+  // for any value representable in the smaller format, so this also re-biases the exponent
 
   assign Sign = Unpacked[P.FLEN-1];
   if (P.FPSIZES == 1) begin
@@ -87,7 +89,7 @@ module packoutput import cvw::*;  #(parameter cvw_t P) (
                 Fract1 = Unpacked[P.NF-1:P.NF-P.NF1];
                 Packed = {{(P.FLEN-P.LEN1){1'b1}}, Sign, Exp1, Fract1};
               end
-        2'h0: begin // float
+        2'h0: begin // single
                 Exp2 = {Unpacked[P.FLEN-2], Unpacked[P.NF+P.NE2-2:P.NF]};
                 Fract2 = Unpacked[P.NF-1:P.NF-P.NF2];
                 Packed = {{(P.FLEN-P.LEN2){1'b1}}, Sign, Exp2, Fract2};

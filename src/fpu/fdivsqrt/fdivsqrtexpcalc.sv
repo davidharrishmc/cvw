@@ -31,7 +31,7 @@ module fdivsqrtexpcalc import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.NE-2:0]      Bias,      // Bias of exponent
   input  logic [P.NE-1:0]      Xe, Ye,    // input exponents
   input  logic                 Sqrt,
-  input  logic [P.DIVBLEN-1:0] ell, m,    // number of leading 0s in Xe and Ye
+  input  logic [P.DIVBLEN-1:0] ell, m,    // number of leading 0s in Xm and Ym
   output logic [P.NE+1:0]      Ue         // result exponent
   );
 
@@ -39,11 +39,11 @@ module fdivsqrtexpcalc import cvw::*;  #(parameter cvw_t P) (
   logic [P.NE+1:0] SExp;
   logic [P.NE+1:0] DExp;
 
-  // Square root exponent = (Xe - l - bias) / 2 + bias; l accounts for subnorms
+  // Square root exponent = (Xe - l - bias) / 2 + bias; l accounts for subnormals
   assign SXExp = {2'b0, Xe} - {{(P.NE+1-P.DIVBLEN){1'b0}}, ell} - (P.NE+2)'(P.BIAS);
   assign SExp  = {SXExp[P.NE+1], SXExp[P.NE+1:1]} + {2'b0, Bias};
 
-  // division exponent = (Xe-l) - (Ye-m) + bias; l and m account for subnorms
+  // Division exponent = (Xe - l) - (Ye - m) + bias; l and m account for subnormals
   assign DExp  = ({2'b0, Xe} - {{(P.NE+1-P.DIVBLEN){1'b0}}, ell} - {2'b0, Ye} + {{(P.NE+1-P.DIVBLEN){1'b0}}, m} + {3'b0, Bias});
 
   // Select square root or division exponent

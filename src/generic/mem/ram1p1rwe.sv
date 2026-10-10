@@ -32,12 +32,12 @@
 
 // WIDTH is number of bits in one "word" of the memory, DEPTH is number of such words
 
-module ram1p1rwe import cvw::* ; #(parameter USE_SRAM=0, DEPTH=64, WIDTH=44) (
-  input logic                     clk,
-  input logic                     ce,
-  input logic [$clog2(DEPTH)-1:0] addr,
-  input logic [WIDTH-1:0]         din,
-  input logic                     we,
+module ram1p1rwe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 44) (
+  input  logic                     clk,
+  input  logic                     ce,
+  input  logic [$clog2(DEPTH)-1:0] addr,
+  input  logic [WIDTH-1:0]         din,
+  input  logic                     we,
   output logic [WIDTH-1:0]        dout
 );
 
@@ -66,8 +66,8 @@ module ram1p1rwe import cvw::* ; #(parameter USE_SRAM=0, DEPTH=64, WIDTH=44) (
     // READ first SRAM model
     //////////////////////////////////////////////////////////////////////////////
   end else begin : ram
-    // Vivado is not implementing this as block ram for some reason.
-    // The version with byte write enables it correctly infers block ram.
+    // Vivado is not implementing this as block RAM for some reason.
+    // The version with byte write enables correctly infers block RAM.
 
     bit [WIDTH-1:0]               RAM[DEPTH-1:0];
 
@@ -76,7 +76,7 @@ module ram1p1rwe import cvw::* ; #(parameter USE_SRAM=0, DEPTH=64, WIDTH=44) (
     flopen #($clog2(DEPTH)) adrreg(clk, ce, addr, addrd);
     assign dout = RAM[addrd];
 
-    /*      // Alternate read logic reads the old contents of mem[addr].  Increases setup time and adds dout reg, but reduces clk to q
+    /*      // Alternate read logic reads the old contents of mem[addr].  Increases setup time and adds dout reg, but reduces clk-to-q
      always_ff @(posedge clk)
      if(ce) dout <= mem[addr]; */
 
@@ -86,7 +86,7 @@ module ram1p1rwe import cvw::* ; #(parameter USE_SRAM=0, DEPTH=64, WIDTH=44) (
     always @(posedge clk)
       // coverage off
       // ce only goes low when cachefsm is in READY state and Flush is asserted.
-      // for read-only caches, we only goes high in the STATE_WRITE_LINE cachefsm state.
+      // For read-only caches, we only goes high in the STATE_WRITE_LINE cachefsm state,
       // so we can never get we=1, ce=0 for I$.
       if (ce & we)
         // coverage on
