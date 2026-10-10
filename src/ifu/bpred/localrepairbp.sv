@@ -30,15 +30,15 @@ module localrepairbp import cvw::*; #(parameter cvw_t P,
                                       parameter XLEN,
                                       parameter m = 6, // 2^m = number of local history branches
                                       parameter k = 10) ( // number of past branches stored
-  input  logic            clk,
-  input  logic            reset,
-  input  logic            StallF, StallD, StallE, StallM, StallW,
-  input  logic            FlushD, FlushE, FlushM, FlushW,
-  output logic [1:0]      BPDirD,
-  output logic            BPDirWrongE,
+  input  logic            clk,                                    // Clock
+  input  logic            reset,                                  // Reset
+  input  logic            StallF, StallD, StallE, StallM, StallW, // Stall Fetch, Decode, Execute, Memory, Writeback stages
+  input  logic            FlushD, FlushE, FlushM, FlushW,         // Flush Decode, Execute, Memory, Writeback stages
+  output logic [1:0]      BPDirD,                                 // Branch direction prediction (2-bit counter state) in Decode stage
+  output logic            BPDirWrongE,                            // Branch direction mispredicted in Execute stage
   // update
-  input  logic [XLEN-1:0] PCNextF, PCE, PCM,
-  input  logic            BranchD, BranchE, BranchM, PCSrcE
+  input  logic [XLEN-1:0] PCNextF, PCE, PCM,                      // Next PC to fetch, PC in Execute and Memory stages
+  input  logic            BranchD, BranchE, BranchM, PCSrcE       // Branch instruction in Decode, Execute, Memory stages, branch taken in Execute stage
 );
 
   logic [1:0]             BPDirE;

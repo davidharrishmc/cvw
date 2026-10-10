@@ -29,17 +29,17 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module clint_apb import cvw::*; #(parameter cvw_t P) (
-  input  logic                PCLK, PRESETn,
-  input  logic                PSEL,
-  input  logic [15:0]         PADDR,
-  input  logic [P.XLEN-1:0]   PWDATA,
-  input  logic [P.XLEN/8-1:0] PSTRB,
-  input  logic                PWRITE,
-  input  logic                PENABLE,
-  output logic [P.XLEN-1:0]   PRDATA,
-  output logic                PREADY,
-  output logic [63:0]         MTIME,
-  output logic                MTimerInt, MSwInt
+  input  logic                PCLK, PRESETn,    // APB clock and reset (active low)
+  input  logic                PSEL,             // APB peripheral select
+  input  logic [15:0]         PADDR,            // APB address
+  input  logic [P.XLEN-1:0]   PWDATA,           // APB write data
+  input  logic [P.XLEN/8-1:0] PSTRB,            // APB byte write strobes
+  input  logic                PWRITE,           // APB write (1) or read (0)
+  input  logic                PENABLE,          // APB enable (access phase)
+  output logic [P.XLEN-1:0]   PRDATA,           // APB read data
+  output logic                PREADY,           // APB ready
+  output logic [63:0]         MTIME,            // Machine timer value
+  output logic                MTimerInt, MSwInt // Machine timer and software interrupts
 );
 
   // register map
@@ -156,10 +156,10 @@ endmodule
 
 /*
 module timeregsync  import cvw::*;  #(parameter cvw_t P) (
-  input  logic              clk, resetn,
-  input  logic              we0, we1,
-  input  logic [P.XLEN-1:0] wd,
-  output logic [63:0]       q);
+  input  logic              clk, resetn, // Clock and reset (active low)
+  input  logic              we0, we1,    // Write lower and upper 32 bits (we0 writes all 64 bits when XLEN = 64)
+  input  logic [P.XLEN-1:0] wd,          // MTIME write data
+  output logic [63:0]       q);          // MTIME value
 
   if (P.XLEN==64)
     always_ff @(posedge clk or negedge resetn)
@@ -176,11 +176,11 @@ endmodule
 
 
 module timereg  import cvw::*;  #(parameter cvw_t P) (
-  input  logic              PCLK, PRESETn, TIMECLK,
-  input  logic              we0, we1,
-  input  logic [P.XLEN-1:0] PWDATA,
-  output logic [63:0]       MTIME,
-  output logic              done);
+  input  logic              PCLK, PRESETn, TIMECLK, // APB clock, reset (active low), and optional MTIME clock
+  input  logic              we0, we1, // Write lower and upper 32 bits (we0 writes all 64 bits when XLEN = 64)
+  input  logic [P.XLEN-1:0] PWDATA,   // MTIME write data
+  output logic [63:0]       MTIME,    // Machine timer value
+  output logic              done);    // MTIME write complete
 
 //  if (P.TIMEBASE_SYNC) begin : timereg // use PCLK for MTIME
   if (1) begin : timereg // use PCLK for MTIME
@@ -231,8 +231,8 @@ module timereg  import cvw::*;  #(parameter cvw_t P) (
 endmodule
 
 module binarytogray #(parameter N) (
-  input  logic [N-1:0] b,
-  output logic [N-1:0] g);
+  input  logic [N-1:0] b,  // Binary input
+  output logic [N-1:0] g); // Gray-code output
 
   // G[N-1] = B[N-1]; G[i] = B[i] ^ B[i+1] for 0 <= i < N-1
   // requires single layer of N-1 XOR gates
@@ -240,8 +240,8 @@ module binarytogray #(parameter N) (
 endmodule
 
 module graytobinary #(parameter N) (
-  input  logic [N-1:0] g,
-  output logic [N-1:0] b);
+  input  logic [N-1:0] g,  // Gray-code input
+  output logic [N-1:0] b); // Binary output
 
   // B[N-1] = G[N-1]; B[i] = G[i] ^ B[i+1] for 0 <= i < N-1
   // requires rippling through N-1 XOR gates

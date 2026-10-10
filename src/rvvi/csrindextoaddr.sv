@@ -28,8 +28,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module csrindextoaddr #(parameter TOTAL_CSRS = 36) (
-  input  logic [TOTAL_CSRS-1:0] CSRWen,
-  output logic [11:0]            CSRAddr);
+  input  logic [TOTAL_CSRS-1:0] CSRWen,    // One-hot CSR write enables
+  output logic [11:0]            CSRAddr); // CSR address
 
   // CSRWen is one-hot: bit i selects CSRArray[i] as assigned in testbench/common/rvvitbwrapper.sv
   // and the FPGA top levels.  Return the address of that CSR (0 if none).

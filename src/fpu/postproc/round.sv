@@ -29,33 +29,33 @@
 
 module round import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.FMTBITS-1:0]     OutFmt,             // output format
-  input  logic [2:0]               Frm,                // rounding mode
-  input  logic [1:0]               PostProcSel,        // select the postprocessor output
-  input  logic                     Ms,                 // normalized sign
-  input  logic [P.NORMSHIFTSZ-1:0] Mf,                 // normalized fraction
+  input  logic [2:0]               Frm,                // Rounding mode: 000 RNE, 001 RTZ, 010 RDN, 011 RUP, 100 RMM
+  input  logic [1:0]               PostProcSel,        // Postprocessor result select
+  input  logic                     Ms,                 // Normalized result sign
+  input  logic [P.NORMSHIFTSZ-1:0] Mf,                 // Normalized fraction
   // fma
-  input  logic                     FmaOp,              // is an fma operation being done?
-  input  logic [P.NE+1:0]          FmaMe,              // exponent of the normalized sum for fma
-  input  logic                     FmaASticky,         // addend's sticky bit
+  input  logic                     FmaOp,              // FMA operation
+  input  logic [P.NE+1:0]          FmaMe,              // FMA normalized sum exponent
+  input  logic                     FmaASticky,         // FMA addend sticky bit
   // divsqrt
-  input  logic                     DivOp,              // is a division operation being done
-  input  logic                     DivSticky,          // divsqrt sticky bit
-  input  logic [P.NE+1:0]          Ue,                 // the divsqrt calculated exponent
+  input  logic                     DivOp,              // Divide or square root operation
+  input  logic                     DivSticky,          // Divide/sqrt sticky bit
+  input  logic [P.NE+1:0]          Ue,                 // Divide/sqrt result exponent
   // cvt
-  input  logic                     CvtOp,              // is a convert operation being done
-  input  logic                     ToInt,              // is the cvt op a cvt to integer
-  input  logic                     CvtResSubnormUf,    // is the cvt result subnormal or underflow
-  input  logic                     CvtResUf,           // does the cvt result underflow
-  input  logic [P.NE:0]            CvtCe,              // the cvt calculated exponent
+  input  logic                     CvtOp,              // Conversion operation
+  input  logic                     ToInt,              // FP to integer conversion
+  input  logic                     CvtResSubnormUf,    // Conversion result is subnormal or underflows
+  input  logic                     CvtResUf,           // Conversion result underflows
+  input  logic [P.NE:0]            CvtCe,              // Conversion calculated exponent
   // outputs
-  output logic [P.NE+1:0]          Me,                 // normalized exponent
-  output logic                     UfPlus1,            // do you add one to the result if given an unbounded exponent
-  output logic [P.NE+1:0]          FullRe,             // Re with bits to determine sign and overflow
+  output logic [P.NE+1:0]          Me,                 // Normalized exponent
+  output logic                     UfPlus1,            // Add one for rounding with unbounded exponent
+  output logic [P.NE+1:0]          FullRe,             // Result exponent with extra bits for sign and overflow
   output logic [P.NE-1:0]          Re,                 // Result exponent
   output logic [P.NF-1:0]          Rf,                 // Result fraction
-  output logic                     Sticky,             // sticky bit
-  output logic                     Plus1,              // do you add one to the final result
-  output logic                     Round, Guard        // bits needed to calculate rounding
+  output logic                     Sticky,             // Sticky bit for rounding
+  output logic                     Plus1,              // Add one for rounding
+  output logic                     Round, Guard        // Round and guard bits for rounding
 );
 
   logic                            UfCalcPlus1;        // calculated plus one for unbounded exponent

@@ -28,9 +28,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module unpackinput import cvw::*;  #(parameter cvw_t P) (
-  input  logic [P.FLEN-1:0]        A,          // inputs from register file
+  input  logic [P.FLEN-1:0]        A,          // Input from FP register file
   input  logic                     En,         // enable the input
-  input  logic [P.FMTBITS-1:0]     Fmt,        // format signal 00 - single 01 - double 11 - quad 10 - half
+  input  logic [P.FMTBITS-1:0]     Fmt,        // FP format: 00 single, 01 double, 10 half, 11 quad
   input  logic                     FPUActive,  // Kill inputs when FPU is not active
   output logic                     Sgn,        // sign bits of the number
   output logic [P.NE-1:0]          Exp,        // exponent of the number  (converted to largest supported precision)
@@ -39,7 +39,7 @@ module unpackinput import cvw::*;  #(parameter cvw_t P) (
   output logic                     SNaN,       // is the number a signaling NaN
   output logic                     Zero,       // is the number zero
   output logic                     Inf,        // is the number infinity
-  output logic                     ExpMax,     // does In have the maximum exponent (NaN or Inf)
+  output logic                     ExpMax,     // Exponent is all ones (NaN or Inf)
   output logic                     Subnorm,    // is the number subnormal
   output logic [P.FLEN-1:0]        PostBox     // Number reboxed correctly as a NaN
 );

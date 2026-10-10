@@ -29,19 +29,19 @@
 
 module icpred import cvw::*;  #(parameter cvw_t P,
                                 parameter INSTR_CLASS_PRED = 1) (
-  input  logic             clk, reset,
-  input  logic             StallD, StallE, StallM, StallW,
-  input  logic             FlushD, FlushE, FlushM,
-  input  logic [31:0]      PostSpillInstrRawF, InstrD,        // Instruction
-  input  logic             BranchD, BranchE,
-  input  logic             JumpD, JumpE,
-  output logic             BranchM, BranchW,
-  output logic             JumpM, JumpW,
-  output logic             CallD, CallE, CallM, CallW,
-  output logic             ReturnD, ReturnE, ReturnM, ReturnW,
-  input  logic             BTBCallF, BTBReturnF, BTBJumpF, BTBBranchF,
-  output logic             BPCallF, BPReturnF, BPJumpF, BPBranchF,
-  output logic             IClassWrongM, BPReturnWrongD
+  input  logic             clk, reset,                                 // Clock and reset
+  input  logic             StallD, StallE, StallM, StallW,             // Stall Decode, Execute, Memory, Writeback stages
+  input  logic             FlushD, FlushE, FlushM,                     // Flush Decode, Execute, Memory stages
+  input  logic [31:0]      PostSpillInstrRawF, InstrD,                 // Fetched instruction, instruction in Decode stage
+  input  logic             BranchD, BranchE,                           // Branch instruction in Decode, Execute stages
+  input  logic             JumpD, JumpE,                               // Jump instruction in Decode, Execute stages
+  output logic             BranchM, BranchW,                           // Branch instruction in Memory, Writeback stages
+  output logic             JumpM, JumpW,                               // Jump instruction in Memory, Writeback stages
+  output logic             CallD, CallE, CallM, CallW,                 // Call instruction in Decode, Execute, Memory, Writeback stages
+  output logic             ReturnD, ReturnE, ReturnM, ReturnW,         // Return instruction in Decode, Execute, Memory, Writeback stages
+  input  logic             BTBCallF, BTBReturnF, BTBJumpF, BTBBranchF, // Instruction class predicted by BTB
+  output logic             BPCallF, BPReturnF, BPJumpF, BPBranchF,     // Predicted instruction class in Fetch stage
+  output logic             IClassWrongM, BPReturnWrongD                // Instruction class prediction was wrong, return prediction was wrong in Decode stage
 );
 
   logic                    IClassWrongD;

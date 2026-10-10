@@ -29,36 +29,36 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module csrc import cvw::*; #(parameter cvw_t P) (
-  input  logic              clk, reset,
-  input  logic              StallE, StallM,
-  input  logic              FlushM,
-  input  logic              InstrValidNotFlushedM, LoadStallD, StoreStallD,
-  input  logic              CSRMWriteM, CSRWriteM,
-  input  logic              BPDirWrongM,
-  input  logic              BTAWrongM,
-  input  logic              RASPredPCWrongM,
-  input  logic              IClassWrongM,
-  input  logic              BPWrongM,                                  // branch predictor is wrong
-  input  logic [3:0]        IClassM,
-  input  logic              DCacheMiss,
-  input  logic              DCacheAccess,
-  input  logic              ICacheMiss,
-  input  logic              ICacheAccess,
-  input  logic              ICacheStallF,
-  input  logic              DCacheStallM,
-  input  logic              sfencevmaM,
-  input  logic              InterruptM,
-  input  logic              ExceptionM,
-  input  logic              InvalidateICacheM,
-  input  logic              DivBusyE,                                  // integer divide busy
-  input  logic              FDivBusyE,                                 // floating point divide busy
-  input  logic [11:0]       CSRAdrM,
-  input  logic [1:0]        PrivilegeModeW,
-  input  logic [P.XLEN-1:0] CSRWriteValM,
-  input  logic [31:0]       MCOUNTINHIBIT_REGW, MCOUNTEREN_REGW, SCOUNTEREN_REGW,
-  input  logic [63:0]       MTIME_CLINT,
-  output logic [P.XLEN-1:0] CSRCReadValM,
-  output logic              IllegalCSRCAccessM
+  input  logic              clk, reset,                                           // Clock and reset
+  input  logic              StallE, StallM,                                       // Stall Execute, Memory stages
+  input  logic              FlushM,                                               // Flush Memory stage
+  input  logic              InstrValidNotFlushedM, LoadStallD, StoreStallD,       // Instruction valid and not flushed; load and store stalls
+  input  logic              CSRMWriteM, CSRWriteM,                                // Write a machine-mode CSR, write any CSR
+  input  logic              BPDirWrongM,                                          // Branch direction mispredicted in Memory stage
+  input  logic              BTAWrongM,                                            // Branch target prediction was wrong
+  input  logic              RASPredPCWrongM,                                      // RAS return address prediction was wrong
+  input  logic              IClassWrongM,                                         // Instruction class prediction was wrong
+  input  logic              BPWrongM,                                             // Branch predictor was wrong in Memory stage
+  input  logic [3:0]        IClassM,                                              // Instruction class in Memory stage, one-hot {call, return, jump, branch}
+  input  logic              DCacheMiss,                                           // D$ miss, for performance counters
+  input  logic              DCacheAccess,                                         // D$ access, for performance counters
+  input  logic              ICacheMiss,                                           // I$ miss, for performance counters
+  input  logic              ICacheAccess,                                         // I$ access, for performance counters
+  input  logic              ICacheStallF,                                         // I$ busy with multicycle operation
+  input  logic              DCacheStallM,                                         // D$ busy with multicycle operation
+  input  logic              sfencevmaM,                                           // sfence.vma: invalidate TLB entries
+  input  logic              InterruptM,                                           // Interrupt is occurring
+  input  logic              ExceptionM,                                           // Exception is occurring
+  input  logic              InvalidateICacheM,                                    // fence.i: invalidate the I$
+  input  logic              DivBusyE,                                             // Integer divider busy
+  input  logic              FDivBusyE,                                            // FPU divider busy
+  input  logic [11:0]       CSRAdrM,                                              // CSR address
+  input  logic [1:0]        PrivilegeModeW,                                       // Current privilege mode
+  input  logic [P.XLEN-1:0] CSRWriteValM,                                         // Value to write to CSR
+  input  logic [31:0]       MCOUNTINHIBIT_REGW, MCOUNTEREN_REGW, SCOUNTEREN_REGW, // mcountinhibit, mcounteren, scounteren CSRs
+  input  logic [63:0]       MTIME_CLINT,                                          // MTIME from CLINT
+  output logic [P.XLEN-1:0] CSRCReadValM,                                         // Counter CSR read value
+  output logic              IllegalCSRCAccessM                                    // Illegal counter CSR access
 );
 
   localparam MHPMCOUNTERBASE  = 12'hB00;

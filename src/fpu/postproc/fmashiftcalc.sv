@@ -28,12 +28,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module fmashiftcalc import cvw::*;  #(parameter cvw_t P) (
-  input  logic [P.FMTBITS-1:0]          Fmt,                 // precision 1 = double 0 = single
-  input  logic [P.NE+1:0]               FmaSe,               // sum's exponent
+  input  logic [P.FMTBITS-1:0]          Fmt,                 // FP format: 00 single, 01 double, 10 half, 11 quad
+  input  logic [P.NE+1:0]               FmaSe,               // FMA sum exponent
   input  logic [P.FMALEN-1:0]           FmaSm,               // the positive sum
-  input  logic [$clog2(P.FMALEN+1)-1:0] FmaSCnt,             // normalization shift count
+  input  logic [$clog2(P.FMALEN+1)-1:0] FmaSCnt,             // FMA normalization shift count
   output logic [P.NE+1:0]               NormSumExp,          // exponent of the normalized sum not taking into account Subnormal or zero results
-  output logic                          FmaSZero,            // is the sum zero
+  output logic                          FmaSZero,            // FMA sum is zero
   output logic                          FmaPreResultSubnorm, // is the result subnormal - calculated before LZA correction
   output logic [$clog2(P.FMALEN+1)-1:0] FmaShiftAmt          // normalization shift count
 );

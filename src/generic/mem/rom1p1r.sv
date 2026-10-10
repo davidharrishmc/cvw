@@ -27,10 +27,10 @@
 // This model actually works correctly with vivado.
 
 module rom1p1r #(parameter ADDR_WIDTH = 8, DATA_WIDTH = 32, PRELOAD_ENABLED = 0)
-  (input  logic                  clk,
-   input  logic                  ce,
-   input  logic [ADDR_WIDTH-1:0] addr,
-   output logic [DATA_WIDTH-1:0] dout
+  (input  logic                  clk,  // Clock
+   input  logic                  ce,   // Chip enable
+   input  logic [ADDR_WIDTH-1:0] addr, // Address
+   output logic [DATA_WIDTH-1:0] dout  // Read data
 );
 
   // Core Memory

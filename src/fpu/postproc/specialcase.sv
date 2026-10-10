@@ -29,39 +29,39 @@
 
 module specialcase import cvw::*;  #(parameter cvw_t P) (
   input  logic                 Xs,                // X sign
-  input  logic [P.NF:0]        Xm, Ym, Zm,        // input significands
-  input  logic                 XNaN, YNaN, ZNaN,  // are the inputs NaN
-  input  logic [2:0]           Frm,               // rounding mode
+  input  logic [P.NF:0]        Xm, Ym, Zm,        // X, Y, Z significands
+  input  logic                 XNaN, YNaN, ZNaN,  // X, Y, Z are NaN
+  input  logic [2:0]           Frm,               // Rounding mode: 000 RNE, 001 RTZ, 010 RDN, 011 RUP, 100 RMM
   input  logic [P.FMTBITS-1:0] OutFmt,            // output format
-  input  logic                 InfIn,             // are any inputs infinity
-  input  logic                 NaNIn,             // are any input NaNs
-  input  logic                 XInf, YInf,        // are X or Y infinity
-  input  logic                 XZero,             // is X zero
-  input  logic                 Plus1,             // do you add one for rounding
-  input  logic                 Rs,                // the result's sign
-  input  logic                 Invalid, Overflow, // flags to choose the result
+  input  logic                 InfIn,             // An input is infinity
+  input  logic                 NaNIn,             // An input is a NaN
+  input  logic                 XInf, YInf,        // X, Y are infinity
+  input  logic                 XZero,             // X is zero
+  input  logic                 Plus1,             // Add one for rounding
+  input  logic                 Rs,                // Result sign
+  input  logic                 Invalid, Overflow, // Invalid and overflow flags
   input  logic [P.NE-1:0]      Re,                // Result exponent
-  input  logic [P.NE+1:0]      FullRe,            // Result full exponent
+  input  logic [P.NE+1:0]      FullRe,            // Result exponent with extra bits for sign and overflow
   input  logic [P.NF-1:0]      Rf,                // Result fraction
   // fma
-  input  logic                 FmaOp,             // is it a fma operation
+  input  logic                 FmaOp,             // FMA operation
   // divsqrt
-  input  logic                 DivOp,             // is it a divsqrt operation
+  input  logic                 DivOp,             // Divide or square root operation
   input  logic                 DivByZero,         // divide by zero flag
   // cvt
-  input  logic                 CvtOp,             // is it a conversion operation
-  input  logic                 IntZero,           // is the integer input zero
-  input  logic                 IntToFp,           // is cvt int -> fp operation
-  input  logic                 Int64,             // is the integer 64 bits
-  input  logic                 Signed,            // is the integer signed
-  input  logic                 Zfa,               // Zfa conversion operation: fcvtmod.w.d
-  input  logic [P.NE:0]        CvtCe,             // the calculated exponent for cvt
-  input  logic                 IntInvalid,        // integer invalid flag to choose the result
-  input  logic                 CvtResUf,          // does the convert result underflow
-  input  logic [P.XLEN+1:0]    CvtNegRes,         // the possibly negated integer result
+  input  logic                 CvtOp,             // Conversion operation
+  input  logic                 IntZero,           // Integer input is zero
+  input  logic                 IntToFp,           // Integer to FP conversion
+  input  logic                 Int64,             // 64-bit integer conversion
+  input  logic                 Signed,            // Signed integer conversion
+  input  logic                 Zfa,               // Zfa variant of FP instruction
+  input  logic [P.NE:0]        CvtCe,             // Conversion calculated exponent
+  input  logic                 IntInvalid,        // Integer conversion invalid flag
+  input  logic                 CvtResUf,          // Conversion result underflows
+  input  logic [P.XLEN+1:0]    CvtNegRes,         // Possibly negated integer result
   // outputs
-  output logic [P.FLEN-1:0]    PostProcRes,       // final result
-  output logic [P.XLEN-1:0]    FCvtIntRes         // final integer result
+  output logic [P.FLEN-1:0]    PostProcRes,       // Postprocessor result
+  output logic [P.XLEN-1:0]    FCvtIntRes         // Float-to-integer conversion result
 );
 
   logic [P.FLEN-1:0]   XNaNRes;    // X is NaN result

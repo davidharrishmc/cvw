@@ -30,10 +30,10 @@
   // verilator lint_off UNOPTFLAT
 
 module adrdecs import cvw::*;  #(parameter cvw_t P) (
-  input  logic [P.PA_BITS-1:0] PhysicalAddress,
-  input  logic                 AccessRW, AccessRX, AccessRWXC,
-  input  logic [1:0]           Size,
-  output logic [12:0]          SelRegions
+  input  logic [P.PA_BITS-1:0] PhysicalAddress,                // Physical address
+  input  logic                 AccessRW, AccessRX, AccessRWXC, // Access types: read or write; read or execute; any including cache management
+  input  logic [1:0]           Size,                           // Access size (log2 bytes)
+  output logic [12:0]          SelRegions                      // One-hot PMA region select
 );
 
   localparam logic [3:0]       SUPPORTED_SIZE = (P.LLEN == 32 ? 4'b0111 : 4'b1111);

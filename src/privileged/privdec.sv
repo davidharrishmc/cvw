@@ -29,19 +29,19 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module privdec import cvw::*; #(parameter cvw_t P) (
-  input  logic         clk, reset,
-  input  logic         StallW, FlushW,
-  input  logic [31:7]  InstrM,                              // privileged instruction function field
-  input  logic         PrivilegedM,                         // is this a privileged instruction (from IEU controller)
-  input  logic         IllegalIEUFPUInstrM,                 // Not a legal IEU instruction
-  input  logic         IllegalCSRAccessM,                   // Not a legal CSR access
-  input  logic [1:0]   PrivilegeModeW,                      // current privilege level
-  input  logic         STATUS_TSR, STATUS_TVM, STATUS_TW,   // status bits
+  input  logic         clk, reset,                          // Clock and reset
+  input  logic         StallW, FlushW,                      // Stall and flush Writeback stage
+  input  logic [31:7]  InstrM,                              // Instruction in Memory stage
+  input  logic         PrivilegedM,                         // Privileged instruction
+  input  logic         IllegalIEUFPUInstrM,                 // Illegal integer or FP instruction in Memory stage
+  input  logic         IllegalCSRAccessM,                   // Illegal CSR access: CSR does not exist or is inaccessible at this privilege level
+  input  logic [1:0]   PrivilegeModeW,                      // Current privilege mode
+  input  logic         STATUS_TSR, STATUS_TVM, STATUS_TW,   // mstatus.TSR, TVM, TW: trap sret, trap virtual memory, timeout wait
   input  logic         TrapM,                               // Trap is occurring
   output logic         IllegalInstrFaultM,                  // Illegal instruction
-  output logic         EcallFaultM, BreakpointFaultM,       // Ecall or breakpoint; must retire, so don't flush it when the trap occurs
-  output logic         sretM, mretM, RetM,                  // return instructions
-  output logic         wfiM, wfiW, sfencevmaM,              // wfi / sfence.vma / sinval.vma instructions
+  output logic         EcallFaultM, BreakpointFaultM,       // ecall and ebreak; must retire, so do not flush them when the trap occurs
+  output logic         sretM, mretM, RetM,                  // sret, mret, either return instruction
+  output logic         wfiM, wfiW, sfencevmaM,              // wfi in Memory and Writeback stages, sfence.vma instruction
   output logic         sfencevmaAllM                        // sfence.vma with rs2=x0: flush all TLB entries including global
 );
 

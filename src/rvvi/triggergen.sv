@@ -28,12 +28,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module triggergen import cvw::*; (
-  input  logic        clk, reset,
-  input  logic [31:0] RvviAxiRdata,
-  input  logic [3:0]  RvviAxiRstrb,
-  input  logic        RvviAxiRlast,
-  input  logic        RvviAxiRvalid,
-  output logic        IlaTrigger);
+  input  logic        clk, reset,    // Clock and reset
+  input  logic [31:0] RvviAxiRdata,  // AXI read data
+  input  logic [3:0]  RvviAxiRstrb,  // AXI read strobes
+  input  logic        RvviAxiRlast,  // AXI read last
+  input  logic        RvviAxiRvalid, // AXI read valid
+  output logic        IlaTrigger);   // Trigger for the integrated logic analyzer
 
   typedef enum logic [2:0] {STATE_RST, STATE_COMPARE, STATE_MISMATCH, STATE_TRIGGER, STATE_TRIGGER_DONE} statetype;
 (* mark_debug = "true" *)  statetype CurrState, NextState;

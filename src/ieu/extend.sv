@@ -29,8 +29,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module extend import cvw::*;  #(parameter cvw_t P) (
-  input  logic [31:7]       InstrD,       // All instruction bits except opcode (lower 7 bits)
-  input  logic [2:0]        ImmSrcD,      // Select what kind of extension to perform
+  input  logic [31:7]       InstrD,       // Instruction in Decode stage
+  input  logic [2:0]        ImmSrcD,      // Type of immediate extension
   output logic [P.XLEN-1:0] ImmExtD);     // Extended immediate
 
   localparam [P.XLEN-1:0] undefined = {(P.XLEN){1'bx}}; // could change to 0 after debug
