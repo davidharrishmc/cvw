@@ -170,6 +170,6 @@ module align import cvw::*;  #(parameter cvw_t P) (
   mux3 #(2*P.LLEN/8) bytemaskspillmux({ByteMaskExtendedM, ByteMaskM}, // no spill
                                       {{{P.LLEN/8}{1'b0}}, ByteMaskM}, // spill, first half
                                       {{{P.LLEN/8}{1'b0}}, ByteMaskExtendedM}, // spill, second half
-                                      {SelSpillM, SelSpillE}, ByteMaskSpillM);
+                                      {SelSpillM & ~SelHPTW, SelSpillE & ~SelHPTW}, ByteMaskSpillM);
 
 endmodule
