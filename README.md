@@ -2,7 +2,20 @@
 
 # core-v-wally
 
-Wally is a 5-stage pipelined processor configurable to support up through the RVA22 profile, including virtual memory, PMP, and the various privileged modes and CSRs. The rv64gc configuration supports RV64IMAFDCB with M, S, and U modes; Zicsr, Zifencei, Zicntr, Zihpm, Zicond, and Zicclsm; Zbc; Zkn scalar crypto (Zbkb/Zbkc/Zbkx/Zknd/Zkne/Zknh); Zcb; Zfh and Zfa; Zicbom/Zicboz/Zicbop; Sstc; Sv39/Sv48/Sv57 virtual memory with Svpbmt, Svnapot, Svinval, and Svadu; and 16 PMP entries. Other configurations range down to a minimal RV32E core, and derivative configurations add the Q extension. It provides optional caches, branch prediction, and standard RISC-V peripherals (CLINT, PLIC, UART, GPIO).   Wally is written in SystemVerilog.  It passes the [RISC-V Arch Tests](https://github.com/riscv-non-isa/riscv-arch-test) and boots Linux on an FPGA.  Wally is part of the OpenHWGroup family of robust open RISC-V cores.
+Wally is a 5-stage pipelined processor configurable to support up through the RVA22 profile, including virtual memory, PMP, and the various privileged modes and CSRs. The rv64gc configuration supports:
+
+- RV64IMAFDCB with M, S, and U modes
+- Zicsr, Zifencei, Zicntr, Zihpm, Zicond, and Zicclsm
+- Zbc
+- Zkn scalar crypto (Zbkb, Zbkc, Zbkx, Zknd, Zkne, and Zknh)
+- Zcb
+- Zfh and Zfa
+- Zicbom, Zicboz, and Zicbop
+- Sstc
+- Sv39, Sv48, and Sv57 virtual memory with Svpbmt, Svnapot, Svinval, and Svadu
+- 16 PMP entries
+
+Other configurations range down to a minimal RV32E core, and derivative configurations add the Q extension. Wally provides optional caches, branch prediction, and standard RISC-V peripherals (CLINT, PLIC, UART, GPIO).   Wally is written in SystemVerilog.  It passes the [RISC-V Arch Tests](https://github.com/riscv-non-isa/riscv-arch-test) and boots Linux on an FPGA.  Wally is part of the OpenHWGroup family of robust open RISC-V cores.
 
 ![Wally block diagram](wallyriscvTopAll.png)
 
