@@ -154,6 +154,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   logic [P.LLEN-1:0]     ReadDataHoldM;                          // Captured read data of a performed access awaiting retirement
   logic [P.LLEN-1:0]     ReadDataSelM;                           // Read data to the W stage (live or held)
   logic                  LSUFlushW;                              // HPTW or hazard unit flushes operation
+  logic                  SelfFaultM;                             // M-stage access has its own fault; squash it
   logic                  SelDTIM;                                // Select DTIM rather than bus or D$
   logic [P.XLEN-1:0]     WriteDataZM;
   logic                  LSULoadPageFaultM, LSUStoreAmoPageFaultM;
@@ -302,8 +303,11 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   // Pause IEU memory request if TLB miss.  After TLB fill, replay request.
-  // Discard memory request on pipeline flush
-  assign LSUFlushW = HPTWFlushW | FlushW;
+  // Discard memory request on pipeline flush or when the access itself faults: TrapM waits for a committed
+  // IFU fetch (~CommittedF, #412), so FlushW alone would let the faulting access proceed.  The walker's accesses are exempt.
+  assign SelfFaultM = ~SelHPTW & (LSULoadPageFaultM | LSUStoreAmoPageFaultM | LSULoadAccessFaultM |
+                      LSUStoreAmoAccessFaultM | LoadMisalignedFaultM | StoreAmoMisalignedFaultM);
+  assign LSUFlushW = HPTWFlushW | FlushW | SelfFaultM;
 
   if (P.DTIM_SUPPORTED) begin : dtim
     logic [P.PA_BITS-1:0] DTIMAdr;
@@ -355,11 +359,16 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
       assign CacheRWM = (CacheableM & ~SelDTIM & ~HoldAccessM) ? LSURWM : '0;
       assign FlushDCache = FlushDCacheM & ~SelHPTW;                          // exclusion-tag: lsu FlushDCacheSelHPTW
 
+      localparam                     LINEBYTELEN = P.DCACHE_LINELENINBITS/8;            // Line length in bytes
+      localparam                     OFFSETLEN = $clog2(LINEBYTELEN);    // Number of bits in offset field
+      localparam                     SETLEN = $clog2(P.DCACHE_WAYSIZEINBYTES*8/LINELEN);          // Number of set bits
+
       cache #(.P(P), .PA_BITS(P.PA_BITS), .LINELEN(P.DCACHE_LINELENINBITS), .NUMSETS(P.DCACHE_WAYSIZEINBYTES*8/LINELEN),
+              .OFFSETLEN(OFFSETLEN), .SETLEN(SETLEN),
               .NUMWAYS(P.DCACHE_NUMWAYS), .LOGBWPL(LLENLOGBWPL), .WORDLEN(CACHEWORDLEN), .MUXINTERVAL(P.LLEN), .READ_ONLY_CACHE(0)) dcache(
         .clk, .reset, .Stall(GatedStallW & ~SelSpillE), .SelBusBeat, .FlushStage(LSUFlushW),
         .CacheRW(CacheRWM),
-        .FlushCache(FlushDCache), .NextSet(IEUAdrExtE[11:0]), .PAdr(PAdrM),
+        .FlushCache(FlushDCache), .NextSet(IEUAdrExtE[OFFSETLEN+SETLEN-1:0]), .PAdr(PAdrM),
         .ByteMask(ByteMaskSpillM), .BeatCount(BeatCount[AHBWLOGBWPL-1:AHBWLOGBWPL-LLENLOGBWPL]),
         .WriteData(LSUWriteDataSpillM), .SelHPTW,
         .CacheStall(DCacheStallM), .CacheMiss(DCacheMiss), .CacheAccess(DCacheAccess),
