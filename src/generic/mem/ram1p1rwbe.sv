@@ -83,12 +83,6 @@ module ram1p1rwbe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 4
   end else begin : ram
     bit [WIDTH-1:0] RAM[DEPTH-1:0];
 
-    // if (PRELOAD_ENABLED) begin
-    //   initial begin
-    //     RAM[0] = 64'h00600100d2e3ca40;
-    //   end
-    // end
-
     `ifdef VERILATOR
       import "DPI-C" function string getenvval(input string env_name);
     `endif

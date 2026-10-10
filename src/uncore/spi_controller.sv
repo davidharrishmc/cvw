@@ -84,7 +84,6 @@ module spi_controller (
   // Transmit Stuff
   logic       ContinueTransmit;
   logic       EndTransmission;
-  // logic       TransmitRegLoaded; // TODO: Could be replaced by TransmitRegLoaded?
   logic       NextEndDelay;
   logic       CurrentEndDelay;
 

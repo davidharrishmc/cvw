@@ -82,7 +82,6 @@ module RASPredictor import cvw::*;  #(parameter cvw_t P) (
     assign NextPtr = Sum >= P.RAS_SIZE[Depth-1:0] ? 0 : Sum; // wrap back around if our stack is not a power of 2
   else
     assign NextPtr = Sum;
-  //assign NextPtr = Ptr + IncDecPtr;
 
   flopenr #(Depth) ptrreg(clk, reset, CounterEn, NextPtr, Ptr);
 

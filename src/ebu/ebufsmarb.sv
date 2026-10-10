@@ -88,7 +88,6 @@ module ebufsmarb (
   // This is necessary because the pipeline is stalled for the entire duration of both transactions,
   // and the LSU memory request will still be active.
   flopr #(1) ifureqreg(HCLK, ~HRESETn, IFUReq, IFUReqDelay);
-  //assign LSUDisable = (CurrState != ARBITRATE) & (IFUReqDelay & ~(HREADY & FinalBeatD));
   assign LSUDisable = (CurrState != ARBITRATE) & IFUReqDelay;
   assign LSUSelect = (NextState == ARBITRATE) ? 1'b1 : LSUReq;
 

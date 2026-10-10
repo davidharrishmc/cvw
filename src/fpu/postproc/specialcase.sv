@@ -247,7 +247,7 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
   //      - don't set to zero if fp input is zero but not using the fp input
   //      - don't set to zero if int input is zero but not using the int input
   // otherwise (fma/divsqrt) kill if the exponent is negative or the divsqrt result is exactly 0 (x/Inf, 0/y, sqrt(0))
-  assign KillRes = CvtOp ? (CvtResUf | (XZero & ~IntToFp) | (IntZero & IntToFp)) : FullRe[P.NE+1] | (((YInf & ~XInf) | XZero) & DivOp); //Underflow & ~ResSubnorm & (Re!=1);
+  assign KillRes = CvtOp ? (CvtResUf | (XZero & ~IntToFp) | (IntZero & IntToFp)) : FullRe[P.NE+1] | (((YInf & ~XInf) | XZero) & DivOp);
 
   // calculate if the overflow result should be selected (Inf inputs give Inf, except x/Inf = 0)
   assign SelOfRes = Overflow | DivByZero | (InfIn & ~(YInf & DivOp));

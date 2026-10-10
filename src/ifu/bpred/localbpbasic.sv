@@ -94,7 +94,6 @@ module localbpbasic import cvw::*; #(parameter cvw_t P,
   assign LHR = LHRArray[IndexLHRNextF];
 
   // this is global history
-  //flopenr #(k) LHRReg(clk, reset, ~StallM & ~FlushM & BranchM, LHRNextW, LHR);
 
   flopenrc #(1) PCSrcMReg(clk, reset, FlushM, ~StallM, PCSrcE, PCSrcM);
 

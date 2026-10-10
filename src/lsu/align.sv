@@ -80,12 +80,10 @@ module align import cvw::*;  #(parameter cvw_t P) (
   logic [P.LLEN*3-1:0]                         LSUWriteDataShiftedExtM;
 
   /* verilator lint_off WIDTHEXPAND */
-  //assign IEUAdrIncrementM = {IEUAdrM[P.XLEN-1:OFFSET_LEN], {{OFFSET_LEN}{1'b0}}} + LLENINBYTES;
   assign IEUAdrIncrementM = IEUAdrM + LLENINBYTES;
   /* verilator lint_on WIDTHEXPAND */
   mux2 #(P.XLEN) ieuadrspillemux(.d0(IEUAdrE), .d1(IEUAdrIncrementM), .s(SelSpillE), .y(IEUAdrSpillE));
   mux2 #(P.XLEN) ieuadrspillmmux(.d0(IEUAdrM), .d1(IEUAdrIncrementM), .s(SelSpillM), .y(IEUAdrSpillM));
-  //assign IEUAdrxTvalM = {IEUAdrSpillM[P.XLEN-1:OFFSET_LEN], {{OFFSET_LEN}{1'b0}}};
   mux2 #(P.XLEN) ieuadrxtvalmmux(.d0(IEUAdrM), .d1({IEUAdrIncrementM[P.XLEN-1:OFFSET_LEN], {{OFFSET_LEN}{1'b0}}}), .s(SelSpillM), .y(IEUAdrxTvalM));
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////

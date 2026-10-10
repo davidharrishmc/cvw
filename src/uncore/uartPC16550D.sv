@@ -322,7 +322,6 @@ module uartPC16550D #(parameter UART_PRESCALE) (
       end else if (~MEMRb & A == 3'b000 & ~DLAB) begin // reading RBR updates ready / pops fifo
         if (fifoenabled) begin
           if (~rxfifoempty) rxfifotail <= rxfifotail + 1;
-          // if (rxfifoempty) rxdataready <= 1'b0;
           if (rxfifoentries == 1) rxdataready <= 1'b0; // When reading the last entry, data ready becomes zero
         end else begin
           rxdataready <= 1'b0;
@@ -341,7 +340,6 @@ module uartPC16550D #(parameter UART_PRESCALE) (
   /* verilator lint_on WIDTH */
   assign rxfifotriggered = rxfifoentries >= rxfifotriggerlevel;
   assign rxfifotimeout = rxtimeoutcnt == {rxbitsexpected, 6'b0}; // time out after 4 character periods; probably not right yet
-  //assign rxfifotimeout = 0; // disabled pending fix
 
   // detect any errors in rx fifo
   // although rxfullbit looks like a combinational loop, in one bit rxfifotail == i and breaks the loop
@@ -355,10 +353,6 @@ module uartPC16550D #(parameter UART_PRESCALE) (
   for (i = 0; i < 16; i++) begin : rx
     assign RXerrbit[i]  = |rxfifo[i][10:8]; // are any of the error conditions set?
     assign rxfullbit[i] = rxfullbitunwrapped[i] | rxfullbitunwrapped[i+16];
-  /*      if (i > 0)
-      assign rxfullbit[i] = ((rxfifohead==i) | rxfullbit[i-1]) & (rxfifotail != i);
-      else
-      assign rxfullbit[0] = ((rxfifohead==i) | rxfullbit[15]) & (rxfifotail != i);*/
   end
   assign rxfifohaserr   = |(RXerrbit & rxfullbit);
 
