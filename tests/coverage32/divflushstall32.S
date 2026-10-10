@@ -6,7 +6,8 @@
 // Purpose: RV32 version of divflushstall for configurations that divide in the integer divider (div.sv,
 //          IDIV_ON_FPU = 0).  A divide that the BTB mispredicts as a jump must keep its result when an
 //          external stall holds it in Execute as it finishes.  Standalone (WALLY-init-lib.h is RV64 only);
-//          the outcome is recorded in selfcheck_record in the WALLY-selfcheck.h format.
+//          the outcome is recorded in selfcheck_record in the WALLY-selfcheck.h format and
+//          reported to tohost (1 = pass, 5 = fail).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
@@ -61,6 +62,7 @@ rvtest_entry_point:
     la t0, selfcheck_record
     li t1, 1                            # status 1: passed
     sw t1, 0(t0)
+    li t0, 1                            # report pass to tohost
     j finish
 
 fail:                                   # status 2: index, address (unused), expected, actual
@@ -71,10 +73,10 @@ fail:                                   # status 2: index, address (unused), exp
     sw zero, 8(t0)
     sw s2, 12(t0)
     sw a0, 16(t0)
+    li t0, (2 << 1) | 1                 # report failure (exit code 2) to tohost
 
 finish:
     la t1, tohost
-    li t0, 1
     sw t0, 0(t1)                        # a store word to tohost ends the simulation
 self_loop:
     j self_loop
