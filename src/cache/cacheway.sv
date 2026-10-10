@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
-// cacheway
+// cacheway.sv
 //
-// Written: Rose Thompson rose@rosethompson.net
-// Created: 7 July 2021
-// Modified: 20 January 2023
+// Written:  Rose Thompson rose@rosethompson.net 7 July 2021
+// Modified: David Harris David_Harris@hmc.edu, Alec Vercruysse avercruysse@hmc.edu, Katherine Parry me@KatherineParry.com
 //
-// Purpose: Storage and read/write access to data cache data, tag valid, dirty, and replacement.
+// Purpose: One cache way holding the tag, valid, dirty, and data arrays, with hit detection, flush and victim selection, and way-gated read data.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

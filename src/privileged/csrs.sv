@@ -1,19 +1,17 @@
 ///////////////////////////////////////////
 // csrs.sv
 //
-// Written: David_Harris@hmc.edu 9 January 2021
-// Modified:
-//          dottolia@hmc.edu 3 May 2021 - fix bug with stvec getting wrong value
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, Ben Bracker bbracker@hmc.edu, Noah Boorstin nboorstin@hmc.edu, Domenico Ottolia dottolia@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, Jacob Pease jacobpease@protonmail.com, Ayesha Anwaar ayesha.anwaar2005@gmail.com
 //
-// Purpose: Supervisor-Mode Control and Status Registers
-//          See RISC-V Privileged Mode Specification 20190608
+// Purpose: Supervisor-mode control and status registers.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

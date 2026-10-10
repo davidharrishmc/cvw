@@ -1,22 +1,21 @@
 ///////////////////////////////////////////
 // plic_apb.sv
 //
-// Written: bbracker@hmc.edu 18 January 2021
-// Modified:
+// Written:  Ben Bracker bbracker@hmc.edu 18 January 2021
+// Modified: David Harris David_Harris@hmc.edu, Rose Thompson rose@rosethompson.net, Jacob Pease jacobpease@protonmail.com, Juan Schroeder jcschroeder@gmail.com
 //
-// Purpose: Platform-Level Interrupt Controller
-//   Based on RISC-V spec (https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc)
-//   With clarifications from ROA's existing implementation (https://roalogic.github.io/plic/docs/AHB-Lite_PLIC_Datasheet.pdf)
-//   Supports only 1 target core and only a global threshold.
-//   This PLIC implementation serves as both the PLIC Gateways and PLIC Core.
-//   It assumes interrupt sources are level-triggered wires.
+// Purpose: Platform-level interrupt controller (PLIC) with an APB interface.
+//          Based on https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc with clarifications
+//          from https://roalogic.github.io/plic/docs/AHB-Lite_PLIC_Datasheet.pdf.
+//          Supports only 1 target core and only a global threshold. Serves as both the PLIC gateways and PLIC core.
+//          Assumes interrupt sources are level-triggered wires.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

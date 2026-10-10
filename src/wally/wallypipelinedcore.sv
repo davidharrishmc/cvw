@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
 // wallypipelinedcore.sv
 //
-// Written: David_Harris@hmc.edu 9 January 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, Katherine Parry me@KatherineParry.com, Ben Bracker bbracker@hmc.edu, Thomas Fleming tfleming@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, Lucio nicholas.lucioforlife@yahoo.com
 //
-// Purpose: Pipelined RISC-V Processor
+// Purpose: Top level of the five-stage pipelined RISC-V core, connecting the IFU, IEU, LSU, FPU, MDU, privileged unit, hazard unit, and bus interface.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

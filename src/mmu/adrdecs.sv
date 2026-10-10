@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
 // adrdecs.sv
 //
-// Written: David_Harris@hmc.edu 22 June 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 22 June 2021
+// Modified: Rose Thompson rose@rosethompson.net, Naiche Whyte-Aguayo nwhyteaguayo@g.hmc.edu, Jacob Pease jacobpease@protonmail.com
 //
-// Purpose: All the address decoders for peripherals
+// Purpose: Address decoders for every memory and peripheral region in the physical memory map.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

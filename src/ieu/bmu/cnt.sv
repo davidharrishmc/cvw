@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
 // cnt.sv
 //
-// Written: Kevin Kim <kekim@hmc.edu>
-// Created: 4 February 2023
+// Written:  Kevin Kim kekim@hmc.edu 4 February 2023
 // Modified:
 //
-// Purpose: Count Instruction Submodule
+// Purpose: Leading zero, trailing zero, and population counts for clz, ctz, cpop, and their W forms.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2023-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

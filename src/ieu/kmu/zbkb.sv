@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
 // zbkb.sv
 //
-// Written: kelvin.tran@okstate.edu, james.stine@okstate.edu
-// Created: 4 October 2023
+// Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 4 October 2023
+// Modified: David Harris David_Harris@hmc.edu
 //
-// Purpose: RISC-V ZBKB top level unit: bit manipulation instructions for crypto
+// Purpose: Zbkb unit for brev8, pack, packh, packw, zip, and unzip.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-24 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2023-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

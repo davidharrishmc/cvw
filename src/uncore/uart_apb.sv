@@ -1,19 +1,18 @@
 ///////////////////////////////////////////
 // uart_apb.sv
 //
-// Written: David_Harris@hmc.edu 21 January 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 21 January 2021
+// Modified: Ben Bracker bbracker@hmc.edu
 //
-// Purpose: APB Interface to Universal Asynchronous Receiver/ Transmitter with FIFOs
-//          Emulates interface of Texas Instruments PC165550D
-//          Compatible with UART in Imperas Virtio model
+// Purpose: APB interface to the PC16550D-compatible UART.
+//          Compatible with the UART in the Imperas Virtio model.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

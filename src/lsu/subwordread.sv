@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
 // subwordread.sv
 //
-// Written: David_Harris@hmc.edu
-// Created: 9 January 2021
-// Modified: 18 January 2023
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, Kevin Kim kekim@hmc.edu, Katherine Parry me@KatherineParry.com
 //
-// Purpose: Extract subwords and sign extend for reads
+// Purpose: Selects and sign- or zero-extends the addressed byte, halfword, word, or doubleword from read data.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

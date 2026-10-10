@@ -1,21 +1,15 @@
 ///////////////////////////////////////////
 // ram2p1r1wbe.sv
-// 2 port sram.
 //
-// Written: rose@rosethompson.net May 3, 2021
-//          Two port SRAM 1 read port and 1 write port.
-//          When clk rises Addr and LineWriteData are sampled.
-//          Following the clk edge read data is output from the sampled Addr.
-//          Write
-// Modified: james.stine@okstate.edu Feb 1, 2023
-//           Integration of memories
+// Written:  Rose Thompson rose@rosethompson.net 3 May 2021
+// Modified: David Harris David_Harris@hmc.edu, James Stine james.stine@okstate.edu
 //
-// Purpose: Storage and read/write access to data cache data, tag valid, dirty, and replacement.
+// Purpose: Two-port RAM with one read port and one byte-enabled write port, built from a behavioral array or SRAM macros.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

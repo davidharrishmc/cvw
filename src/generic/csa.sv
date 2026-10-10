@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
 // csa.sv
 //
-// Written: Katherine Parry and David_Harris@hmc.edu 21 August 2022
+// Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 21 August 2022
 // Modified:
 //
-// Purpose: 3:2 carry-save adder
+// Purpose: 3:2 carry-save adder that reduces three operands to a sum and a carry.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2022-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

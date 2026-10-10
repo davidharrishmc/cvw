@@ -1,20 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // lsu.sv
 //
-// Written: David_Harris@hmc.edu, rose@rosethompson.net
-// Created: 9 January 2021
-// Modified: 11 January 2023
+// Written:  David Harris David_Harris@hmc.edu, Rose Thompson rose@rosethompson.net 9 January 2021
+// Modified: Katherine Parry me@KatherineParry.com, Kip Macsai-Goren kmacsaigoren@hmc.edu, Muhammad Zain zainzahid2050@gmail.com
 //
-// Purpose: Load/Store Unit
-//          HPTW, DMMU, data cache, interface to external bus
-//          Atomic, Endian swap, and subword read/write logic
+// Purpose: Load/store unit containing the DMMU, HPTW, data cache or DTIM, bus interface, atomics, misaligned access, endian swap, and subword logic.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
 // ieu.sv
 //
-// Written: David_Harris@hmc.edu 9 January 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, Katherine Parry me@KatherineParry.com, Kevin Kim kekim@hmc.edu, James Stine james.stine@okstate.edu, Ben Bracker bbracker@hmc.edu
 //
-// Purpose: Integer Execution Unit: datapath and controller
+// Purpose: Integer execution unit that connects the controller and datapath.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

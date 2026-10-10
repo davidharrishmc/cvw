@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
 // triggergen.sv
 //
-// Written: Rose Thompson rose@rosethompson.net
-// Created: June 26, 2024
-// Modified: June 26, 2024
+// Written:  Rose Thompson rose@rosethompson.net 26 June 2024
+// Modified:
 //
-// Purpose: Scans for specific ethernet frame to generate an ila trigger.
+// Purpose: Watches incoming Ethernet frames for a specific trigger frame and pulses an ILA trigger when it arrives.
 //
 // Documentation:
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
+// https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2024-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

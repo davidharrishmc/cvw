@@ -1,22 +1,19 @@
 ///////////////////////////////////////////
 // csrm.sv
 //
-// Written: David_Harris@hmc.edu 9 January 2021
-// Modified:
-//          dottolia@hmc.edu 7 April 2021
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Ben Bracker bbracker@hmc.edu, Thomas Fleming tfleming@hmc.edu, Domenico Ottolia dottolia@hmc.edu, Rose Thompson rose@rosethompson.net, Noah Boorstin nboorstin@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, James Stine james.stine@okstate.edu, Syed Moeed Ali syedmoeedali2006@gmail.com, Abe castaa7@unlv.nevada.edu
 //
-// Purpose: Machine-Mode Control and Status Registers
-//          See RISC-V Privileged Mode Specification 20190608
-// Note: the CSRs do not support the following optional features
-//   - Disabling portions of the instruction set with bits of the MISA register
-//   - Changing from RV64 to RV32 by writing the SXL/UXL bits of the STATUS register
+// Purpose: Machine-mode control and status registers.
+//          Unsupported optional features: disabling parts of the ISA with MISA bits, and
+//          changing from RV64 to RV32 by writing the SXL/UXL bits of STATUS.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

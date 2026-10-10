@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
 // sha512_32.sv
 //
-// Written: kelvin.tran@okstate.edu, james.stine@okstate.edu
-// Created: 13 February 2024
+// Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 13 February 2024
+// Modified: David Harris David_Harris@hmc.edu
 //
-// Purpose: RISC-V (RV32) ZKNH 512-bit SHA: select shifted inputs and XOR6
+// Purpose: RV32 SHA-512 sig0h/l, sig1h/l, sum0r, and sum1r functions on a 64-bit value split across two registers.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-24 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2024-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

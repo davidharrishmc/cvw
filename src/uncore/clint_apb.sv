@@ -1,18 +1,18 @@
 ///////////////////////////////////////////
 // clint_apb.sv
 //
-// Written: David_Harris@hmc.edu 14 January 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 14 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, Ben Bracker bbracker@hmc.edu
 //
-// Purpose: Core-Local Interruptor
-//   See FE310-G002-Manual-v19p05 for specifications
+// Purpose: Core-local interruptor (CLINT) with machine timer and software interrupts on an APB interface.
+//          See FE310-G002-Manual-v19p05.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

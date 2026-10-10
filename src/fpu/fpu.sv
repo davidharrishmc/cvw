@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
 // fpu.sv
 //
-// Written: me@KatherineParry.com, James Stine, Brett Mathis, David Harris
-// Modified: 6/23/2021
+// Written:  Katherine Parry me@KatherineParry.com, James Stine james.stine@okstate.edu, Brett Mathis brett.mathis@okstate.edu, David Harris David_Harris@hmc.edu
+// Modified: Rose Thompson rose@rosethompson.net, Cedar Turek cturek@hmc.edu, Ben Bracker bbracker@hmc.edu
 //
-// Purpose: Floating Point Unit Top-Level Interface
+// Purpose: Top level of the floating-point unit, connecting the register file, hazard logic, functional units, and result selection.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

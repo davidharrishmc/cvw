@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
 // aes64ks1i.sv
 //
-// Written: ryan.swann@okstate.edu, james.stine@okstate.edu
-// Created: 20 February 2024
+// Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
+// Modified: David Harris David_Harris@hmc.edu, Kelvin Tran kelvin.tran@okstate.edu
 //
-// Purpose: aes64ks1i instruction: part of AES keyschedule with involving sbox
+// Purpose: AES key schedule step for aes64ks1i: rotate a word, substitute it through the shared S-box, and XOR the round constant.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-24 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2024-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

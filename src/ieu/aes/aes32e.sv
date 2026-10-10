@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
 // aes32e.sv
 //
-// Written: ryan.swann@okstate.edu, james.stine@okstate.edu
-// Created: 20 February 2024
+// Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
+// Modified: David Harris David_Harris@hmc.edu
 //
-// Purpose: aes32esmi and aes32esi instruction: RV32 middle and final round AES encryption
+// Purpose: S-box and MixColumns on one byte for the RV32 aes32esi and aes32esmi encryption instructions.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-24 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2024-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

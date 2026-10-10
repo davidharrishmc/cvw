@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
 // controller.sv
 //
-// Written: David_Harris@hmc.edu, Sarah.Harris@unlv.edu, kekim@hmc.edu
-// Created: 9 January 2021
-// Modified: 3 March 2023
+// Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu, Kevin Kim kekim@hmc.edu 9 January 2021
+// Modified: Rose Thompson rose@rosethompson.net, James Stine james.stine@okstate.edu, Ben Bracker bbracker@hmc.edu, Katherine Parry me@KatherineParry.com, Shreya Sanghai ssanghai@hmc.edu, Madeleine Masser-Frye, Alec Vercruysse avercruysse@hmc.edu
 //
-// Purpose: Top level controller module
+// Purpose: Decodes instructions, pipelines integer control signals from Decode to Writeback, and detects structural hazards.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,15 +1,15 @@
 ///////////////////////////////////////////
-// ram2p1rwbe_1024x68.sv
+// ram2p1r1wbe_1024x68.sv
 //
-// Written: james.stine@okstate.edu 28 January 2023
-// Modified:
+// Written:  James Stine james.stine@okstate.edu 28 January 2023
+// Modified: David Harris David_Harris@hmc.edu
 //
-// Purpose: RAM wrapper for instantiating RAM IP
+// Purpose: Wrapper that instantiates a 1024x68 two-port SRAM macro with bit write enables.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2023-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////

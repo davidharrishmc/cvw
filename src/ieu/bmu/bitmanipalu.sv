@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
 // bitmanipalu.sv
 //
-// Written: Kevin Kim <kekim@hmc.edu>, kelvin.tran@okstate.edu
-// Created: 23 March 2023
-// Modified: 9 March 2024
+// Written:  Kevin Kim kekim@hmc.edu, Kelvin Tran kelvin.tran@okstate.edu 23 March 2023
+// Modified: David Harris David_Harris@hmc.edu, James Stine james.stine@okstate.edu
 //
-// Purpose: RISC-V Arithmetic/Logic Unit Bit-Manipulation Extension and K extension
+// Purpose: Bit-manipulation ALU that computes Zba, Zbb, Zbc, Zbs, Zbk*, and Zkn* results and merges them with the base ALU.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-24 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2023-27 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
