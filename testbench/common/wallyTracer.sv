@@ -70,7 +70,6 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   logic [11:0]           CSRAdrM, CSRAdrW;
   logic                  wfiM;
   logic                  InterruptM, InterruptW;
-  logic                  MExtInt, SExtInt, MTimerInt, MSwInt;
   logic                  valid;
   logic                  HPTWUpdateDA, DA_updated, capture_PTE;
 
@@ -116,20 +115,12 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
     assign STATUS_UXL     = testbench.dut.core.priv.priv.csr.csrsr.STATUS_UXL;
     assign wfiM           = testbench.dut.core.priv.priv.wfiM;
     assign InterruptM     = testbench.dut.core.priv.priv.InterruptM;
-    assign MExtInt        = testbench.dut.MExtInt;
-    assign SExtInt        = testbench.dut.SExtInt;
-    assign MTimerInt      = testbench.dut.MTimerInt;
-    assign MSwInt         = testbench.dut.MSwInt;
   end else begin
     assign PrivilegeModeW = 2'b11;
     assign STATUS_SXL     = 0;
     assign STATUS_UXL     = 0;
     assign wfiM           = 0;
     assign InterruptM     = 0;
-    assign MExtInt        = 0;
-    assign SExtInt        = 0;
-    assign MTimerInt      = 0;
-    assign MSwInt         = 0;
   end
 
   //For VM Verification
@@ -403,6 +394,8 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   assign rvvi.halt[0][0]     = HaltW;
   assign rvvi.intr[0][0]     = InterruptW;
   assign rvvi.mode[0][0]     = PrivilegeModeW;
+  assign rvvi.mode_virt[0][0] = 1'b0;  // no hypervisor, so never in a virtual mode
+  assign rvvi.debug_mode[0][0] = 1'b0; // no debug mode
   assign rvvi.ixl[0][0]      = PrivilegeModeW == 2'b11 ? 2'b10 :
                                PrivilegeModeW == 2'b01 ? STATUS_SXL : STATUS_UXL;
   assign rvvi.pc_wdata[0][0] = ~FlushW ? PCM :
@@ -496,16 +489,6 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
       //     end
       //   end
       // end
-    end
-    if(HaltW) begin
-`ifdef FCOV
-      $display("Functional coverage test complete.");
-`endif
-`ifdef QUESTA
-      $stop;  // if this is changed to $finish for Questa, wally.do does not go to the next step to run coverage and terminates without allowing GUI debug
-`else
-      $finish;
-`endif
     end
   end
 endmodule

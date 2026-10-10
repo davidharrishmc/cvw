@@ -44,9 +44,6 @@ set SRC ${WALLY}/src
 # a hack to describe coverage exclusions without hardcoding linenumbers:
 do ${WALLY}/sim/questa/GetLineNum.do
 
-# (lzc used to be excluded wholesale because its (i<64) loop confused the coverage tool; every lzc bin is now
-# reported and hit, so all of its instances, including the Zbb clz/ctz counter, are counted.)
-
 #################
 # FPU Exclusions
 #################
@@ -62,12 +59,20 @@ coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtfsm -linerange [GetLineNu
 # (FpInexact row 14 and Underflow row 22 are the DivByZero_1 rows)
 coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign FpInexact"] 14
 coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign Underflow"] 22
+# Underflow row 5 needs FullRe other than 0 or 1 while Me == 0, but a subnormal (Me = 0) rounds to FullRe = 0 or 1
+coverage exclude -scope /core/fpu/fpu/postprocess/flags -fecexprrow [GetLineNum ${SRC}/fpu/postproc/flags.sv "assign Underflow"] 5
 # Convert int to fp will never underflow
 coverage exclude -scope /core/fpu/fpu/postprocess/cvtshiftcalc -fecexprrow [GetLineNum ${SRC}/fpu/postproc/cvtshiftcalc.sv "assign CvtResUf"] 4
 # without Q support, an instruction with FMT = 11 is rejected as an unsupported format before the case statement,
 # so the FMT field here is 00, 01, or 10.  Rows 1, 3 and 5 each need all three compares false (FMT = 11).
 coverage exclude -scope /core/fpu/fpu/fctrl -feccondrow [GetLineNum ${SRC}/fpu/fctrl.sv "fmv int to fp"] 1 3 5
+# fmvp.q.x (funct7 1011011) has FMT = 11, so without Q support it is rejected as an unsupported format
+# before the case statement and its case arm cannot be selected.
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "7'b1011011: if"] -item b 1
 coverage exclude -scope /core/fpu/fpu/fctrl -feccondrow [GetLineNum ${SRC}/fpu/fctrl.sv "fmv fp to int"] 1 3 5
+# The same FMT = 11 case is the implicit else of both ifs, so their all-false branches cannot be taken either.
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "fmv int to fp"] -code b -allfalse
+coverage exclude -scope /core/fpu/fpu/fctrl -linerange [GetLineNum ${SRC}/fpu/fctrl.sv "fmv fp to int"] -code b -allfalse
 # j0 can only be 1 in iteration 0, j1 can only be 1 in iteration 1
 coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtiter/iterations[0]/stage/fdivsqrtstage/uslc4 -fecexprrow [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtuslc4cmp.sv "assign sqrtspecial"] 4 6
 coverage exclude -scope /core/fpu/fpu/fdivsqrt/fdivsqrtiter/iterations[1]/stage/fdivsqrtstage/uslc4 -fecexprrow [GetLineNum ${SRC}/fpu/fdivsqrt/fdivsqrtuslc4cmp.sv "assign sqrtspecial"] 6
@@ -173,8 +178,7 @@ coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -l
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -linerange [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm HREADY6"] -item c 1
 # HTRANS: ATOMIC_READ_DATA_PHASE_1 (row 12) is a dead state for the I$, and CacheAccess_0 (row 13) needs
 # FinalBeatCount outside a cache burst, which needs a BeatCount left stale by a flush in mid burst; the I$ is never
-# flushed in mid burst (see HBURST below).  (Row 5, HREADY_0, used to be excluded as "HREADY is always 1", but the
-# I$ does see HREADY = 0 in ADR_PHASE, at the HREADYread branch, so it is counted.)
+# flushed in mid burst (see HBURST below).
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign HTRANS"] 12 13
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -fecexprrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign BeatCntEn"] 4
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -fecexprrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign CacheAccess"] 4
@@ -226,9 +230,6 @@ coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -f
 # initiating a new fetch, so that 1-cycle uncached request never coincides with an LSU grant.
 coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm HREADY0"] 1
 
-# (bpred BPWrongE InstrValidD_0, row 5, used to be excluded as a single-issue invariant; the regression with
-# the tests of #1900 and #1909 hits it, so it is counted.)
-
 ## D$ Exclusions.
 # InvalidateCache is I$ only:
 coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -linerange [GetLineNum ${SRC}/cache/cachefsm.sv "exclusion-tag: dcache InvalidateCheck"] -item b 2
@@ -247,6 +248,11 @@ coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -feccondrow [GetLin
 # D$ InvalidateCache is tied 1'b0 in lsu.sv, so InvalidateCache can never be 1.  (The "cache AnyMiss"
 # exclusion above resolves via GetLineNum to L95/AnyMiss; this anchor catches the L193 LoadMiss copy.)
 coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -fecexprrow [GetLineNum ${SRC}/cache/cachefsm.sv "assign LoadMiss"] 4
+
+# D$ cachefsm CacheMiss (STATE_ADDRESS_SETUP & ~Stall & ~FlushStage) FlushStage_1 (row 4): a trap that flushes the
+# M stage waits for the access to commit, and an access that faults on its own is squashed before it reaches the
+# cache (lsu.sv SelfFaultM), so the D$ is not flushed in ADDRESS_SETUP.
+coverage exclude -scope /core/lsu/bus/dcache/dcache/cachefsm -fecexprrow [GetLineNum ${SRC}/cache/cachefsm.sv "assign CacheMiss"] 4
 
 # D$ cachefsm L195 CacheBusRW[0] CacheCMOpM[1]/[2] terms (FEC rows 13-16): the writeback-CMO term
 # (STATE_WRITEBACK & (CMOpM[1]|CMOpM[2]) & ~CacheBusAck) is logically subsumed by the earlier OR term
@@ -267,8 +273,6 @@ for {set i 0} {$i < $numcacheways} {incr i} {
     coverage exclude -scope /core/lsu/bus/dcache/dcache/CacheWays[$i] -feccondrow $line 2-4
     # InvalidateCacheDelay is always 0 for D$ because it is flushed, not invalidated
     coverage exclude -scope /core/lsu/bus/dcache/dcache/CacheWays[$i] -fecexprrow [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: dcache HitWay"] 2
-    # (SetValidEN and ClearValidEN FlushStage_1, row 4, used to be excluded here on the argument that FlushStage
-    # cannot rise while SetValidWay is set; both rows are hit in the D$, so they are counted.)
 # Not right; other ways can get flushed and dirtied simultaneously    coverage exclude -scope /core/lsu/bus/dcache/dcache/CacheWays[$i] -linerange [GetLineNum ${SRC}/cache/cacheway.sv "exclusion-tag: cache UpdateDirty"] -item c 1 -feccondrow 6
 }
 # D$ writeback, flush, write_line, or flush_writeback states can't be cancelled by a flush
@@ -418,8 +422,7 @@ foreach arm {"2'b00:  DataMisalignedM" "2'b01:  DataMisalignedM" "2'b11:  DataMi
 }
 coverage exclude -scope /core/ifu/immu/immu -fecexprrow [GetLineNum ${SRC}/mmu/mmu.sv "2'b10:  DataMisalignedM"] 4
 
-# IMMU never disables translations (DisableTranslation_1).  (UpdateDA Translate_0, row 5, used to be excluded too;
-# it is hit.)
+# IMMU never disables translations (DisableTranslation_1).
 coverage exclude -scope /core/ifu/immu/immu/tlb/tlb/tlbcontrol -fecexprrow [GetLineNum ${SRC}/mmu/tlb/tlbcontrol.sv "assign Translate"] 2
 # never reaches this when ENVCFG_ADUE_1 because HPTW updates A bit first
 coverage exclude -scope /core/ifu/immu/immu/tlb/tlb/tlbcontrol -fecexprrow [GetLineNum ${SRC}/mmu/tlb/tlbcontrol.sv "assign PrePageFault"] 18
@@ -434,9 +437,6 @@ coverage exclude -scope /core/ifu/immu/immu/tlb/tlb/tlbcontrol -fecexprrow [GetL
 # RV64GC HPTW never starts at L1_ADR
 set line [GetLineNum ${SRC}/mmu/hptw.sv "InitialWalkerState == L1_ADR"]
 coverage exclude -scope /core/lsu/hptw/hptw -feccondrow $line 2
-
-# (HPTWLoadPageFault row 7, HPTWStoreAmoPageFault row 3 and HPTWUpdateDA row 3 used to be excluded here as
-# unreachable; every row of the three expressions is hit, so they are counted.)
 
 # UPDATE_PTE never self-loops on a cache-bus stall: the PTE being A/D-updated was just read during the
 # same uninterrupted walk (LSU stalled, line cannot be evicted), so it is resident/writable in the D$ and
@@ -477,7 +477,6 @@ set line [GetLineNum ${SRC}/ebu/ebufsmarb.sv "BeatCounter\\("]
 coverage exclude -scope /core/ebu/ebu/ebufsmarb -fecexprrow $line 1
 set line [GetLineNum ${SRC}/ebu/ebufsmarb.sv "FinalBeatReg\\("]
 coverage exclude -scope /core/ebu/ebu/ebufsmarb -fecexprrow $line 1
-# (The ARBITRATE: if condition, row 2 both_1, used to be excluded here; it is hit, so it is counted.)
 
 set line [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm AtomicElse"]
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -linerange $line-$line  -item bc 1
@@ -506,7 +505,7 @@ coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -f
 
 # HREADY is low for a requester only while the other requester owns the bus (EBU arbitration; ram_ahb never
 # stalls).  Once the cache owns the bus for a burst, HREADY stays high, so the HREADY_0 rows of the CACHE_FETCH and
-# CACHE_WRITEBACK conditions are unreachable.  (The D$ ADR_PHASE HREADY0 row used to be excluded too; it is hit.)
+# CACHE_WRITEBACK conditions are unreachable.
 
 #set line [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm HREADY1"]
 #coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -linerange $line-$line -item c 1 -feccondrow 1
@@ -550,6 +549,12 @@ coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -f
 # the cache makes no request.
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign HTRANS"] 15
 
+# D$ AHBBuscachefsm HTRANS and HBURST (CacheAccess & |BeatCount) CacheAccess_0: as for the I$, BeatCount is only
+# nonzero outside a cache state if a burst was cut off by a flush, and a D$ burst is never flushed: a cache
+# instruction that faults on its own is squashed before its writeback starts (lsu.sv SelfFaultM).
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "CacheAccess & \\|BeatCount\\) ?"] 1
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -feccondrow [GetLineNum ${SRC}/ebu/buscachefsm.sv "assign HBURST"] 5
+
 # D$ AHBBuscachefsm CaptureEn ((~Flush & DATA_PHASE) & BusRW[1]) Flush_1: unreachable for the D$ -- a
 # DATA_PHASE access with BusRW[1] is a committed, non-speculative uncached load read; the D$ Flush input
 # (LSUFlushW) has no branch-mispredict component, so Flush is always 0 here.
@@ -561,12 +566,16 @@ coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -f
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -linerange [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm AtomicElse"] -item s 1
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -linerange [GetLineNum ${SRC}/ebu/buscachefsm.sv "exclusion-tag: buscachefsm AtomicWait"] -item s 1
 
-# these transitions will not happen (DATA_PHASE->ADR_PHASE used to be listed too; it is hit)
+# these transitions will not happen
 coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -ftrans CurrState ATOMIC_READ_DATA_PHASE->ADR_PHASE ATOMIC_PHASE->ADR_PHASE CACHE_FETCH->CACHE_WRITEBACK
 
+# The bus FSM leaves DATA_PHASE for ADR_PHASE only on a flush, and the D$ bus is never flushed during a data phase:
+# a trap that flushes the M stage waits for the access to commit, and an access that faults on its own is squashed
+# before it reaches the bus (lsu.sv SelfFaultM).
+coverage exclude -scope /core/lsu/bus/dcache/ahbcacheinterface/AHBBuscachefsm -ftrans CurrState DATA_PHASE->ADR_PHASE
+
 # TLB not recently used never has all RU bits = 1 because it will then clear all to 0, so the last bit of
-# the TLB NRU priority encoder never sees ~RUBits[31]_0 with every lower bit 1 (row 1 of poh[31]).  This used to
-# be a -du exclusion of priorityonehot, which also hid the PMP priority and cache LRU encoders.
+# the TLB NRU priority encoder never sees ~RUBits[31]_0 with every lower bit 1 (row 1 of poh[31]).
 foreach tlb {/core/ifu/immu/immu/tlb/tlb /core/lsu/dmmu/dmmu/tlb/tlb} {
   coverage exclude -scope "$tlb/lru/nru/poh\[31\]" -fecexprrow [GetLineNum ${SRC}/generic/priorityonehot.sv {assign y\[i\]}] 1
 }
@@ -596,6 +605,10 @@ coverage exclude -scope /core/priv/priv/csr/csru/csru -fecexprrow [GetLineNum ${
 # these two lines named counters twice, so vsim reported the scope as not found and excluded nothing.
 coverage exclude -scope /core/priv/priv/csr/counters/cntr[1] -fecexprrow [GetLineNum ${SRC}/privileged/csrc.sv "MTIME traps"] 2 4
 coverage exclude -scope /core/priv/priv/csr/counters/cntr[1] -linerange [GetLineNum ${SRC}/privileged/csrc.sv "assign NextHPMCOUNTERM"] -item b 1
+
+# rv64gc divides integers in the FPU (IDIV_ON_FPU), so the integer divider never runs and DivBusyE is never
+# asserted: row 2 (DivBusyE_1) of the division-cycles event cannot be reached.  FDivBusyE's rows are hit.
+coverage exclude -scope /core/priv/priv/csr/counters -fecexprrow [GetLineNum ${SRC}/privileged/csrc.sv "division cycles"] 2
 
 # CounterEvent[0] is tied high because MCYCLE always increments, so the FEC row that needs it low
 # cannot be reached.
@@ -642,14 +655,9 @@ coverage exclude -scope /core/priv/priv/csr/csrs/csrs -fecexprrow [GetLineNum ${
 # EBU
 ####################
 
-# (The EBU BeatCounter flop used to be excluded whole, as idle only with multicycle bus latency; all of its
-# branches and statements are hit, so it is counted.)
-
 ####################
 # IFU
 ####################
-
-# (ITLBMissOrUpdateRawF InstrUpdateAF_1, row 4, used to be excluded here as unreachable; it is hit, so it is counted.)
 
 # I$ fetchbuffer CaptureBeat: CaptureEn_0 is unreachable for beats 1..7.  In the read-only I$ with HREADY
 # always 1, CaptureEn is high on every beat of a CACHE_FETCH, so it is never 0 at a matching delayed beat
