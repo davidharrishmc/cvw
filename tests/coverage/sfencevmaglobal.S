@@ -8,7 +8,7 @@
 //          rs2 = x0 (the fence applies to all address spaces) and permits an ASID-scoped fence
 //          (rs2 != x0) to leave them in place.  This test verifies the required direction on both the
 //          data TLB and the instruction TLB, and that an ASID-scoped fence still invalidates
-//          non-global mappings.  It is self-checking: the outcome is left in selfcheck_record.
+//          non-global mappings.  It is self-checking (WALLY-selfcheck.h): it reports the outcome through tohost.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
@@ -30,6 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "WALLY-init-lib.h"
+#include "WALLY-selfcheck.h"
 
 // Page table entry flag combinations
 #define PTE_PTR  0x01                   // V, pointer to the next level
@@ -46,23 +47,6 @@
     srli t0, \adr, 12
     slli t0, t0, 10
     ori  t0, t0, \flags
-.endm
-
-// Fail the test, recording which check failed along with the expected and actual values
-.macro CHECKEQ actual, expected, index
-    beq \actual, \expected, 8f
-    la t0, selfcheck_record
-    li t1, 2
-    sd t1, 0(t0)                        // status 2: value mismatch
-    li t1, \index
-    sd t1, 8(t0)                        // which check failed
-    sd zero, 16(t0)
-    sd \expected, 24(t0)
-    sd \actual, 32(t0)
-    li a0, 3
-    ecall                               // back to machine mode to terminate
-    j done
-8:
 .endm
 
 main:
@@ -124,7 +108,7 @@ main:
     // 1. The global mapping translates to page A
     ////////////////////////////////////////////////////////////////////////////////////////////
     ld s3, 0(s0)
-    CHECKEQ s3, s4, 1
+    SC_CHECK_EQ s3, s4, 1
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // 2. sfence.vma x0, x0 must invalidate the global mapping: repoint it at page B
@@ -134,7 +118,7 @@ main:
     sd t0, 0(s2)
     sfence.vma
     ld s3, 0(s0)
-    CHECKEQ s3, s5, 2
+    SC_CHECK_EQ s3, s5, 2
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // 3. sfence.vma rs1, x0 (address-scoped, all address spaces) must also invalidate it
@@ -144,7 +128,7 @@ main:
     sd t0, 0(s2)
     sfence.vma s0, x0
     ld s3, 0(s0)
-    CHECKEQ s3, s4, 3
+    SC_CHECK_EQ s3, s4, 3
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // 4. An ASID-scoped sfence.vma must still invalidate a NON-global mapping
@@ -154,14 +138,14 @@ main:
     sd t0, 0(s2)
     sfence.vma
     ld s3, 0(s0)                        // fills the TLB with the non-global mapping
-    CHECKEQ s3, s5, 4
+    SC_CHECK_EQ s3, s5, 4
     la t1, data_page_a
     MAKEPTE t1, PTE_RWL
     sd t0, 0(s2)
     li a1, 1                            // the ASID this mapping was installed under
     sfence.vma x0, a1
     ld s3, 0(s0)
-    CHECKEQ s3, s4, 5
+    SC_CHECK_EQ s3, s4, 5
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // 5. A global mapping still translates correctly across an ASID-scoped sfence.vma, whether the
@@ -172,10 +156,10 @@ main:
     sd t0, 0(s2)
     sfence.vma
     ld s3, 0(s0)
-    CHECKEQ s3, s4, 6
+    SC_CHECK_EQ s3, s4, 6
     sfence.vma x0, a1
     ld s3, 0(s0)
-    CHECKEQ s3, s4, 7
+    SC_CHECK_EQ s3, s4, 7
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // 6. The same requirement on the instruction TLB: a global executable mapping must be
@@ -184,30 +168,28 @@ main:
     li s6, 0xA
     li s7, 0xB
     jalr ra, 0(s1)                      // code page A sets a5 = 0xA
-    CHECKEQ a5, s6, 8
+    SC_CHECK_EQ a5, s6, 8
 
     la t1, code_page_b
     MAKEPTE t1, PTE_RXGL
     sd t0, 8(s2)
     sfence.vma
     jalr ra, 0(s1)                      // code page B sets a5 = 0xB
-    CHECKEQ a5, s7, 9
+    SC_CHECK_EQ a5, s7, 9
 
     la t1, code_page_a
     MAKEPTE t1, PTE_RXGL
     sd t0, 8(s2)
     sfence.vma s1, x0
     jalr ra, 0(s1)
-    CHECKEQ a5, s6, 10
+    SC_CHECK_EQ a5, s6, 10
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Every check passed
     ////////////////////////////////////////////////////////////////////////////////////////////
     li a0, 3
     ecall                               // return to machine mode to terminate
-    la t0, selfcheck_record
-    li t1, 1
-    sd t1, 0(t0)
+    SC_PASS
     j done
 
 .data
@@ -240,9 +222,3 @@ code_page_a:
 code_page_b:
     li a5, 0xB
     ret
-
-.align 12
-    .dword 0                            // keep selfcheck_record from sharing an address with another label
-.globl selfcheck_record
-selfcheck_record:
-    .fill 8, 8, 0
