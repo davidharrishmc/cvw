@@ -40,7 +40,7 @@ module divstep #(parameter XLEN) (
   logic qi, qib;                 // Quotient digit and its complement
 
   assign {WShift, XQOut} = {W[XLEN-2:0], XQ, qi};  // shift W and X/Q left, insert quotient bit at bottom
-  adder #(XLEN+1) wdsub({1'b0, WShift}, {1'b1, DAbsB}, {qib, WPrime}); // effective subtractor; sign of WShift - |D| determines quotient bit
+  adder #(XLEN+1) wdsub({1'b0, WShift}, {1'b1, DAbsB}, {qib, WPrime}); // effective subtractor, carry out determines quotient bit
   assign qi = ~qib;
   mux2 #(XLEN) wrestoremux(WShift, WPrime, qi, WOut); // if quotient is zero, restore W
 endmodule

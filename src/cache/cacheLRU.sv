@@ -33,7 +33,7 @@ module cacheLRU
   input  logic                clk,
   input  logic                reset,
   input  logic                InvalidateFlushStage,
-  input  logic                CacheEn,         // Enable the cache memory arrays.  When disabled, hold read data constant
+  input  logic                CacheEn,         // Enable the cache memory arrays.  Disable hold read data constant
   input  logic [NUMWAYS-1:0]  HitWay,          // Which way is valid and matches PAdr's tag
   input  logic [NUMWAYS-1:0]  ValidWay,        // Which ways for a particular set are valid, ignores tag
   input  logic [SETLEN-1:0]   CacheSetLRU,     // Cache set, the output of the address select mux: NextSet, PAdr, or FlushAdr
@@ -56,7 +56,7 @@ module cacheLRU
   genvar                               row;
 
   /* verilator lint_off UNOPTFLAT */
-  // False combinational loop reported by Verilator; it is not a circular path.
+  // Rose: For some reason verilator does not like this.  I checked and it is not a circular path.
   logic [NUMWAYS-2:0]                  LRUUpdate;
   logic [LOGNUMWAYS-1:0]               Intermediate [NUMWAYS-2:0];
   /* verilator lint_on UNOPTFLAT */

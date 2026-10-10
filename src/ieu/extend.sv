@@ -50,7 +50,7 @@ module extend import cvw::*;  #(parameter cvw_t P) (
       // Atomics (sc, AMOs) and CMOs: zero offset
       3'b101:  if (P.ZALRSC_SUPPORTED | P.ZAAMO_SUPPORTED | P.ZICBOM_SUPPORTED | P.ZICBOZ_SUPPORTED) ImmExtD = '0;
                else             ImmExtD = undefined;
-      default: ImmExtD = undefined;
+      default: ImmExtD = undefined; // undefined
     endcase
 
 endmodule

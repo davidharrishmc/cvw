@@ -134,6 +134,7 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
     always_ff @(posedge PCLK)
       if (~PRESETn) begin
         MTIME <= '0;
+        // MTIMECMP is not reset
       end else if (memwrite & (entry == 16'hBFF8)) begin
         for (i = 0; i < P.XLEN/8; i++)
           if (PSTRB[i])

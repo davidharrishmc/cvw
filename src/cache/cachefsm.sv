@@ -68,7 +68,7 @@ module cachefsm #(parameter READ_ONLY_CACHE = 0) (
   output logic       FlushWayCntEn,     // Enable the way counter during a flush
   output logic       FlushCntRst,       // Reset both flush counters
   output logic       SelFetchBuffer,    // Bypass the SRAM for a load hit by directly using the read data from the ahbcacheinterface's FetchBuffer
-  output logic       CacheEn            // Enable the cache memory arrays.  When disabled, hold read data constant
+  output logic       CacheEn            // Enable the cache memory arrays.  Disable hold read data constant
 );
 
   logic              resetDelay;
@@ -157,6 +157,7 @@ module cachefsm #(parameter READ_ONLY_CACHE = 0) (
                     (CurrState == STATE_ACCESS & CMOZeroNoEviction) |
                     (CurrState == STATE_WRITEBACK & CacheBusAck & CMOpM[3]);
   assign ClearValid = (CurrState == STATE_ACCESS & (CMOpM[0] | (CMOpM[2] & ~HitLineDirty))) |
+  //assign ClearValid = (CurrState == STATE_ACCESS & (CMOpM[0])) |
                       (CurrState == STATE_WRITEBACK & CMOpM[2] & CacheBusAck);
   assign LRUWriteEn = (((CurrState == STATE_ACCESS & (AnyHit | CMOZeroNoEviction)) |
                        (CurrState == STATE_WRITE_LINE)) & ~FlushStage) |

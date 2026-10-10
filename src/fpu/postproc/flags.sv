@@ -147,7 +147,7 @@ module flags import cvw::*;  #(parameter cvw_t P) (
   // Inexact
   ///////////////////////////////////////////////////////////////////////////////
 
-  // Set Inexact flag if the result is different from what would be output given infinite precision
+  // Set Inexact flag if the result is different from what would be outputted given infinite precision
   //      - not set for Inf or NaN inputs, divide by zero, or invalid operations
   assign FpInexact = (Sticky | Guard | Overflow | Round) & ~(InfIn | NaNIn | DivByZero | Invalid);
 

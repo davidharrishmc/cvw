@@ -114,7 +114,7 @@ module tlbmixer import cvw::*;  #(parameter cvw_t P) (
   end
 
   // Output the hit physical address if translation is currently on.
-  // Provide physical address of zero on a miss, to cause an error if a miss somehow propagates through
+  // Provide physical address of zero if not TLBHits, to cause segmentation error if miss somehow percolated through signal
   assign TLBPAdr = TLBHit ? {PPNMixed2, Offset} : 0;
 
 endmodule

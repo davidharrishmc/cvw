@@ -114,7 +114,7 @@ module csrc import cvw::*; #(parameter cvw_t P) (
     assign CounterEvent[8]  = BTAWrongM & InstrValidNotFlushedM;                         // branch predictor wrong target
     assign CounterEvent[9]  = RASPredPCWrongM & InstrValidNotFlushedM;                   // return address stack wrong address
     assign CounterEvent[10] = IClassWrongM & InstrValidNotFlushedM;                      // instruction class predictor wrong
-    assign CounterEvent[11] = LoadStallM;                                                // Load stalls. Don't suppress on flush, as this only happens if flushed.
+    assign CounterEvent[11] = LoadStallM;                                                // Load Stalls. don't want to suppress on flush as this only happens if flushed.
     assign CounterEvent[12] = StoreStallM;                                               // Store Stall
     assign CounterEvent[13] = DCacheAccess;                                              // data cache access
     assign CounterEvent[14] = DCacheMiss;                                                // data cache miss. Miss asserted 1 cycle at start of cache miss
@@ -189,6 +189,7 @@ module csrc import cvw::*; #(parameter cvw_t P) (
       // realize happen only at one XLEN.
       /* verilator lint_off WIDTH */
       if (P.XLEN == 64) begin // 64-bit counter reads
+        // Veri lator doesn't realize this only occurs for XLEN=64
         if      (CSRAdrM == TIME & ~CSRWriteM)  CSRCReadValM = MTIME_CLINT; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
         else if (CSRAdrM >= MHPMCOUNTERBASE & CSRAdrM < MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM != MTIME)
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
@@ -202,6 +203,7 @@ module csrc import cvw::*; #(parameter cvw_t P) (
                 CSRCReadValM = '0;
         else IllegalCSRCAccessM = 1'b1;  // requested CSR doesn't exist
       end else begin // 32-bit counter reads
+        // Veril ator doesn't realize this only occurs for XLEN=32
         if      (CSRAdrM == TIME & ~CSRWriteM)  CSRCReadValM = MTIME_CLINT[31:0]; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
         else if (CSRAdrM == TIMEH & ~CSRWriteM) CSRCReadValM = MTIME_CLINT[63:32];
         else if (CSRAdrM >= MHPMCOUNTERBASE  & CSRAdrM < MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM != MTIME)
@@ -228,6 +230,6 @@ module csrc import cvw::*; #(parameter cvw_t P) (
       end
       /* verilator lint_on WIDTH */
     end
-    else IllegalCSRCAccessM = 1'b1; // no privileges for this CSR
+    else IllegalCSRCAccessM = 1'b1; // no privileges for this csr
   end
 endmodule

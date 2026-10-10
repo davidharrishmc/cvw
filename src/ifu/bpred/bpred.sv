@@ -57,13 +57,13 @@ module bpred import cvw::*;  #(parameter cvw_t P) (
   input  logic              JumpD, JumpE,
   input  logic              PCSrcE,                    // Execution stage branch is taken
   input  logic [P.XLEN-1:0] IEUAdrE,                   // The branch/jump target address
-  input  logic [P.XLEN-1:0] IEUAdrM,                   // The branch/jump target address in the Memory stage
+  input  logic [P.XLEN-1:0] IEUAdrM,                   // The branch/jump target address
   input  logic [P.XLEN-1:0] PCLinkE,                   // The address following the branch instruction. (AKA Fall through address)
   output logic [3:0]        IClassM,                   // The valid instruction class. 1-hot encoded as {call, return, jump, branch}
 
   // Report branch prediction status
   output logic              BPWrongE,                  // Prediction is wrong
-  output logic              BPWrongM,                  // Prediction is wrong (Memory stage)
+  output logic              BPWrongM,                  // Prediction is wrong
   output logic              BPDirWrongM,               // Prediction direction is wrong
   output logic              BTAWrongM,                 // Prediction target wrong
   output logic              RASPredPCWrongM,           // RAS prediction is wrong

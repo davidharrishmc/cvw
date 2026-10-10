@@ -74,7 +74,7 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
   logic [P.XLEN-1:0]   OfIntRes;   // the overflow result for integer output
   logic [P.XLEN-1:0]   OfIntRes2;  // the overflow result for integer output after accounting for fcvtmod.w.d
   logic [P.XLEN-1:0]   Int64Res;   // Result for conversion to 64-bit int after accounting for fcvtmod.w.d
-  logic                OfResMax;   // does the overflow result output maximum norm fp number
+  logic                OfResMax;   // does the of result output maximum norm fp number
   logic                KillRes;    // kill the result for underflow
   logic                SelOfRes;   // should the overflow result be selected (excluding convert)
   logic                SelCvtOfRes; // select overflow result for convert instruction
@@ -85,8 +85,7 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
   assign OfResMax = (~InfIn | (IntToFp & CvtOp)) & ~DivByZero & ((Frm[1:0] == 2'b01) | (Frm[1:0] == 2'b10 & ~Rs) | (Frm[1:0] == 2'b11 & Rs));
 
   // select correct outputs for special cases
-  // UfRes is +/-0, or the smallest subnormal if rounding away from zero (Plus1 with Frm[1] = 1 for RDN/RUP);
-  // the zero is exact when dividing by infinity, so don't add 1
+  // UfRes is +/-0, or the smallest subnormal if rounding away from zero (Plus1 with Frm[1] = 1 for RDN/RUP)
   if (P.FPSIZES == 1) begin
       // NaN res selection depending on standard
       if (P.IEEE754) begin
@@ -236,6 +235,7 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
                   end
 
                   OfRes   = OfResMax ? {{P.FLEN-P.H_LEN{1'b1}}, Rs, {P.H_NE-1{1'b1}}, 1'b0, {P.H_NF{1'b1}}} : {{P.FLEN-P.H_LEN{1'b1}}, Rs, {P.H_NE{1'b1}}, (P.H_NF)'(0)};
+                  // zero is exact if dividing by infinity so don't add 1
                   UfRes   = {{P.FLEN-P.H_LEN{1'b1}}, Rs, (P.H_LEN-2)'(0), Plus1 & Frm[1] & ~(DivOp & YInf)};
                   NormRes = {{P.FLEN-P.H_LEN{1'b1}}, Rs, Re[P.H_NE-1:0], Rf[P.NF-1:P.NF-P.H_NF]};
               end
@@ -247,12 +247,12 @@ module specialcase import cvw::*;  #(parameter cvw_t P) (
   //      - don't set to zero if fp input is zero but not using the fp input
   //      - don't set to zero if int input is zero but not using the int input
   // otherwise (fma/divsqrt) kill if the exponent is negative or the divsqrt result is exactly 0 (x/Inf, 0/y, sqrt(0))
-  assign KillRes = CvtOp ? (CvtResUf | (XZero & ~IntToFp) | (IntZero & IntToFp)) : FullRe[P.NE+1] | (((YInf & ~XInf) | XZero) & DivOp);
+  assign KillRes = CvtOp ? (CvtResUf | (XZero & ~IntToFp) | (IntZero & IntToFp)) : FullRe[P.NE+1] | (((YInf & ~XInf) | XZero) & DivOp); //Underflow & ~ResSubnorm & (Re!=1);
 
   // calculate if the overflow result should be selected (Inf inputs give Inf, except x/Inf = 0)
   assign SelOfRes = Overflow | DivByZero | (InfIn & ~(YInf & DivOp));
 
-  // select the result; divide by zero selects OfRes, which is infinity with the result sign
+  // output infinity with result sign if divide by zero
   if (P.IEEE754)
     always_comb
       if (XNaN & ~(IntToFp & CvtOp)) PostProcRes = XNaNRes;

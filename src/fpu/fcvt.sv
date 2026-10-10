@@ -183,7 +183,7 @@ module fcvt import cvw::*;  #(parameter cvw_t P) (
   assign Ce = {1'b0, OldExp} - (P.NE+1)'(P.BIAS) - {{P.NE-P.LOGCVTLEN+1{1'b0}}, (LeadingZeros)} + {2'b0, NewBias};
 
   // find if the result is subnormal or underflows
-  //      - if calculated exponent is 0 or negative (and the input/result is not exactly 0)
+  //      - if Calculated exponent is 0 or negative (and the input/result is not exactly 0)
   //      - can't underflow an integer to Fp conversion
   assign ResSubnormUf = (~|Ce | Ce[P.NE]) & ~XZero & ~IntToFp;
 

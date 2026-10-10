@@ -50,7 +50,7 @@ module zbc import cvw::*; #(parameter cvw_t P) (
   // choose Y = B for clmul, Rev(B) for clmulh/clmulr
   mux2 #(P.XLEN) ymux(B, RevB, Funct3[1], Y);
 
-  // carry-less multiplier
+  // carry free multiplier
   clmul #(P.XLEN) clm(.X, .Y, .ClmulResult);
 
   // choose result = rev(X @ Y) for clmulh/clmulr

@@ -105,7 +105,7 @@ module fdivsqrtpreproc import cvw::*;  #(parameter cvw_t P) (
   // Integer & FP leading zero and normalization shift
   //////////////////////////////////////////////////////
 
-  // count leading zeros for subnormal FP and to normalize integer inputs
+  // count leading zeros for Subnorm FP and to normalize integer inputs
   lzc #(P.DIVb+1) lzcX (IFX, ell);
   lzc #(P.DIVb+1) lzcY (IFD, mE);
 

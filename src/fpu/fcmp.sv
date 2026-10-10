@@ -138,7 +138,7 @@ module fcmp import cvw::*;  #(parameter cvw_t P) (
           else
             if (LT) CmpFpRes = Y; // X < Y
             else    CmpFpRes = X; // X > Y
-        else // fmax performs IEEE 754-2019 maximumNumber, which produces NaN only if both inputs are NaN
+        else // fmax performs IEEE754 maxNumber that produces NaN if both inputs are NaN
           if (XNaN)
             if (YNaN)   CmpFpRes = NaNRes;   // X = NaN Y = NaN
             else        CmpFpRes = Y;        // X = NaN Y != NaN
@@ -153,7 +153,7 @@ module fcmp import cvw::*;  #(parameter cvw_t P) (
           else
             if (LT) CmpFpRes = X; // X < Y
             else    CmpFpRes = Y; // X > Y
-        else // fmin performs IEEE 754-2019 minimumNumber, which produces NaN only if both inputs are NaN
+        else // fmin performs IEEE754 minNumber that produces NaN if both inputs are NaN
           if (XNaN)
             if (YNaN)   CmpFpRes = NaNRes;   // X = NaN Y = NaN
             else        CmpFpRes = Y;        // X = NaN Y != NaN

@@ -102,7 +102,7 @@ module csrm import cvw::*; #(parameter cvw_t P) (
   // Constants
   localparam ZERO = {(P.XLEN){1'b0}};
   // Delegable exceptions: causes 0-9, 12, 13, 15.  Cause 11 (ecall from M-mode) cannot be delegated and 10, 14 are reserved.
-  // When compressed instructions are supported, there can't be misaligned instructions, so cause 0 is not delegable
+  // when compressed instructions are supported, there can't be misaligned instructions
   localparam MEDELEG_MASK  = P.ZCA_SUPPORTED ? 16'hB3FE : 16'hB3FF;
   localparam MIDELEG_MASK  = 12'h222; // we choose to not make machine interrupts delegable
   // only nonzero counters can be inhibited; TM (bit 1) is read-only 0 because the time counter lives in the CLINT

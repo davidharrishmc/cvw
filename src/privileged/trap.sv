@@ -36,7 +36,7 @@ module trap import cvw::*; #(parameter cvw_t P) (
   input  logic                 wfiM, wfiW,                                      // wait for interrupt instruction
   input  logic [1:0]           PrivilegeModeW,                                  // current privilege mode
   input  logic [11:0]          MIP_REGW, MIE_REGW, MIDELEG_REGW,                // interrupt pending, enabled, and delegate CSRs
-  input  logic [15:0]          MEDELEG_REGW,                                    // exception delegation CSR
+  input  logic [15:0]          MEDELEG_REGW,                                    // exception delegation SR
   input  logic                 STATUS_MIE, STATUS_SIE,                          // machine/supervisor interrupt enables
   input  logic                 InstrValidM,                                     // current instruction is valid, not flushed
   input  logic                 CommittedM, CommittedF,                          // LSU/IFU has committed to a bus operation that can't be interrupted

@@ -47,7 +47,7 @@ module cache import cvw::*; #(parameter cvw_t P,
   output logic                   CacheCommitted,    // Cache has started bus operation that shouldn't be interrupted
   output logic                   CacheStall,        // Cache stalls pipeline during multicycle operation
   output logic [WORDLEN-1:0]     ReadDataWord,      // Word read from cache (goes to CPU and bus)
-  // to performance counters
+  // to performance counters to cpu
   output logic                   CacheMiss,         // Cache miss
   output logic                   CacheAccess,       // Cache access
   // lsu control

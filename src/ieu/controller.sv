@@ -92,7 +92,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   output logic [4:0]  RdW                      // Destination register in Writeback stage
 );
 
-  logic [4:0] Rs1E;                            // Rs1 source register in Execute stage
+  logic [4:0] Rs1E;                            // pipelined register sources
   logic [6:0] OpD;                             // Opcode in Decode stage
   logic [2:0] Funct3D;                         // Funct3 field in Decode stage
   logic [6:0] Funct7D;                         // Funct7 field in Decode stage
@@ -250,7 +250,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
       7'b0000011: if (LFunctD)
                       ControlsD = `CTRLW'b1_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_0; // loads
       7'b0000111: if (FLSFunctD)
-                      ControlsD = `CTRLW'b0_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_1; // FP loads; Illegal = 1 here, so legality comes from FPU decoder
+                      ControlsD = `CTRLW'b0_000_01_10_001_0_0_0_0_0_0_0_0_0_00_0_1; // flw - only legal if FP supported
       7'b0001111: if (FenceFunctD) begin
                     if (P.ZIFENCEI_SUPPORTED)
                       ControlsD = `CTRLW'b0_000_00_00_000_0_0_0_0_0_0_0_1_0_00_0_0; // fence
@@ -267,7 +267,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
       7'b0100011: if (SFunctD)
                       ControlsD = `CTRLW'b0_001_01_01_000_0_0_0_0_0_0_0_0_0_00_0_0; // stores
       7'b0100111: if (FLSFunctD)
-                      ControlsD = `CTRLW'b0_001_01_01_000_0_0_0_0_0_0_0_0_0_00_0_1; // FP stores; Illegal = 1 here, so legality comes from FPU decoder
+                      ControlsD = `CTRLW'b0_001_01_01_000_0_0_0_0_0_0_0_0_0_00_0_1; // fsw - only legal if FP supported
       7'b0101111: if (AFunctD) begin
                     if (P.ZALRSC_SUPPORTED & InstrD[31:27] == 5'b00010 & Rs2D == 5'b0)
                       ControlsD = `CTRLW'b1_000_00_10_001_0_0_0_0_0_0_0_0_0_01_0_0; // lr
@@ -302,18 +302,18 @@ module controller import cvw::*;  #(parameter cvw_t P) (
 
   // Unswizzle control bits
   // Squash control signals if coming from an illegal compressed instruction
-  // On RV32E, can't write to upper 16 registers (RegWrite with rd[4] = 1).  Checking reads to upper 16 is more costly so disregard them.
+  // On RV32E, can't write to upper 16 registers.  Checking reads to upper 16 is more costly so disregard them.
   assign IllegalERegAdrD = P.E_SUPPORTED & P.ZICSR_SUPPORTED & ControlsD[`CTRLW-1] & InstrD[11];
   assign {BaseRegWriteD, PreImmSrcD, ALUSrcAD, BaseALUSrcBD, MemRWD,
           ResultSrcD, BranchD, ALUOpD, JumpD, ALUResultSrcD, BaseW64D, CSRReadD,
           PrivilegedD, FenceXD, MDUD, AtomicD, CMOD, unused} = IllegalIEUFPUInstrD ? `CTRLW'b0 : ControlsD;
 
   assign CSRZeroSrcD = InstrD[14] ? (InstrD[19:15] == 0) : (Rs1D == 0); // Is a CSR instruction using zero as the source?
-  assign CSRWriteD = CSRReadD & !(CSRZeroSrcD & InstrD[13]);            // csrrs[i]/csrrc[i] (InstrD[13] = 1) with zero source don't write
+  assign CSRWriteD = CSRReadD & !(CSRZeroSrcD & InstrD[13]);            // Don't write if setting or clearing zeros
   assign SFenceVmaD = PrivilegedD & (InstrD[31:25] == 7'b0001001);
   assign FenceD = SFenceVmaD | FenceXD; // possible sfence.vma or fence.i
 
-  // ALU Decoding is lazy, only using Funct7[5] to distinguish add/sub and srl/sra
+  // ALU Decoding is lazy, only using func7[5] to distinguish add/sub and srl/sra
   assign sltuD = (Funct3D == 3'b011);
   assign subD = (Funct3D == 3'b000 & Funct7D[5] & OpD[5]);  // OpD[5] needed to distinguish sub from addi
   assign sraD = (Funct3D == 3'b101 & Funct7D[5]);
@@ -333,8 +333,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
       .BRegWriteD, .BALUSrcBD, .BW64D, .BUW64D, .BSubArithD, .IllegalBitmanipInstrD, .StallE, .FlushE,
       .ALUSelectD(PreALUSelectD), .BSelectE, .ZBBSelectE, .BALUControlE, .BMUActiveE);
     if (P.ZBA_SUPPORTED) begin
-      // ALU Decoding is more comprehensive when ZBA is supported. slt shares Funct3 with sh1add, distinguished by Funct7[4];
-      // slti (OpD[5] = 0) has no Funct7
+      // ALU Decoding is more comprehensive when ZBA is supported. slt and slti conflicts with sh1add, sh1add.uw
       assign sltD = (Funct3D == 3'b010 & (~(Funct7D[4]) | ~OpD[5]));
     end else assign sltD = (Funct3D == 3'b010);
 
@@ -345,7 +344,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
     assign RegWriteD = BaseRegWriteD | BRegWriteD;
     assign W64D = BaseW64D | BW64D;
     assign ALUSrcBD = BaseALUSrcBD | BALUSrcBD;
-    assign SubArithD = BaseSubArithD | BSubArithD; // TRUE if BMU or R-type instruction involves inverted operand
+    assign SubArithD = BaseSubArithD | BSubArithD; // TRUE If BMU or R-type instruction involves inverted operand
 
   end else begin : bitmanipi
     assign PreALUSelectD = ALUOpD ? Funct3D : 3'b000; // add for address generation when not doing ALU operation
@@ -407,7 +406,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
     IFUPrefetchD = 1'b0;
     LSUPrefetchD = 1'b0;
     ImmSrcD = PreImmSrcD;
-    if (P.ZICBOP_SUPPORTED & (InstrD[14:0] == 15'b110_00000_0010011)) begin // ori with destination x0 is a prefetch hint
+    if (P.ZICBOP_SUPPORTED & (InstrD[14:0] == 15'b110_00000_0010011)) begin // ori with destination x0 is hint for Prefetch
       /* verilator lint_off CASEINCOMPLETE */
       case (Rs2D) // which type of prefetch?  Note: prefetch.r and .w are handled the same in Wally
         5'b00000: IFUPrefetchD = 1'b1; // prefetch.i

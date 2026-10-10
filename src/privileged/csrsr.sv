@@ -137,7 +137,7 @@ module csrsr import cvw::*; #(parameter cvw_t P) (
 
   // registers for STATUS bits
   // complex register with reset, write enable, and the ability to update other bits in certain cases
-  always_ff @(posedge clk)
+  always_ff @(posedge clk) //, posedge reset)
     if (reset) begin
       STATUS_TSR_INT  <= 1'b0;
       STATUS_TW_INT   <= 1'b0;

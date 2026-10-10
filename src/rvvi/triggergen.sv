@@ -90,6 +90,15 @@ module triggergen import cvw::*; (
   assign CounterRst = CurrState == STATE_RST;
   assign CounterEn = RvviAxiRvalid;
 
+/* -----\/----- EXCLUDED -----\/-----
+  always_ff @(posedge clk) begin
+    if(reset) IlaTrigger <= '0;
+    else if (IlaTriggerOneCycle) IlaTrigger <= '1;
+    else if (IlaTriggerAck) IlaTrigger <= '0;
+    else IlaTrigger <= IlaTrigger;
+  end
+ -----/\----- EXCLUDED -----/\----- */
+
   // this is a bit hacky, but it works!
   logic [3:0] TriggerCount;
   logic       TriggerReset, TriggerEn;

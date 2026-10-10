@@ -77,6 +77,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
   //     2: NF   > XLEN > NF1
   //     3: NF   > NF1  > XLEN
   //  half and single will always be smaller than XLEN
+  //`define XLENPOS ((`XLEN>`NF) ? 1 : (`XLEN>`NF1) ? 2 : 3)
   localparam XLENPOS = P.XLEN > P.NF ? 1 : P.XLEN > P.NF1 ? 2 : 3;
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -112,7 +113,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
   // determine what format the final result is in: int or fp
   assign IntRes = ToInt;
   assign FpRes  = ~IntRes;
-  assign CvtToInt = ToInt; // under current encodings, CvtOp is always 1 when ToInt is selected, so leave it out
+  assign CvtToInt = ToInt; // under current encodings, CvtOp always is 1 when ToInt is selected, so leave it out
 
   // sticky bit calculation
   // NormSticky is the OR of all Mf bits below the guard bit of the result format.
@@ -174,7 +175,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
                                                 (|Mf[P.NORMSHIFTSZ-P.XLEN-2:P.NORMSHIFTSZ-P.Q_NF-1] & (~(OutFmt == P.Q_FMT) | IntRes)) |
                                                 (|Mf[P.NORMSHIFTSZ-P.Q_NF-2:0]);
       // 3: NF   > NF1  > XLEN
-      // The extra XLEN bit will be ORed later when calculating the final sticky bit - the ufplus1 not needed for integer
+      // The extra XLEN bit will be ored later when calculating the final sticky bit - the ufplus1 not needed for integer
       if (XLENPOS == 3) assign NormSticky = (|Mf[P.NORMSHIFTSZ-P.H_NF-2:P.NORMSHIFTSZ-P.S_NF-1] & FpRes & (OutFmt == P.H_FMT)) |
                                                 (|Mf[P.NORMSHIFTSZ-P.S_NF-2:P.NORMSHIFTSZ-P.XLEN-1] & FpRes & ((OutFmt == P.S_FMT) | (OutFmt == P.H_FMT))) |
                                                 (|Mf[P.NORMSHIFTSZ-P.XLEN-2:P.NORMSHIFTSZ-P.D_NF-1] & ((OutFmt == P.S_FMT) | (OutFmt == P.H_FMT) | IntRes)) |
@@ -307,6 +308,7 @@ module round import cvw::*;  #(parameter cvw_t P) (
     case (PostProcSel)
       2'b10:    Me = FmaMe; // fma
       2'b00:    Me = {CvtCe[P.NE], CvtCe} & {P.NE+2{~CvtResSubnormUf | CvtResUf}}; // cvt; exponent is 0 for subnormal results that don't fully underflow
+      // 2'b01: Me = DivDone ? Ue : 0; // divide
       2'b01:    Me = Ue; // divide
       default:  Me = '0;
     endcase

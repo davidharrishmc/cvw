@@ -68,7 +68,7 @@ module fdivsqrtiter import cvw::*;  #(parameter cvw_t P) (
   flopen #(P.DIVb+4) wcreg(clk, FDivBusyE, WCN, WC[0]);
 
   // UOTFC Result U and UM registers/initialization mux
-  // Initialize U to 0 = 0.0000... and UM to -1 = 1.00000... (in Q1.DIVb)
+  // Initialize U to 0 = 0.0000... and UM to -1 = 1.00000... (in Q1.Divb)
   assign initU  = {(P.DIVb+1){1'b0}};
   assign initUM = {{1'b1}, {(P.DIVb){1'b0}}};
   mux2   #(P.DIVb+1)  uinitmux(UNext[P.DIVCOPIES-1],  initU,  IFDivStartE, UMux);

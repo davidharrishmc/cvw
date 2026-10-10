@@ -83,11 +83,12 @@ module ebufsmarb (
   assign IFUSelect = (NextState == ARBITRATE) ? 1'b0 : IFUReq;
   // Controller 1 (LSU)
   // When both the IFU and LSU request at the same time, the FSM will go into the arbitrate state.
-  // Once the LSU request is done the FSM returns to IDLE.  To prevent the LSU from regaining
+  // Once the LSU request is done the fsm returns to IDLE.  To prevent the LSU from regaining
   // priority and re-issuing the same memory operation, the delayed IFUReqDelay squashes the LSU request.
   // This is necessary because the pipeline is stalled for the entire duration of both transactions,
   // and the LSU memory request will still be active.
   flopr #(1) ifureqreg(HCLK, ~HRESETn, IFUReq, IFUReqDelay);
+  //assign LSUDisable = (CurrState != ARBITRATE) & (IFUReqDelay & ~(HREADY & FinalBeatD));
   assign LSUDisable = (CurrState != ARBITRATE) & IFUReqDelay;
   assign LSUSelect = (NextState == ARBITRATE) ? 1'b1 : LSUReq;
 

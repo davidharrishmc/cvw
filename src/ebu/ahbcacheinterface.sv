@@ -31,7 +31,7 @@
 module ahbcacheinterface import cvw::*; #(
   parameter cvw_t P,
   parameter BEATSPERLINE,  // Number of AHBW words (beats) in cacheline
-  parameter AHBWLOGBWPL,   // Log2 of BEATSPERLINE
+  parameter AHBWLOGBWPL,   // Log2 of ^
   parameter LINELEN,       // Number of bits in cacheline
   parameter LLENPOVERAHBW, // Number of AHB beats in an LLEN word. AHBW cannot be larger than LLEN. (implementation limitation)
   parameter READ_ONLY_CACHE
@@ -56,7 +56,7 @@ module ahbcacheinterface import cvw::*; #(
   input  logic                   Cacheable,              // Memory operation is cacheable
   input  logic [1:0]             CacheBusRW,             // Cache bus operation, 01: writeback, 10: fetch
   output logic                   CacheBusAck,            // Handshake to $ indicating bus transaction completed
-  output logic [LINELEN-1:0]     FetchBuffer,            // Register to hold beats of cache line as they arrive from the bus
+  output logic [LINELEN-1:0]     FetchBuffer,            // Register to hold beats of cache line as they arrive from bus
   output logic [AHBWLOGBWPL-1:0] BeatCount,              // Beat position within the cache line in the Address Phase
   output logic                   SelBusBeat,             // Tells the cache to select the word from ReadData or WriteData from BeatCount rather than PAdr
 

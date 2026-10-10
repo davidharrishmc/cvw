@@ -36,6 +36,6 @@ module fmasign(
 );
 
   assign Ps   = Xs ^ Ys ^ (OpCtrl[1] & ~OpCtrl[2]); // product sign.  Negate for fnmsub (010) or fnmadd (011)
-  assign As   = Zs ^ OpCtrl[0];                     // flip addend sign for fmsub (001), fnmadd (011), fsub (111)
+  assign As   = Zs ^ OpCtrl[0];                     // flip addend sign for subtraction
   assign InvA = As ^ Ps;                            // Effective subtraction when product and addend have opposite signs
 endmodule

@@ -32,7 +32,7 @@ module fround import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.NE-1:0]         Xe,           // input's exponent
   input  logic [P.NF:0]           Xm,           // input's fraction with leading integer bit (U1.NF)
   input  logic                    XNaN,         // X is NaN
-  input  logic                    XSNaN,        // X is signaling NaN
+  input  logic                    XSNaN,        // X is Signalling NaN
   input  logic [P.FMTBITS-1:0]    Fmt,          // the input's precision (11=quad 01=double 00=single 10=half)
   input  logic [2:0]              Frm,          // rounding mode
   input  logic [P.LOGFLEN-1:0]    Nf,           // Number of fractional bits in selected format
@@ -111,12 +111,12 @@ module fround import cvw::*;  #(parameter cvw_t P) (
   //                              if (Xe = emax) {Ws, We, Wf} = {Xs, 111..11, 0}   // overflow to W = Infinity with sign of Xs
   //                              else           {Ws, We, Wf} = {Xs, Xe+1, 0}      // 1.0 x 2^(E+1)
   //                      else                   {Ws, We, Wf} = {Xs, Xe, Rf}       // Rounded fraction, retain sign and exponent
-  //              if (froundnx instruction) Inexact = R' | T'
+  //              If (FroundNX instruction) Inexact = R' | T'
   ///////////////////////////
 
   // Exact logic
   /* verilator lint_off WIDTHEXPAND */
-  assign EgeNf = (E >= Nf) & Xe[P.NE-1]; // Check if E >= Nf.  Xe[NE-1] means E >= 1, which excludes negative E that would wrap to a large unsigned value
+  assign EgeNf = (E >= Nf) & Xe[P.NE-1]; // Check if E >= Nf.  Also check that Xe is positive to avoid wraparound problems
   /* verilator lint_on WIDTHEXPAND */
 
   // Rounding logic: determine whether to round up in magnitude

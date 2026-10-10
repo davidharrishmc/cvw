@@ -51,7 +51,7 @@ module resultsign(
   //      - the sign of an exact zero sum (with operands of different signs) should be positive unless rounding toward negative infinity
   //      - when the exact result of an FMA operation is non-zero, but is zero due to rounding, use the sign of the exact result
   //      - if x = +0 or -0 then x+x=x and x-(-x)=x
-  //      - the sign of a product is the exclusive OR of the operands' signs
+  //      - the sign of a product is the exclusive or of the operands' signs
   //  Zero sign will only be selected if:
   //      - P=Z and a cancellation occurs - exact zero
   //      - Z is zero and P is zero - exact zero

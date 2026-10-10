@@ -67,7 +67,10 @@ module fmaadd import cvw::*;  #(parameter cvw_t P) (
 
   // Choose the positive sum and accompanying LZA result.
   assign Sm = NegSum ? NegPreSum : PreSum;
-  // sum's sign: the product's sign, flipped if the sum was negated
+  // is the result negative
+  //  if p - z is the Sum negative
+  //  if -p + z is the Sum positive
+  //  if -p - z then the Sum is negative
   assign Ss = NegSum ^ Ps;
   assign Se = KillProd ? {2'b0, Ze} : Pe;
 endmodule

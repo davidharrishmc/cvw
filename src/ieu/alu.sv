@@ -45,7 +45,7 @@ module alu import cvw::*; #(parameter cvw_t P) (
   output logic [P.XLEN-1:0] Sum);        // Sum of operands
 
   // CondMaskInvB = ~CondMaskB when subtracting, CondMaskB otherwise. Shift = shift result.
-  // FullResult = ALU result before adjusting for an RV64 W-type instruction.
+  // FullResult = ALU result before adjusting for a RV64 w-suffix instruction.
   logic [P.XLEN-1:0] CondMaskInvB, Shift, FullResult, PreALUResult;               // Intermediate Signals
   logic [P.XLEN-1:0] CondMaskB;                                                   // Result of B mask select mux
   logic [P.XLEN-1:0] CondShiftA;                                                  // Result of A shifted select mux
@@ -80,7 +80,7 @@ module alu import cvw::*; #(parameter cvw_t P) (
   shifter #(P) sh(.A(CondShiftA), .Amt(B[P.LOG_XLEN-1:0]), .Right(Funct3[2]), .W64, .SubArith, .Y(Shift), .Rotate(BALUControl[2]));
 
   // Condition code flags are based on subtraction output Sum = A-B.
-  // Overflow occurs when the numbers being subtracted have opposite signs
+  // Overflow occurs when the numbers being subtracted have the opposite sign
   // and the result has the opposite sign of A.
   // LT = Neg ^ Overflow, with Overflow = (Asign ^ Bsign) & (Asign ^ Neg), simplifies to the expression below
   assign Neg  = Sum[P.XLEN-1];
@@ -98,7 +98,7 @@ module alu import cvw::*; #(parameter cvw_t P) (
       3'b010: FullResult = {{(P.XLEN-1){1'b0}}, LT};       // slt
       3'b011: FullResult = {{(P.XLEN-1){1'b0}}, LTU};      // sltu
       3'b100: FullResult = A ^ CondMaskInvB;               // xor, xnor, binv
-      3'b101: FullResult = (P.ZBS_SUPPORTED) ? {{(P.XLEN-1){1'b0}}, {|(AndResult)}} : Shift; // bext (srl/sra when Zbs not supported)
+      3'b101: FullResult = (P.ZBS_SUPPORTED) ? {{(P.XLEN-1){1'b0}}, {|(AndResult)}} : Shift; // bext (or IEU shift when BMU not supported)
       3'b110: FullResult = A | CondMaskInvB;               // or, orn, bset
       3'b111: FullResult = AndResult;                      // and, bclr, czero.*
     endcase

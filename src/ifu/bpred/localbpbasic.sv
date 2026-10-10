@@ -75,8 +75,8 @@ module localbpbasic import cvw::*; #(parameter cvw_t P,
   assign BPDirWrongE = PCSrcE != BPDirE[1] & BranchE;
 
   // This is the main difference between global and local history basic implementations. In global,
-  // the GHR wraps back into itself directly without
-  // being pipelined.  i.e., GHR is not read in F and then pipelined to M where it is updated.  Instead
+  // the ghr wraps back into itself directly without
+  // being pipelined.  I.E. GHR is not read in F and then pipelined to M where it is updated.  Instead
   // GHR is both read and updated in M.  GHR is still pipelined so that the PHT is updated with the correct
   // GHR.  Local history in contrast must pipeline the specific history register read during F and then update
   // that same one in M.  This implementation does not forward if a branch matches in the D, E, or M stages.
@@ -92,6 +92,9 @@ module localbpbasic import cvw::*; #(parameter cvw_t P,
   end
   assign IndexLHRNextF = {PCNextF[m+1] ^ PCNextF[1], PCNextF[m:2]};
   assign LHR = LHRArray[IndexLHRNextF];
+
+  // this is global history
+  //flopenr #(k) LHRReg(clk, reset, ~StallM & ~FlushM & BranchM, LHRNextW, LHR);
 
   flopenrc #(1) PCSrcMReg(clk, reset, FlushM, ~StallM, PCSrcE, PCSrcM);
 

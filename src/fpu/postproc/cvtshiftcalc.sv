@@ -33,7 +33,7 @@ module cvtshiftcalc import cvw::*;  #(parameter cvw_t P) (
   input  logic                     IntToFp,            // integer to floating point conversion?
   input  logic [P.FMTBITS-1:0]     OutFmt,             // output format
   input  logic [P.NE:0]            CvtCe,              // the calculated exponent
-  input  logic [P.NF:0]            Xm,                 // input significand
+  input  logic [P.NF:0]            Xm,                 // input mantissas
   input  logic [P.CVTLEN-1:0]      CvtLzcIn,           // input to the Leading Zero Counter (without msb)
   input  logic                     CvtResSubnormUf,    // is the conversion result subnormal or underflows
   output logic                     CvtResUf,           // does the cvt result underflow
@@ -52,7 +52,7 @@ module cvtshiftcalc import cvw::*;  #(parameter cvw_t P) (
   //                          .
   //          Other problems:
   //              - if shifting to the right (negative CvtCe) then don't put a 1 in the round bit (to prevent an incorrect plus 1 later during rounding)
-  //              - we do however want to keep the one in the sticky bit so set one of the bits in the sticky bit area to 1
+  //              - we do however want to keep the one in the sticky bit so set one of bits in the sticky bit area to 1
   //                  - ex: for the case 0010000.... (double)
   //      int/fp -> fp:
   //          - if result is subnormal or underflowed then we want to shift right i.e. shift right then shift left:

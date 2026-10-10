@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module shifter import cvw::*; #(parameter cvw_t P) (
-  input  logic [P.XLEN-1:0]     A,                             // Shift source
+  input  logic [P.XLEN-1:0]     A,                             // shift Source
   input  logic [P.LOG_XLEN-1:0] Amt,                           // Shift amount
   input  logic                  Right, Rotate, W64, SubArith,  // Shift right, rotate, W64-type operation, arithmetic shift
   output logic [P.XLEN-1:0]     Y);                            // Shifted result

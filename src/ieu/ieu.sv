@@ -65,7 +65,7 @@ module ieu import cvw::*;  #(parameter cvw_t P) (
   output logic              JumpD, JumpE,
   // Writeback stage signals
   input  logic [P.XLEN-1:0] FIntDivResultW,                  // Integer divide result from FPU (fdivsqrt)
-  input  logic [P.XLEN-1:0] CSRReadValW,                     // CSR read value
+  input  logic [P.XLEN-1:0] CSRReadValW,                     // CSR read value,
   input  logic [P.XLEN-1:0] MDUResultW,                      // multiply/divide unit result
   input  logic [P.XLEN-1:0] FCvtIntResW,                     // FPU's float to int conversion result
   input  logic              FCvtIntW,                        // FPU converts float to int

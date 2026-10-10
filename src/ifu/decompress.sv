@@ -67,7 +67,7 @@ module decompress import cvw::*;  #(parameter cvw_t P) (
   assign immCILUI = {{15{instr16[12]}}, instr16[6:2]};                                                    // c.lui
   assign immCIASP = {{3{instr16[12]}}, instr16[4:3], instr16[5], instr16[2], instr16[6], 4'b0000};        // c.addi16sp
   assign immCIW = {2'b00, instr16[10:7], instr16[12:11], instr16[5], instr16[6], 2'b00};
-  assign immSH = {instr16[12], instr16[6:2]};                                                             // compressed shift instructions: c.srli, c.srai, c.slli
+  assign immSH = {instr16[12], instr16[6:2]};                                                             // c. shift instructions: c.srli, c.srai, c.slli
 
 // only for RV128
 //      assign immCILSPQ = {2{instr16[5]}, instr16[5:2], instr16[12], instr16[6], 4'b0000};

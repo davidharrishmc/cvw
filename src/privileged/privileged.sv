@@ -39,7 +39,7 @@ module privileged import cvw::*; #(parameter cvw_t P) (
   input  logic [31:0]       InstrOrigM,                                     // Original compressed or uncompressed instruction in Memory stage for Illegal Instruction XTVAL
   input  logic [P.XLEN-1:0] IEUAdrxTvalM,                                   // address from IEU
   input  logic [P.XLEN-1:0] PCM,                                            // program counter
-  input  logic [P.XLEN-1:0] PCSpillM,                                       // PC of the faulting half of a spilled instruction fetch
+  input  logic [P.XLEN-1:0] PCSpillM,                                       // program counter
   // control signals
   input  logic              InstrValidM,                                    // Current instruction is valid (not flushed)
   input  logic              CommittedM, CommittedF,                         // current instruction is using bus; don't interrupt

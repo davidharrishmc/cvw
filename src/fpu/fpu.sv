@@ -65,7 +65,7 @@ module fpu import cvw::*;  #(parameter cvw_t P) (
 );
 
   // RISC-V FPU specifics:
-  //    - multiprecision support uses NaN-boxing, putting 1's in unused msbs
+  //    - multiprecision support uses NAN-boxing, putting 1's in unused msbs
   //    - RISC-V detects underflow after rounding
 
   // control signals
@@ -208,7 +208,7 @@ module fpu import cvw::*;  #(parameter cvw_t P) (
   mux3  #(P.FLEN)  fyemux (FRD2E, FResultW, PreFpResM, ForwardYE, PreYE);
   mux3  #(P.FLEN)  fzemux (FRD3E, FResultW, PreFpResM, ForwardZE, PreZE);
 
-  // Select NaN-boxed value of Y = 1.0 in proper format for fma to add/subtract X*Y+Z
+  // Select NAN-boxed value of Y = 1.0 in proper format for fma to add/subtract X*Y+Z
   // 1.0 = sign 0, biased exponent 011...1, fraction 0
   if (P.FPSIZES == 1) assign BoxedOneE = {2'b0, {P.NE-1{1'b1}}, (P.NF)'(0)};
   else if (P.FPSIZES == 2)

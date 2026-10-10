@@ -33,8 +33,8 @@ module fdivsqrtuotfc4 import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.DIVb:0] C,              // Q1.DIVb
   output logic [P.DIVb:0] UNext, UMNext   // U1.DIVb
 );
-  //  The on-the-fly converter accumulates result digits
-  //  into U and UM as they are selected.
+  //  The on-the-fly converter transfers the square root
+  //  bits to the quotient as they come.
   //  Use this otfc for division and square root.
 
   // C is a thermometer code; K is its lowest 1, the lsb of the current radix-4 digit.

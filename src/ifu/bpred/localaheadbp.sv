@@ -42,6 +42,7 @@ module localaheadbp import cvw::*; #(parameter cvw_t P,
 );
 
   logic [k-1:0]           IndexNextF, IndexM;
+  //logic [1:0]             BPDirD, BPDirE;
   logic [1:0]             BPDirE;
   logic [1:0]             BPDirM;
   logic [1:0]             NewBPDirE, NewBPDirM, NewBPDirW;
@@ -55,6 +56,7 @@ module localaheadbp import cvw::*; #(parameter cvw_t P,
 
   logic                   UpdateM;
 
+  //assign IndexNextF = LHR;
   assign IndexM = LHRW;
 
   ram2p1r1wbe #(.USE_SRAM(P.USE_SRAM), .DEPTH(2**k), .WIDTH(2)) PHT(.clk(clk),
@@ -66,23 +68,27 @@ module localaheadbp import cvw::*; #(parameter cvw_t P,
     .we2(BranchM),
     .bwe2(1'b1));
 
+  //flopenrc #(2) PredictionRegD(clk, reset,  FlushD, ~StallD, BPDirF, BPDirD);
   flopenrc #(2) PredictionRegE(clk, reset, FlushE, ~StallE, BPDirD, BPDirE);
   flopenrc #(2) PredictionRegM(clk, reset, FlushM, ~StallM, BPDirE, BPDirM);
 
   satCounter2 BPDirUpdateE(.BrDir(PCSrcE), .OldState(BPDirM), .NewState(NewBPDirM));
+  //flopenrc #(2) NewPredictionRegM(clk, reset,  FlushM, ~StallM, NewBPDirE, NewBPDirM);
   flopenrc #(2) NewPredictionRegW(clk, reset, FlushW, ~StallW, NewBPDirM, NewBPDirW);
 
   assign BPDirWrongE = PCSrcE != BPDirM[1] & BranchE;
 
   // This is the main difference between global and local history basic implementations. In global,
-  // the GHR wraps back into itself directly without
-  // being pipelined.  i.e., GHR is not read in F and then pipelined to M where it is updated.  Instead
+  // the ghr wraps back into itself directly without
+  // being pipelined.  I.E. GHR is not read in F and then pipelined to M where it is updated.  Instead
   // GHR is both read and updated in M.  GHR is still pipelined so that the PHT is updated with the correct
   // GHR.  Local history in contrast must pipeline the specific history register read during F and then update
   // that same one in M.  This implementation does not forward if a branch matches in the D, E, or M stages.
   assign LHRNextW = BranchM ? {PCSrcM, LHRW[k-1:1]} : LHRW;
 
   // this is local history
+  //genvar      index;
+  //assign UpdateM = BranchM & ~StallW & ~FlushW;
   assign IndexLHRM = {PCW[m+1] ^ PCW[1], PCW[m:2]};
   assign IndexLHRNextF = {PCNextF[m+1] ^ PCNextF[1], PCNextF[m:2]};
 
@@ -97,6 +103,8 @@ module localaheadbp import cvw::*; #(parameter cvw_t P,
 
   flopenrc #(1) PCSrcMReg(clk, reset, FlushM, ~StallM, PCSrcE, PCSrcM);
 
+  //flopenrc #(k) LHRFReg(clk, reset, FlushD, ~StallF, LHRNextF, LHRF);
+  //assign LHRF = LHRNextF;
   flopenrc #(k) LHRDReg(clk, reset, FlushD, ~StallD, LHRF, LHRD);
   flopenrc #(k) LHREReg(clk, reset, FlushE, ~StallE, LHRD, LHRE);
   flopenrc #(k) LHRMReg(clk, reset, FlushM, ~StallM, LHRE, LHRM);

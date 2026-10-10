@@ -42,7 +42,7 @@ module fregfile #(parameter FLEN) (
   // read three ports combinationally (A1/RD1, A2/RD2, A3/RD3)
   // write fourth port on falling edge of clock (A4/WD4/WE4)
 
-  always_ff @(negedge clk)
+  always_ff @(negedge clk) // or posedge reset)
     if (reset) for (i = 0; i < 32; i++) rf[i] <= '0;
     else if (we4) rf[a4] <= wd4;
 

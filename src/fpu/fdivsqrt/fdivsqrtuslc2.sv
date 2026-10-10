@@ -36,7 +36,7 @@ module fdivsqrtuslc2 (
 
   // Carry chain logic determines if W = WS + WC = -1, < -1, > -1 to choose 0, -1, 1 respectively
 
-  // If p2 & p1 & p0 (all bits propagate), W = -1 and choose digit of 0
+  //if p2 * p1 * p0, W = -1 and choose digit of 0
   assign uz = ((WS[2] ^ WC[2]) & (WS[1] ^ WC[1]) &
         (WS[0] ^ WC[0]));
 

@@ -162,7 +162,7 @@ module uartPC16550D #(parameter UART_PRESCALE) (
         case (A)
           UART_DLL_RBR: if (DLAB) DLL <= Din; // else TXHR <= Din; // TX handled in TX register/FIFO section
           UART_DLM_IER: if (DLAB) DLM <= Din; else IER <= Din[3:0];
-          UART_IIR: FCR <= {Din[7:6], 2'b0, Din[3], 2'b0, Din[0]}; // Write only FIFO Control Register; 5:4 reserved and 2:1 self-clearing
+          UART_IIR: FCR <= {Din[7:6], 2'b0, Din[3], 2'b0, Din[0]}; // Write only FIFO Control Register; 4:5 reserved and 2:1 self-clearing
           UART_LCR: LCR <= Din;
           UART_MCR: MCR <= Din[4:0];
           UART_SCR: SCR <= Din;
@@ -322,6 +322,7 @@ module uartPC16550D #(parameter UART_PRESCALE) (
       end else if (~MEMRb & A == 3'b000 & ~DLAB) begin // reading RBR updates ready / pops fifo
         if (fifoenabled) begin
           if (~rxfifoempty) rxfifotail <= rxfifotail + 1;
+          // if (rxfifoempty) rxdataready <= 1'b0;
           if (rxfifoentries == 1) rxdataready <= 1'b0; // When reading the last entry, data ready becomes zero
         end else begin
           rxdataready <= 1'b0;
@@ -340,6 +341,7 @@ module uartPC16550D #(parameter UART_PRESCALE) (
   /* verilator lint_on WIDTH */
   assign rxfifotriggered = rxfifoentries >= rxfifotriggerlevel;
   assign rxfifotimeout = rxtimeoutcnt == {rxbitsexpected, 6'b0}; // time out after 4 character periods; probably not right yet
+  //assign rxfifotimeout = 0; // disabled pending fix
 
   // detect any errors in rx fifo
   // although rxfullbit looks like a combinational loop, in one bit rxfifotail == i and breaks the loop
@@ -353,6 +355,10 @@ module uartPC16550D #(parameter UART_PRESCALE) (
   for (i = 0; i < 16; i++) begin : rx
     assign RXerrbit[i]  = |rxfifo[i][10:8]; // are any of the error conditions set?
     assign rxfullbit[i] = rxfullbitunwrapped[i] | rxfullbitunwrapped[i+16];
+  /*      if (i > 0)
+      assign rxfullbit[i] = ((rxfifohead==i) | rxfullbit[i-1]) & (rxfifotail != i);
+      else
+      assign rxfullbit[0] = ((rxfifohead==i) | rxfullbit[15]) & (rxfifotail != i);*/
   end
   assign rxfifohaserr   = |(RXerrbit & rxfullbit);
 
@@ -522,7 +528,7 @@ module uartPC16550D #(parameter UART_PRESCALE) (
   end
   always_ff @(posedge PCLK) INTR <= intrpending; // prevent glitches on interrupt pin
 
-  // Side effect of reading LSR is lowering overrun, parity, framing, break interrupts
+  // Side effect of reading LSR is lowering overrun, parity, framing, break intr's
   assign setSquashRXerrIP = ~MEMRb & (A == 3'b101);
   assign resetSquashRXerrIP = (rxstate == UART_DONE);
   assign squashRXerrIP = (prevSquashRXerrIP | setSquashRXerrIP) & ~resetSquashRXerrIP;

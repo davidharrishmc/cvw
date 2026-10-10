@@ -41,7 +41,7 @@ module ram1p1rwbe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 4
   input  logic [WIDTH-1:0]         din,
   input  logic                     we,
   input  logic [(WIDTH-1)/8:0]     bwe,
-  output logic [WIDTH-1:0]        dout
+  output logic [WIDTH-1:0]         dout
 );
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -83,6 +83,12 @@ module ram1p1rwbe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 4
   end else begin : ram
     bit [WIDTH-1:0] RAM[DEPTH-1:0];
 
+    // if (PRELOAD_ENABLED) begin
+    //   initial begin
+    //     RAM[0] = 64'h00600100d2e3ca40;
+    //   end
+    // end
+
     `ifdef VERILATOR
       import "DPI-C" function string getenvval(input string env_name);
     `endif
@@ -107,7 +113,7 @@ module ram1p1rwbe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 4
     flopen #($clog2(DEPTH)) adrreg(clk, ce, addr, addrd);
     assign dout = RAM[addrd];
 
-    /*      // Alternate read logic reads the old contents of mem[addr].  Increases setup time and adds dout reg, but reduces clk-to-q
+    /*      // Alternate read logic reads the old contents of mem[addr].  Increases setup time and adds dout reg, but reduces clk to q
      always_ff @(posedge clk)
      if(ce) dout <= mem[addr]; */
 

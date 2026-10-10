@@ -89,7 +89,7 @@ module rvvisynth import cvw::*; #(parameter cvw_t P,
                      '0;
 
   /* verilator lint_off UNOPTFLAT */
-  // For some reason Verilator complains about CSRWenFilterMatrix being in a circular loop when it is not.
+  // For some reason verilator complains about CSRWenFilterMatrix being in a circular loop when it is not.
 
   // the CSRs are complex
   // 1. we need to get the CSR values

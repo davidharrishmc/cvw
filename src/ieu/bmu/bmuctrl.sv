@@ -74,7 +74,7 @@ module bmuctrl import cvw::*;  #(parameter cvw_t P) (
   // Main Instruction Decoder
   always_comb begin
     // BALUSelect_BSelect_ZBBSelect_BRegWrite_BALUSrcB_BW64_BUW64_BALUOp_BSubArithD_RotateD_MaskD_PreShiftD_IllegalBitmanipInstrD
-    BMUControlsD = `BMUCTRLW'b000_0000_0000_0_0_0_0_0_0_0_0_0_1;  // default: Illegal bmu instruction
+    BMUControlsD = `BMUCTRLW'b000_00_000_0_0_0_0_0_0_0_0_1;  // default: Illegal bmu instruction;
     if (P.ZBA_SUPPORTED) begin
       casez({OpD, Funct7D, Funct3D})
         17'b0110011_0010000_010: BMUControlsD = `BMUCTRLW'b000_0001_0000_1_0_0_0_1_0_0_0_1_0;  // sh1add
@@ -94,9 +94,9 @@ module bmuctrl import cvw::*;  #(parameter cvw_t P) (
     if (P.ZBB_SUPPORTED) begin
       casez({OpD, Funct7D, Funct3D})
         17'b0010011_0110000_001: if ((Rs2D[4:1] == 4'b0010))
-                                   BMUControlsD = `BMUCTRLW'b000_0010_0001_1_1_0_0_1_0_0_0_0_0;  // sext.b, sext.h
+                                   BMUControlsD = `BMUCTRLW'b000_0010_0001_1_1_0_0_1_0_0_0_0_0;  // sign extend instruction
                                  else if ((Rs2D[4:2] == 3'b000) & ~(Rs2D[1] & Rs2D[0]))
-                                   BMUControlsD = `BMUCTRLW'b000_0010_0000_1_1_0_0_1_0_0_0_0_0;  // clz, ctz, cpop
+                                   BMUControlsD = `BMUCTRLW'b000_0010_0000_1_1_0_0_1_0_0_0_0_0;  // count instruction
         17'b0010011_0010100_101: if (Rs2D[4:0] == 5'b00111)
                                    BMUControlsD = `BMUCTRLW'b000_0010_0010_1_1_0_0_1_0_0_0_0_0;  // orc.b
         17'b0110011_0000101_110: BMUControlsD = `BMUCTRLW'b000_0010_0111_1_0_0_0_1_1_0_0_0_0;  // max
@@ -141,7 +141,7 @@ module bmuctrl import cvw::*;  #(parameter cvw_t P) (
           17'b0010011_0110100_001: BMUControlsD = `BMUCTRLW'b100_0001_0000_1_1_0_0_1_0_0_1_0_0;  // binvi
           17'b0010011_0010100_001: BMUControlsD = `BMUCTRLW'b110_0001_0000_1_1_0_0_1_0_0_1_0_0;  // bseti
         endcase
-      else if (P.XLEN == 64) // RV64: Funct7[0] is shamt[5]
+      else if (P.XLEN == 64) // ZBS 64-bit
         casez({OpD, Funct7D, Funct3D})
           17'b0010011_010010?_001: BMUControlsD = `BMUCTRLW'b111_0001_0000_1_1_0_0_1_1_0_1_0_0;  // bclri (rv64)
           17'b0010011_010010?_101: BMUControlsD = `BMUCTRLW'b101_0001_0000_1_1_0_0_1_0_0_1_0_0;  // bexti (rv64)
@@ -246,8 +246,8 @@ module bmuctrl import cvw::*;  #(parameter cvw_t P) (
       casez({OpD, Funct7D, Funct3D})
         // aes64ks1i rs2 field is {1, rnum} with rnum <= 10
         17'b0010011_0011000_001: if (Rs2D[4] == 1'b1 & $unsigned(Rs2D[3:0]) <= 10)
-                                   BMUControlsD = `BMUCTRLW'b000_0111_0010_1_0_0_0_1_0_0_0_0_0;  // aes64ks1i - key schedule 1
-        17'b0110011_0111111_000: BMUControlsD = `BMUCTRLW'b000_0111_0011_1_0_0_0_1_0_0_0_0_0;  // aes64ks2 - key schedule 2
+                                   BMUControlsD = `BMUCTRLW'b000_0111_0010_1_0_0_0_1_0_0_0_0_0;  // aes64ks1i - key schedule istr1
+        17'b0110011_0111111_000: BMUControlsD = `BMUCTRLW'b000_0111_0011_1_0_0_0_1_0_0_0_0_0;  // aes64ks2 - key schedule istr2
       endcase
     end
 

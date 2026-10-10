@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Branch comparator producing eq and lt flags for signed or unsigned operands
+// This comparator is best
 module comparator #(parameter WIDTH=64) (
   input  logic [WIDTH-1:0] a, b,    // Operands
   input  logic             sgnd,    // Signed operands

@@ -51,10 +51,10 @@ module ifu import cvw::*;  #(parameter cvw_t P) (
   output logic [P.XLEN-1:0]    PCLinkE,                                  // The address following the branch instruction. (AKA Fall through address)
   input  logic                 PCSrcE,                                   // Execution stage branch is taken
   input  logic [P.XLEN-1:0]    IEUAdrE,                                  // The branch/jump target address
-  input  logic [P.XLEN-1:0]    IEUAdrM,                                  // The branch/jump target address in the Memory stage
+  input  logic [P.XLEN-1:0]    IEUAdrM,                                  // The branch/jump target address
   output logic [P.XLEN-1:0]    PCE,                                      // Execution stage instruction address
   output logic                 BPWrongE,                                 // Prediction is wrong
-  output logic                 BPWrongM,                                 // Prediction is wrong (Memory stage)
+  output logic                 BPWrongM,                                 // Prediction is wrong
   // Mem
   output logic                 CommittedF,                               // I$ or bus memory operation started, delay interrupts
   input  logic [P.XLEN-1:0]    EPCM,                                     // Exception Program counter from privileged unit
@@ -116,7 +116,7 @@ module ifu import cvw::*;  #(parameter cvw_t P) (
   logic [P.XLEN-1:0]           PCSpillNextF;                             // Next PCF after possible + 2 to handle spill
   logic [P.XLEN-1:2]           PCPlus4F;                                 // PCPlus4F is always PCF + 4.  Fancy way to compute PCPlus2or4F
   logic [P.XLEN-1:0]           PCD;                                      // Decode stage instruction address
-  logic [P.XLEN-1:0]           NextValidPCE;                             // The PC of the next valid instruction in the pipeline after a CSR write or fence
+  logic [P.XLEN-1:0]           NextValidPCE;                             // The PC of the next valid instruction in the pipeline after csr write or fence
   logic [P.XLEN-1:0]           PCF;                                      // Fetch stage instruction address
   logic [P.PA_BITS-1:0]        PCPF;                                     // Physical address after address translation
   logic [P.XLEN+1:0]           PCFExt;
@@ -127,7 +127,7 @@ module ifu import cvw::*;  #(parameter cvw_t P) (
   logic                        CompressedF, CompressedE;                 // The fetched instruction is compressed
   logic [31:0]                 PostSpillInstrRawF;                       // Fetch instruction after merge two halves of spill
   logic [31:0]                 InstrRawD;                                // Non-decompressed instruction in the Decode stage
-  logic                        IllegalIEUInstrD;                         // IEU Instruction (regular or compressed) is illegal
+  logic                        IllegalIEUInstrD;                         // IEU Instruction (regular or compressed) is not good
 
   logic [1:0]                  IFURWF;                                   // IFU always reads: IFURWF = 10
   logic [31:0]                 InstrE;                                   // Instruction in the Execution stage
@@ -192,10 +192,11 @@ module ifu import cvw::*;  #(parameter cvw_t P) (
     ///////////////////////////////////////////
     // sfence.vma causes TLB flushes
     ///////////////////////////////////////////
-    // TLBFlush pulses for one cycle of the sfence.vma instruction.
-    // The sfence.vma flushes the TLB, then a page table walk refills the ITLB while the sfence.vma is still stalled in M.
-    // If TLBFlush were simply sfencevmaM, it would never drop and the TLB write after the walk would never take place.
-    // Gating with ~StallMQ drops TLBFlush after one cycle and still pulses it again for back-to-back sfences.
+    // sets ITLBFlush to pulse for one cycle of the sfence.vma instruction
+    // In this instr we want to flush the tlb and then do a pagetable walk to update the itlb and continue the program.
+    // But we're still in the stalled sfence instruction, so if itlbflushf == sfencevmaM, tlbflush would never drop and
+    // the tlbwrite would never take place after the pagetable walk. by adding in ~StallMQ, we are able to drop itlbflush
+    // after a cycle AND pulse it for another cycle on any further back-to-back sfences.
     logic StallMQ, TLBFlush, TLBFlushAll;
     flopr #(1) StallMReg(.clk, .reset, .d(StallM), .q(StallMQ));
     assign TLBFlush = sfencevmaM & ~StallMQ;

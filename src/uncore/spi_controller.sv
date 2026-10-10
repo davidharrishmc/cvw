@@ -84,6 +84,7 @@ module spi_controller (
   // Transmit Stuff
   logic       ContinueTransmit;
   logic       EndTransmission;
+  // logic       TransmitRegLoaded; // TODO: Could be replaced by TransmitRegLoaded?
   logic       NextEndDelay;
   logic       CurrentEndDelay;
 
@@ -203,7 +204,8 @@ module spi_controller (
   assign EndOfFramePulse = EdgePulse & LastBit;
 
   // Delay ShiftEdge and SampleEdge by a half PCLK period
-  // so they are aligned exactly in the middle of the leading and trailing edges.
+  // Aligned EXACTLY ON THE MIDDLE of the leading and trailing edges.
+  // Sweeeeeeeeeet...
   // SckMode = {pol, pha}; when pol ^ pha, shift and sample on the opposite SPICLK level
   assign InvertClock = ^SckMode;
   always_ff @(negedge PCLK) begin

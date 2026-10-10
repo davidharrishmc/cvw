@@ -89,7 +89,7 @@ module packoutput import cvw::*;  #(parameter cvw_t P) (
                 Fract1 = Unpacked[P.NF-1:P.NF-P.NF1];
                 Packed = {{(P.FLEN-P.LEN1){1'b1}}, Sign, Exp1, Fract1};
               end
-        2'h0: begin // single
+        2'h0: begin // float
                 Exp2 = {Unpacked[P.FLEN-2], Unpacked[P.NF+P.NE2-2:P.NF]};
                 Fract2 = Unpacked[P.NF-1:P.NF-P.NF2];
                 Packed = {{(P.FLEN-P.LEN2){1'b1}}, Sign, Exp2, Fract2};

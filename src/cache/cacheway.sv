@@ -35,7 +35,7 @@ module cacheway import cvw::*; #(parameter cvw_t P,
   input  logic                        reset,
   input  logic                        FlushStage,     // Pipeline flush of second stage (prevent writes and bus operations)
   input  logic                        InvalidateFlushStage, // Flush of the stage issuing InvalidateCache (suppresses the invalidate)
-  input  logic                        CacheEn,        // Enable the cache memory arrays.  When disabled, hold read data constant
+  input  logic                        CacheEn,        // Enable the cache memory arrays.  Disable hold read data constant
   input  logic [$clog2(NUMSETS)-1:0]  CacheSetData,   // Data array set, the output of the address select mux: NextSet, PAdr, or FlushAdr
   input  logic [$clog2(NUMSETS)-1:0]  CacheSetTag,    // Tag array set, the output of the address select mux: NextSet, PAdr, or FlushAdr
   input  logic [PA_BITS-1:0]          PAdr,           // Physical address
@@ -146,7 +146,7 @@ module cacheway import cvw::*; #(parameter cvw_t P,
   // Valid Bits
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk) begin // Valid bit array
+  always_ff @(posedge clk) begin // Valid bit array,
     if (reset) ValidBits <= '0;
     if (CacheEn) begin
       ValidWay <= ValidBits[CacheSetTag];

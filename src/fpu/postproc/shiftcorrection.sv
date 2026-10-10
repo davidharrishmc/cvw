@@ -88,7 +88,7 @@ module shiftcorrection import cvw::*;  #(parameter cvw_t P) (
   // recalculate if the result is subnormal after LZA correction
   assign ResSubnorm = FmaPreResultSubnorm & ~Shifted[P.NORMSHIFTSZ-2] & ~Shifted[P.NORMSHIFTSZ-1];
 
-  // the quotient is in the range (0.5, 2) if there is no early termination
+  // the quotient is in the range (.5,2) if there is no early termination
   // if the quotient < 1 and not Subnormal then subtract 1 to account for the normalization shift
   assign Ue = (DivResSubnorm & DivSubnormShiftPos) ? 0 : DivUe - {(P.NE+1)'(0), ~LZAPlus1};
 endmodule

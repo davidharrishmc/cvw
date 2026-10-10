@@ -32,9 +32,9 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// P.PLIC_NUM_SRC is the number of interrupt sources.
-// It does not include source 0, which does not connect to anything according to spec.
-// Up to 63 sources supported; in the future, allow up to 1023 sources.
+// number of interrupt sources
+// does not include source 0, which does not connect to anything according to spec
+// up to 63 sources supported; in the future, allow up to 1023 sources
 
 // number of contexts
 // hardcoded to 2 contexts for now; later upgrade to arbitrary (up to 15872) contexts
@@ -88,7 +88,7 @@ module plic_apb import cvw::*; #(parameter cvw_t P) (
   logic [`C-1:0][7:1]                    threshMask;
   logic [P.PLIC_NUM_SRC-1:0]             One;
 
-  // hacks to gracefully handle PLIC_NUM_SRC being smaller than 32
+  // hacks to handle gracefully PLIC_NUM_SRC being smaller than 32
   // Otherwise Questa and other simulators produce part-select out of bounds even
   // though sources >=32 are never used
 
