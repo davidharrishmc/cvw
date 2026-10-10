@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module divshiftcalc import cvw::*;  #(parameter cvw_t P) (
+module divshiftcalc import cvw::*; #(parameter cvw_t P) (
   input  logic [P.NE+1:0]              DivUe,              // Divide/sqrt result exponent
   output logic [P.LOGNORMSHIFTSZ-1:0]  DivShiftAmt,        // divsqrt shift amount
   output logic                         DivResSubnorm,      // is the divsqrt result subnormal

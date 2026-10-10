@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module RASPredictor import cvw::*;  #(parameter cvw_t P) (
+module RASPredictor import cvw::*; #(parameter cvw_t P) (
   input  logic              clk,            // Clock
   input  logic              reset,          // Reset
   input  logic              StallD, StallE, StallM, FlushD, FlushE, FlushM, // Stall and flush Decode, Execute, Memory stages

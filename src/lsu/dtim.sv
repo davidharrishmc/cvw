@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module dtim import cvw::*;  #(parameter cvw_t P) (
+module dtim import cvw::*; #(parameter cvw_t P) (
   input  logic                 clk, reset,    // Clock and reset
   input  logic                 FlushW,        // Flush Writeback stage
   input  logic                 ce,            // Chip enable
@@ -42,14 +42,14 @@ module dtim import cvw::*;  #(parameter cvw_t P) (
   logic                       we;
 
   localparam LLENBYTES  = P.LLEN/8;
-  // verilator  lint_off WIDTH
+  // verilator lint_off WIDTH
   localparam DEPTH      = P.DTIM_RANGE/LLENBYTES;
-  // verilator  lint_on WIDTH
-  localparam ADDR_WDITH = $clog2(DEPTH);
+  // verilator lint_on WIDTH
+  localparam ADDR_WIDTH = $clog2(DEPTH);
   localparam OFFSET     = $clog2(LLENBYTES);
 
   assign we = MemRWM[0] & ~FlushW;  // have to ignore write if Trap.
 
   ram1p1rwbe #(.USE_SRAM(P.USE_SRAM), .DEPTH(DEPTH), .WIDTH(P.LLEN))
-    ram(.clk, .ce, .we, .bwe(ByteMaskM), .addr(DTIMAdr[ADDR_WDITH+OFFSET-1:OFFSET]), .dout(ReadDataWordM), .din(WriteDataM));
+    ram(.clk, .ce, .we, .bwe(ByteMaskM), .addr(DTIMAdr[ADDR_WIDTH+OFFSET-1:OFFSET]), .dout(ReadDataWordM), .din(WriteDataM));
 endmodule

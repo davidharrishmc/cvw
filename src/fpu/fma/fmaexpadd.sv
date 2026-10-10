@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fmaexpadd import cvw::*;  #(parameter cvw_t P) (
+module fmaexpadd import cvw::*; #(parameter cvw_t P) (
   input  logic [P.NE-1:0]      Xe, Ye,         // X and Y exponents
   input  logic                 XZero, YZero,   // X, Y are zero
   output logic [P.NE+1:0]      Pe              // Product exponent

@@ -33,7 +33,7 @@
 // OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////
 
-module hptw import cvw::*;  #(parameter cvw_t P) (
+module hptw import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset,             // Clock and reset
   input  logic [P.XLEN-1:0] SATP_REGW,              // satp CSR
   input  logic [P.XLEN-1:0] PCSpillF,               // PCF, or PCF + 2 for the second half of a spilled fetch
@@ -111,7 +111,6 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   logic                     HPTWLoadAccessFaultDelay, HPTWStoreAmoAccessFaultDelay, HPTWInstrAccessFaultDelay;
   logic                     HPTWLoadPageFault, HPTWStoreAmoPageFault, HPTWInstrPageFault;
   logic                     HPTWLoadPageFaultDelay, HPTWStoreAmoPageFaultDelay, HPTWInstrPageFaultDelay;
-  logic                     HPTWAccessFaultDelay;
   logic                     TakeHPTWFault;
   logic                     NonLeafReservedFaultM;
   logic                     DAUFaultM;
@@ -129,10 +128,10 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   assign HPTWStoreAmoPageFault   = NonLeafPageFaultM & DTLBWalk & (MemRWM[0] | (|CMOpM));
   assign HPTWInstrPageFault      = NonLeafPageFaultM & ~DTLBWalk;
 
-  flopr #(6) HPTWAccesFaultReg(clk, reset, {HPTWLoadAccessFault, HPTWStoreAmoAccessFault, HPTWInstrAccessFault,
-                                            HPTWLoadPageFault, HPTWStoreAmoPageFault, HPTWInstrPageFault},
-                               {HPTWLoadAccessFaultDelay, HPTWStoreAmoAccessFaultDelay, HPTWInstrAccessFaultDelay,
-                                HPTWLoadPageFaultDelay, HPTWStoreAmoPageFaultDelay, HPTWInstrPageFaultDelay});
+  flopr #(6) HPTWAccessFaultReg(clk, reset, {HPTWLoadAccessFault, HPTWStoreAmoAccessFault, HPTWInstrAccessFault,
+                                             HPTWLoadPageFault, HPTWStoreAmoPageFault, HPTWInstrPageFault},
+                                {HPTWLoadAccessFaultDelay, HPTWStoreAmoAccessFaultDelay, HPTWInstrAccessFaultDelay,
+                                 HPTWLoadPageFaultDelay, HPTWStoreAmoPageFaultDelay, HPTWInstrPageFaultDelay});
 
   assign TakeHPTWFault = WalkerState != IDLE;
 
@@ -222,7 +221,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     mux2 #(P.PA_BITS) HPTWWriteAdrMux(HPTWReadAdr, HPTWWriteAdr, SelHPTWWriteAdr, HPTWAdr);
 
     assign {Dirty, Accessed} = PTE[7:6];
-    assign WriteAccess = MemRWM[0] | CMOpM[3]; // implies | (|AtomicM); cbo.zero needs W and sets D, as in tlbcontrol
+    assign WriteAccess = MemRWM[0] | CMOpM[CMO_ZERO]; // implies | (|AtomicM); cbo.zero needs W and sets D, as in tlbcontrol
     assign SetDirty = ~Dirty & DTLBWalk & WriteAccess;
     assign ReadAccess = MemRWM[1] | (|CMOpM[2:0]); // cbo.clean/flush/inval need R (or X with MXR), as in tlbcontrol
 
@@ -271,11 +270,11 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   flopr #(3) PageTypeReg(clk, reset, NextPageType, PageType);
   always_comb
     case (WalkerState)
-      L4_RD:  NextPageType = 3'b100; // petapage
-      L3_RD:  NextPageType = 3'b011; // terapage
-      L2_RD:  NextPageType = 3'b010; // gigapage
-      L1_RD:  NextPageType = 3'b001; // megapage
-      L0_RD:  NextPageType = 3'b000; // kilopage
+      L4_RD:   NextPageType = PETAPAGE;
+      L3_RD:   NextPageType = TERAPAGE;
+      L2_RD:   NextPageType = GIGAPAGE;
+      L1_RD:   NextPageType = MEGAPAGE;
+      L0_RD:   NextPageType = KILOPAGE;
       default: NextPageType = PageType;
     endcase
 
@@ -309,7 +308,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
   if (P.XLEN == 32) begin
     assign InitialWalkerState = L1_ADR;
     assign MegapageMisaligned = |(CurrentPPN[9:0]); // must have zero PPN0
-    assign Misaligned = (WalkerState == LEAF) & (PageType == 3'b001) & MegapageMisaligned;
+    assign Misaligned = (WalkerState == LEAF) & (PageType == MEGAPAGE) & MegapageMisaligned;
   end else begin
     logic PetapageMisaligned, GigapageMisaligned, TerapageMisaligned;
     assign InitialWalkerState = (P.SV57_SUPPORTED & SvMode == P.SV57) ? L4_ADR :
@@ -320,10 +319,10 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
     assign GigapageMisaligned =                    |(CurrentPPN[17:0]); // Must have zero PPN1 and PPN0
     assign MegapageMisaligned = |(CurrentPPN[8:0]);  // Must have zero PPN0
     assign Misaligned = (WalkerState == LEAF) &
-                        ((P.SV57_SUPPORTED & (PageType == 3'b100) & PetapageMisaligned) |
-                         (P.SV48_SUPPORTED & (PageType == 3'b011) & TerapageMisaligned) |
-                                            ((PageType == 3'b010) & GigapageMisaligned) |
-                                            ((PageType == 3'b001) & MegapageMisaligned));
+                        ((P.SV57_SUPPORTED & (PageType == PETAPAGE) & PetapageMisaligned) |
+                         (P.SV48_SUPPORTED & (PageType == TERAPAGE) & TerapageMisaligned) |
+                                            ((PageType == GIGAPAGE) & GigapageMisaligned) |
+                                            ((PageType == MEGAPAGE) & MegapageMisaligned));
   end
 
   // Page Table Walker FSM
@@ -348,7 +347,7 @@ module hptw import cvw::*;  #(parameter cvw_t P) (
       L2_RD:      if (HPTWFaultM)                                     NextWalkerState = FAULT;
                   else if (DCacheBusStallM)                           NextWalkerState = L2_RD;
                   else                                                NextWalkerState = L1_ADR;
-      L1_ADR:     if (HPTWFaultM)                                      NextWalkerState = FAULT;
+      L1_ADR:     if (HPTWFaultM)                                     NextWalkerState = FAULT;
                   else if (InitialWalkerState == L1_ADR | ValidNonLeafPTE) NextWalkerState = L1_RD; // First access in SV32
                   else                                                NextWalkerState = LEAF;
       L1_RD:      if (HPTWFaultM)                                     NextWalkerState = FAULT;

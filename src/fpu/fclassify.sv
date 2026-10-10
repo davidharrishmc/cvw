@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fclassify import cvw::*;  #(parameter cvw_t P) (
+module fclassify import cvw::*; #(parameter cvw_t P) (
   input  logic                Xs,         // X sign
   input  logic                XNaN,       // X is a NaN
   input  logic                XSNaN,      // X is a signaling NaN

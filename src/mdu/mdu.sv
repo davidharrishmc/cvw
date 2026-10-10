@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module mdu import cvw::*;  #(parameter cvw_t P) (
+module mdu import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset,                     // Clock and reset
   input  logic              StallM, StallW,                 // Stall Memory, Writeback stages
   input  logic              FlushE, FlushM, FlushW,         // Flush Execute, Memory, Writeback stages

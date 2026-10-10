@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrt import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrt import cvw::*; #(parameter cvw_t P) (
   input  logic                 clk,                               // Clock
   input  logic                 reset,                             // Reset
   input  logic [P.FMTBITS-1:0] FmtE,                              // FP format in Execute stage

@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module div import cvw::*;  #(parameter cvw_t P) (
+module div import cvw::*; #(parameter cvw_t P) (
   input  logic              clk,                            // Clock
   input  logic              reset,                          // Reset
   input  logic              StallM,                         // Stall Memory stage
@@ -112,7 +112,7 @@ module div import cvw::*;  #(parameter cvw_t P) (
   // Memory Stage: output sign correction and special cases
   //////////////////////////////
 
-  flopen #(3) Div0eMReg(clk, DivStartE, {Div0E, NegQE, SignXE}, {Div0M, NegQM, NegWM});
+  flopen #(3) Div0MReg(clk, DivStartE, {Div0E, NegQE, SignXE}, {Div0M, NegQM, NegWM});
 
   // On final step of signed operations, negate outputs as needed to get correct sign
   neg #(P.XLEN) qneg(XQ[0], XQnM);

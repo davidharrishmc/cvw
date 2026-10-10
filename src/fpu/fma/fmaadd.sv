@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fmaadd import cvw::*;  #(parameter cvw_t P) (
+module fmaadd import cvw::*; #(parameter cvw_t P) (
   input  logic [3*P.NF+5:0]    Am,         // Aligned addend significand (U(NF+5.2NF+1))
   input  logic [P.NE-1:0]      Ze,         // Z exponent
   input  logic                 Ps,         // Product sign

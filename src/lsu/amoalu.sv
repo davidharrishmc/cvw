@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module amoalu import cvw::*;  #(parameter cvw_t P) (
+module amoalu import cvw::*; #(parameter cvw_t P) (
   input  logic [P.XLEN-1:0] ReadDataM,    // Read data from memory in Memory stage
   input  logic [P.XLEN-1:0] IHWriteDataM, // IEU or HPTW write data
   input  logic [6:0]        LSUFunct7M,   // IEU or HPTW AMO operation

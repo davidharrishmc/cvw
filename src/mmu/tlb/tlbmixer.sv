@@ -30,7 +30,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbmixer import cvw::*;  #(parameter cvw_t P) (
+module tlbmixer import cvw::*; #(parameter cvw_t P) (
   input  logic [P.VPN_BITS-1:0] VPN,           // Virtual page number
   input  logic [P.PPN_BITS-1:0] PPN,           // Physical page number
   input  logic [2:0]            HitPageType,   // Page type of the matching TLB entry

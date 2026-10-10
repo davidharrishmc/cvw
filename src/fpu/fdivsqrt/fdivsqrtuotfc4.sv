@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrtuotfc4 import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrtuotfc4 import cvw::*; #(parameter cvw_t P) (
   input  logic [3:0]      udigit,         // Radix-4 result digit, one-hot {2, 1, -1, -2}; 0 if none hot
   input  logic [P.DIVb:0] U, UM,          // Partial result and partial result minus 1 ulp (U1.DIVb); UM starts negative, but still gives the right answer
   input  logic [P.DIVb:0] C,              // Digit position marker (Q1.DIVb)

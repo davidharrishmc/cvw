@@ -28,14 +28,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module roundsign(
-  input logic         Xs,     // X sign
-  input logic         Ys,     // Y sign
-  input logic         CvtCs,  // Conversion result sign
-  input logic         FmaSs,  // FMA sum sign
-  input logic         Sqrt,   // Square root operation
-  input logic         FmaOp,  // FMA operation
-  input logic         DivOp,  // Divide or square root operation
-  input logic         CvtOp,  // Conversion operation
+  input  logic        Xs,     // X sign
+  input  logic        Ys,     // Y sign
+  input  logic        CvtCs,  // Conversion result sign
+  input  logic        FmaSs,  // FMA sum sign
+  input  logic        Sqrt,   // Square root operation
+  input  logic        FmaOp,  // FMA operation
+  input  logic        DivOp,  // Divide or square root operation
+  input  logic        CvtOp,  // Conversion operation
   output logic        Ms      // Normalized result sign
 );
 

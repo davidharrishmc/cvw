@@ -30,8 +30,8 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbcamline import cvw::*;  #(parameter cvw_t P,
-                                    parameter KEY_BITS = 20, SEGMENT_BITS = 10) (
+module tlbcamline import cvw::*; #(parameter cvw_t P,
+                                   parameter KEY_BITS = 20, SEGMENT_BITS = 10) (
   input  logic                   clk, reset,       // Clock and reset
   input  logic [P.VPN_BITS-1:0]  VPN,              // Virtual page number
   input  logic [P.ASID_BITS-1:0] SATP_ASID,        // satp.ASID
@@ -47,12 +47,7 @@ module tlbcamline import cvw::*;  #(parameter cvw_t P,
   output logic                   Match             // Address matches this entry
 );
 
-  // PageTypeRead is a key for a peta, tera, giga, mega, or kilopage.
-  // PageType == 3'b000 --> kilopage
-  // PageType == 3'b001 --> megapage
-  // PageType == 3'b010 --> gigapage
-  // PageType == 3'b011 --> terapage
-  // PageType == 3'b100 --> petapage
+  // PageTypeRead is a key for a peta, tera, giga, mega, or kilopage (KILOPAGE..PETAPAGE in the cvw package).
   // This entry has KEY_BITS for the key plus one valid bit.
   logic                Valid;
   logic [KEY_BITS-1:0] Key;
@@ -75,25 +70,25 @@ module tlbcamline import cvw::*;  #(parameter cvw_t P,
   assign Query0 = VPN[SEGMENT_BITS-1:0];
   // In Svnapot, if N bit is set and bottom 4 bits of PPN = 1000, then these bits don't need to match
   assign MatchNAPOT = P.SVNAPOT_SUPPORTED & PTE_NAPOT & (Query0[SEGMENT_BITS-1:4] == Key0[SEGMENT_BITS-1:4]);
-  assign Match0 = (Query0 == Key0) | (PageType > 3'd0) | MatchNAPOT; // always match for megapage or larger
+  assign Match0 = (Query0 == Key0) | (PageType > KILOPAGE) | MatchNAPOT; // always match for megapage or larger
 
   // segment 1
   assign Key1   = Key[2*SEGMENT_BITS-1:SEGMENT_BITS];
   assign Query1 = VPN[2*SEGMENT_BITS-1:SEGMENT_BITS];
-  assign Match1 = (Query1 == Key1) | (PageType > 3'd1); // always match for gigapage or larger
+  assign Match1 = (Query1 == Key1) | (PageType > MEGAPAGE); // always match for gigapage or larger
 
   if (P.SV39_SUPPORTED) begin : segment2
     logic [SEGMENT_BITS-1:0] Key2, Query2;
     assign Key2   = Key[3*SEGMENT_BITS-1:2*SEGMENT_BITS];
     assign Query2 = VPN[3*SEGMENT_BITS-1:2*SEGMENT_BITS];
-    assign Match2 = (Query2 == Key2) | (PageType > 3'd2);  // always match for terapage or larger
+    assign Match2 = (Query2 == Key2) | (PageType > GIGAPAGE); // always match for terapage or larger
   end else assign Match2 = 1'b1;
 
   if (P.SV48_SUPPORTED) begin : segment3
     logic [SEGMENT_BITS-1:0] Key3, Query3;
     assign Key3   = Key[4*SEGMENT_BITS-1:3*SEGMENT_BITS];
     assign Query3 = VPN[4*SEGMENT_BITS-1:3*SEGMENT_BITS];
-    assign Match3 = (Query3 == Key3) | (PageType > 3'd3) | SV39Mode; // always match in SV39 mode or for petapage
+    assign Match3 = (Query3 == Key3) | (PageType > TERAPAGE) | SV39Mode; // always match in SV39 mode or for petapage
   end else assign Match3 = 1'b1;
 
   if (P.SV57_SUPPORTED) begin : segment4

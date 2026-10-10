@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module vm64check import cvw::*;  #(parameter cvw_t P) (
+module vm64check import cvw::*; #(parameter cvw_t P) (
   input  logic [P.SVMODE_BITS-1:0]  SATP_MODE,       // Current address translation mode
   input  logic [P.XLEN-1:0]         VAdr,            // Address before translation (virtual or physical)
   output logic                      SV39Mode,        // Translation mode is Sv39

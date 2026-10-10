@@ -71,7 +71,7 @@
     //      | Nf 0's |           Qm           | << calculated shift amount
     //        .
 
-module normshift import cvw::*;  #(parameter cvw_t P) (
+module normshift import cvw::*; #(parameter cvw_t P) (
   input  logic [P.LOGNORMSHIFTSZ-1:0]  ShiftAmt,   // Shift amount
   input  logic [P.NORMSHIFTSZ-1:0]     ShiftIn,    // number to be shifted
   output logic [P.NORMSHIFTSZ-1:0]     Shifted     // Normalization shifter output

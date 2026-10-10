@@ -29,7 +29,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module lrsc import cvw::*;  #(parameter cvw_t P) (
+module lrsc import cvw::*; #(parameter cvw_t P) (
   input  logic                 clk,        // Clock
   input  logic                 reset,      // Reset
   input  logic                 StallW,     // Stall Writeback stage

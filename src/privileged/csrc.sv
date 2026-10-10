@@ -190,41 +190,41 @@ module csrc import cvw::*; #(parameter cvw_t P) (
       /* verilator lint_off WIDTH */
       if (P.XLEN == 64) begin // 64-bit counter reads
         // Veri lator doesn't realize this only occurs for XLEN=64
-        if      (CSRAdrM == TIME & ~CSRWriteM)  CSRCReadValM = MTIME_CLINT; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
+        if      (CSRAdrM == TIME & ~CSRWriteM) CSRCReadValM = MTIME_CLINT; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
         else if (CSRAdrM >= MHPMCOUNTERBASE & CSRAdrM < MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM != MTIME)
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
         else if (CSRAdrM >= MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM < MHPMCOUNTERBASE+32)
                 CSRCReadValM = '0; // unused counters are read-only zero
-        else if (CSRAdrM >= HPMCOUNTERBASE  & CSRAdrM  < HPMCOUNTERBASE+3 & ~CSRWriteM & P.ZICNTR_SUPPORTED)  // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE & CSRAdrM < HPMCOUNTERBASE+3 & ~CSRWriteM & P.ZICNTR_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERBASE+3  & CSRAdrM  < HPMCOUNTERBASE+P.COUNTERS & ~CSRWriteM & P.ZIHPM_SUPPORTED)  // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE+3 & CSRAdrM < HPMCOUNTERBASE+P.COUNTERS & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERBASE+P.COUNTERS  & CSRAdrM  < HPMCOUNTERBASE+32 & ~CSRWriteM & P.ZIHPM_SUPPORTED)  // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE+P.COUNTERS & CSRAdrM < HPMCOUNTERBASE+32 & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = '0;
         else IllegalCSRCAccessM = 1'b1;  // requested CSR doesn't exist
       end else begin // 32-bit counter reads
         // Veril ator doesn't realize this only occurs for XLEN=32
-        if      (CSRAdrM == TIME & ~CSRWriteM)  CSRCReadValM = MTIME_CLINT[31:0]; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
+        if      (CSRAdrM == TIME & ~CSRWriteM) CSRCReadValM = MTIME_CLINT[31:0]; // TIME register is a shadow of the memory-mapped MTIME from the CLINT
         else if (CSRAdrM == TIMEH & ~CSRWriteM) CSRCReadValM = MTIME_CLINT[63:32];
-        else if (CSRAdrM >= MHPMCOUNTERBASE  & CSRAdrM < MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM != MTIME)
+        else if (CSRAdrM >= MHPMCOUNTERBASE & CSRAdrM < MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM != MTIME)
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
         else if (CSRAdrM >= MHPMCOUNTERBASE+P.COUNTERS & CSRAdrM < MHPMCOUNTERBASE+32)
                 CSRCReadValM = '0; // unused counters are read-only zero
-        else if (CSRAdrM >= HPMCOUNTERBASE   & CSRAdrM < HPMCOUNTERBASE+3  & ~CSRWriteM & P.ZICNTR_SUPPORTED)    // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE & CSRAdrM < HPMCOUNTERBASE+3 & ~CSRWriteM & P.ZICNTR_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERBASE+3   & CSRAdrM < HPMCOUNTERBASE+P.COUNTERS  & ~CSRWriteM & P.ZIHPM_SUPPORTED)    // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE+3 & CSRAdrM < HPMCOUNTERBASE+P.COUNTERS & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTER_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERBASE+P.COUNTERS   & CSRAdrM < HPMCOUNTERBASE+32  & ~CSRWriteM & P.ZIHPM_SUPPORTED)    // read-only
+        else if (CSRAdrM >= HPMCOUNTERBASE+P.COUNTERS & CSRAdrM < HPMCOUNTERBASE+32 & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = '0; // unused counters are read-only zero
         else if (CSRAdrM >= MHPMCOUNTERHBASE & CSRAdrM < MHPMCOUNTERHBASE+P.COUNTERS & CSRAdrM != MTIMEH)
                 CSRCReadValM = HPMCOUNTERH_REGW[CounterNumM];
         else if (CSRAdrM >= MHPMCOUNTERHBASE+P.COUNTERS & CSRAdrM < MHPMCOUNTERHBASE+32)
                 CSRCReadValM = '0; // unused counters are read-only zero
-        else if (CSRAdrM >= HPMCOUNTERHBASE   & CSRAdrM < HPMCOUNTERHBASE+3  & ~CSRWriteM & P.ZICNTR_SUPPORTED)   // read-only
+        else if (CSRAdrM >= HPMCOUNTERHBASE & CSRAdrM < HPMCOUNTERHBASE+3 & ~CSRWriteM & P.ZICNTR_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTERH_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERHBASE+3 & CSRAdrM < HPMCOUNTERHBASE+P.COUNTERS & ~CSRWriteM & P.ZIHPM_SUPPORTED)   // read-only
+        else if (CSRAdrM >= HPMCOUNTERHBASE+3 & CSRAdrM < HPMCOUNTERHBASE+P.COUNTERS & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = HPMCOUNTERH_REGW[CounterNumM];
-        else if (CSRAdrM >= HPMCOUNTERHBASE+P.COUNTERS & CSRAdrM < HPMCOUNTERHBASE+32 & ~CSRWriteM & P.ZIHPM_SUPPORTED)   // read-only
+        else if (CSRAdrM >= HPMCOUNTERHBASE+P.COUNTERS & CSRAdrM < HPMCOUNTERHBASE+32 & ~CSRWriteM & P.ZIHPM_SUPPORTED) // read-only
                 CSRCReadValM = '0;
         else    IllegalCSRCAccessM = 1'b1; // requested CSR doesn't exist
       end

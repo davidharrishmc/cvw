@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module subwordread import cvw::*;  #(parameter cvw_t P) (
+module subwordread import cvw::*; #(parameter cvw_t P) (
   input  logic [P.LLEN-1:0] ReadDataWordMuxM, // Read data word before subword selection
   input  logic [3:0]        PAdrM,            // Physical memory address
   input  logic [2:0]        Funct3M,          // funct3 field of instruction in Memory stage

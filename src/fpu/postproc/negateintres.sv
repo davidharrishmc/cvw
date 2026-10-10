@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module negateintres import cvw::*;  #(parameter cvw_t P) (
+module negateintres import cvw::*; #(parameter cvw_t P) (
   input  logic                     Signed,         // Signed integer conversion
   input  logic                     Int64,          // 64-bit integer conversion
   input  logic                     Plus1,          // Add one for rounding

@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrtcycles import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrtcycles import cvw::*; #(parameter cvw_t P) (
   input  logic [P.LOGFLEN-1:0] Nf,             // Number of fractional bits in selected format
   input  logic                 IntDivE,        // Integer divide or remainder instruction in Execute stage
   input  logic [P.DIVBLEN-1:0] IntResultBitsE, // Number of bits in integer divide result

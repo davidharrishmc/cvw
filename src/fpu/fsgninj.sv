@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fsgninj import cvw::*;  #(parameter cvw_t P) (
+module fsgninj import cvw::*; #(parameter cvw_t P) (
   input  logic                 Xs, Ys, // X and Y signs
   input  logic [P.FLEN-1:0]    X,      // X input
   input  logic [P.FMTBITS-1:0] Fmt,    // FP format: 00 single, 01 double, 10 half, 11 quad

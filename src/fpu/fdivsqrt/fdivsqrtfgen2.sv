@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrtfgen2 import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrtfgen2 import cvw::*; #(parameter cvw_t P) (
   input  logic              up, uz,     // Result digit is +1 or 0
   input  logic [P.DIVb+3:0] C, U, UM,   // Digit position marker, partial result, partial result minus 1 ulp (Q4.DIVb, extended)
   output logic [P.DIVb+3:0] F           // Square root residual adjustment term (Q4.DIVb)

@@ -46,7 +46,7 @@ module ebufsmarb (
   output logic       LSUDisable, // Suppress HREADY to the LSU
   output logic       LSUSelect); // Grant the bus to the LSU
 
-  typedef enum       logic [1:0] {IDLE, ARBITRATE} statetype;
+  typedef enum logic [1:0] {IDLE, ARBITRATE} statetype;
   statetype          CurrState, NextState;
 
   logic              both;                       // Both the LSU and IFU request at the same time

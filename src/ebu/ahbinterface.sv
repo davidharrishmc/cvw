@@ -30,7 +30,7 @@
 
 module ahbinterface #(
   parameter XLEN,
-  parameter logic LSU = 1'b0                                   // 1: LSU bus width is `XLEN, 0: IFU bus width is 32 bits
+  parameter logic LSU = 1'b0 // 1: LSU bus width is XLEN, 0: IFU bus width is 32 bits
 )(
   input  logic                          HCLK, HRESETn, // AHB clock and reset (active low)
   // bus interface
@@ -53,7 +53,7 @@ module ahbinterface #(
   output logic [XLEN-1:0]               FetchBuffer    // Data captured from the bus
 );
 
-  logic                                 CaptureEn;
+  logic CaptureEn;
 
   flopen #(XLEN) fb(.clk(HCLK), .en(CaptureEn), .d(HRDATA), .q(FetchBuffer));
 

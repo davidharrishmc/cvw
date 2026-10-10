@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fround import cvw::*;  #(parameter cvw_t P) (
+module fround import cvw::*; #(parameter cvw_t P) (
   input  logic                    Xs,           // X sign
   input  logic [P.NE-1:0]         Xe,           // X exponent
   input  logic [P.NF:0]           Xm,           // X significand
@@ -122,11 +122,11 @@ module fround import cvw::*;  #(parameter cvw_t P) (
   // Rounding logic: determine whether to round up in magnitude
   always_comb begin
     case (Frm) // Frm is either specified in the instruction or is the dynamic rounding mode
-      3'b000:  RoundUp = Rp & (Lp | Tp);  // RNE
-      3'b001:  RoundUp = 0;               // RTZ
-      3'b010:  RoundUp = Xs & (Rp | Tp);  // RDN
-      3'b011:  RoundUp = ~Xs & (Rp | Tp); // RUP
-      3'b100:  RoundUp = Rp;              // RMM
+      RM_RNE:  RoundUp = Rp & (Lp | Tp);
+      RM_RTZ:  RoundUp = 0;
+      RM_RDN:  RoundUp = Xs & (Rp | Tp);
+      RM_RUP:  RoundUp = ~Xs & (Rp | Tp);
+      RM_RMM:  RoundUp = Rp;
       default: RoundUp = 0;               // should never happen
     endcase
 

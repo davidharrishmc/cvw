@@ -28,7 +28,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module datapath import cvw::*;  #(parameter cvw_t P) (
+module datapath import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset,              // Clock and reset
   // Decode stage signals
   input  logic [2:0]        ImmSrcD,                 // Type of immediate extension

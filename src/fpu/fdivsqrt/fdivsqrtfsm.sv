@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrtfsm import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrtfsm import cvw::*; #(parameter cvw_t P) (
   input  logic                clk, reset,             // Clock and reset
   input  logic                XInfE, YInfE,           // X, Y are infinity
   input  logic                XZeroE, YZeroE,         // X, Y are zero

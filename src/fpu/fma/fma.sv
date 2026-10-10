@@ -27,20 +27,20 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fma import cvw::*;  #(parameter cvw_t P) (
-  input  logic                         Xs, Ys, Zs,             // X, Y, Z signs
-  input  logic [P.NE-1:0]              Xe, Ye, Ze,             // X, Y, Z biased exponents (B(NE.0))
-  input  logic [P.NF:0]                Xm, Ym, Zm,             // X, Y, Z significands (U1.NF)
-  input  logic                         XZero, YZero, ZZero,    // X, Y, Z are zero
-  input  logic [2:0]                   OpCtrl,                 // FPU operation control
-  output logic                         ASticky,                // Sticky bit from the aligned addend
-  output logic [P.FMALEN-1:0]          Sm,                     // Positive sum significand
-  output logic                         InvA,                   // Invert addend for effective subtraction
-  output logic                         As,                     // Aligned addend sign (Z sign adjusted for the operation)
-  output logic                         Ps,                     // Product sign
-  output logic                         Ss,                     // Sum sign
-  output logic [P.NE+1:0]              Se,                     // Sum exponent
-  output logic [$clog2(P.FMALEN+1)-1:0] SCnt                    // Normalization shift count
+module fma import cvw::*; #(parameter cvw_t P) (
+  input  logic                          Xs, Ys, Zs,          // X, Y, Z signs
+  input  logic [P.NE-1:0]               Xe, Ye, Ze,          // X, Y, Z biased exponents (B(NE.0))
+  input  logic [P.NF:0]                 Xm, Ym, Zm,          // X, Y, Z significands (U1.NF)
+  input  logic                          XZero, YZero, ZZero, // X, Y, Z are zero
+  input  logic [2:0]                    OpCtrl,              // FPU operation control
+  output logic                          ASticky,             // Sticky bit from the aligned addend
+  output logic [P.FMALEN-1:0]           Sm,                  // Positive sum significand
+  output logic                          InvA,                // Invert addend for effective subtraction
+  output logic                          As,                  // Aligned addend sign (Z sign adjusted for the operation)
+  output logic                          Ps,                  // Product sign
+  output logic                          Ss,                  // Sum sign
+  output logic [P.NE+1:0]               Se,                  // Sum exponent
+  output logic [$clog2(P.FMALEN+1)-1:0] SCnt                 // Normalization shift count
 );
 
   //  OpCtrl:

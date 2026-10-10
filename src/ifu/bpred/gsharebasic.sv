@@ -29,9 +29,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module gsharebasic import cvw::*; #(parameter cvw_t P,
-                     parameter XLEN,
-                     parameter k = 10,
-                     parameter TYPE = 1) (
+                                    parameter XLEN,
+                                    parameter k = 10,
+                                    parameter TYPE = 1) (
   input  logic            clk,                                    // Clock
   input  logic            reset,                                  // Reset
   input  logic            StallF, StallD, StallE, StallM, StallW, // Stall Fetch, Decode, Execute, Memory, Writeback stages

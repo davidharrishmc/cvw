@@ -30,8 +30,8 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbcam import cvw::*;  #(parameter cvw_t P,
-                                 parameter TLB_ENTRIES = 8, KEY_BITS = 20, SEGMENT_BITS = 10) (
+module tlbcam import cvw::*; #(parameter cvw_t P,
+                               parameter TLB_ENTRIES = 8, KEY_BITS = 20, SEGMENT_BITS = 10) (
   input  logic                    clk, reset,       // Clock and reset
   input  logic [P.VPN_BITS-1:0]   VPN,              // Virtual page number
   input  logic [2:0]              PageTypeWriteVal, // Page type to write to TLB

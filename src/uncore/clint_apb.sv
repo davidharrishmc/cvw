@@ -43,9 +43,11 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
 );
 
   // register map
-  localparam CLINT_MSIP     = 16'h0000;
-  localparam CLINT_MTIMECMP = 16'h4000;
-  localparam CLINT_MTIME    = 16'hBFF8;
+  localparam CLINT_MSIP      = 16'h0000;
+  localparam CLINT_MTIMECMP  = 16'h4000;
+  localparam CLINT_MTIMECMPH = 16'h4004;
+  localparam CLINT_MTIME     = 16'hBFF8;
+  localparam CLINT_MTIMEH    = 16'hBFFC;
 
   logic                       MSIP;
   logic [15:0]                entry;
@@ -95,7 +97,7 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
     always_ff @(posedge PCLK)
       if (~PRESETn) begin
         MTIME <= '0;
-      end else if (memwrite & entry == 16'hBFF8) begin
+      end else if (memwrite & entry == CLINT_MTIME) begin
         // MTIME Counter.  Eventually change this to run off separate clock.  Synchronization then needed
         for (j = 0; j < P.XLEN/8; j++)
           if (PSTRB[j])
@@ -104,12 +106,12 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
   end else begin : clint // 32-bit
     always_ff @(posedge PCLK) begin
       case (entry)
-        16'h0000: PRDATA <= {31'b0, MSIP};
-        16'h4000: PRDATA <= MTIMECMP[31:0];
-        16'h4004: PRDATA <= MTIMECMP[63:32];
-        16'hBFF8: PRDATA <= MTIME[31:0];
-        16'hBFFC: PRDATA <= MTIME[63:32];
-        default:  PRDATA <= '0;
+        CLINT_MSIP:      PRDATA <= {31'b0, MSIP};
+        CLINT_MTIMECMP:  PRDATA <= MTIMECMP[31:0];
+        CLINT_MTIMECMPH: PRDATA <= MTIMECMP[63:32];
+        CLINT_MTIME:     PRDATA <= MTIME[31:0];
+        CLINT_MTIMEH:    PRDATA <= MTIME[63:32];
+        default:         PRDATA <= '0;
       endcase
     end
     always_ff @(posedge PCLK)
@@ -117,12 +119,12 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
         MSIP <= 1'b0;
         MTIMECMP <= 64'hFFFFFFFFFFFFFFFF; // Spec says MTIMECMP is not reset, but we reset to maximum value to prevent spurious timer interrupts
       end else if (memwrite) begin
-        if (entry == 16'h0000) MSIP <= PWDATA[0];
-        if (entry == 16'h4000)
+        if (entry == CLINT_MSIP) MSIP <= PWDATA[0];
+        if (entry == CLINT_MTIMECMP)
           for (j = 0; j < P.XLEN/8; j++)
             if (PSTRB[j])
               MTIMECMP[j*8 +: 8] <= PWDATA[j*8 +: 8];
-        if (entry == 16'h4004)
+        if (entry == CLINT_MTIMECMPH)
           for (j = 0; j < P.XLEN/8; j++)
             if (PSTRB[j])
               MTIMECMP[32 + j*8 +: 8] <= PWDATA[j*8 +: 8];
@@ -135,11 +137,11 @@ module clint_apb import cvw::*; #(parameter cvw_t P) (
       if (~PRESETn) begin
         MTIME <= '0;
         // MTIMECMP is not reset
-      end else if (memwrite & (entry == 16'hBFF8)) begin
+      end else if (memwrite & (entry == CLINT_MTIME)) begin
         for (i = 0; i < P.XLEN/8; i++)
           if (PSTRB[i])
             MTIME[i*8 +: 8] <= PWDATA[i*8 +: 8];
-      end else if (memwrite & (entry == 16'hBFFC)) begin
+      end else if (memwrite & (entry == CLINT_MTIMEH)) begin
         // MTIME Counter.  Eventually change this to run off separate clock.  Synchronization then needed
         for (i = 0; i < P.XLEN/8; i++)
           if (PSTRB[i])

@@ -44,8 +44,8 @@ module ram2p1r1wbe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 1024, WIDTH 
   output logic [WIDTH-1:0]         rd1       // Read data
 );
 
-  localparam                      SRAMWIDTH = 32;
-  localparam                      SRAMNUMSETS = SRAMWIDTH/WIDTH;
+  localparam SRAMWIDTH   = 32;
+  localparam SRAMNUMSETS = SRAMWIDTH/WIDTH;
 
   ///////////////////////////////////////////////////////////////////////////////
   // TRUE SRAM macro

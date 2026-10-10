@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbramline import cvw::*;  #(parameter cvw_t P) (
+module tlbramline import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset, // Clock and reset
   input  logic              re, we,     // Read and write enables
   input  logic [P.XLEN-1:0] d,          // PTE to write

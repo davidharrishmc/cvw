@@ -28,12 +28,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module hazard (
-  input  logic  BPWrongE, CSRWriteFenceM, RetM, TrapM, // Events that flush the pipeline: misprediction, CSR write or fence, return, trap
-  input  logic  StructuralStallD,                      // Structural hazard stall in Decode stage
-  input  logic  LSUStallM, IFUStallF,                  // LSU and IFU stall the pipeline during multicycle operations
-  input  logic  FPUStallD, ExternalStall,              // FPU stalls Decode stage, external stall
-  input  logic  DivBusyE, FDivBusyE,                   // Integer and FPU dividers busy
-  input  logic  wfiM, IntPendingM,                     // wfi instruction, interrupt pending
+  input  logic BPWrongE, CSRWriteFenceM, RetM, TrapM,  // Events that flush the pipeline: misprediction, CSR write or fence, return, trap
+  input  logic StructuralStallD,                       // Structural hazard stall in Decode stage
+  input  logic LSUStallM, IFUStallF,                   // LSU and IFU stall the pipeline during multicycle operations
+  input  logic FPUStallD, ExternalStall,               // FPU stalls Decode stage, external stall
+  input  logic DivBusyE, FDivBusyE,                    // Integer and FPU dividers busy
+  input  logic wfiM, IntPendingM,                      // wfi instruction, interrupt pending
   // Stall & flush outputs
   output logic StallF, StallD, StallE, StallM, StallW, // Stall Fetch, Decode, Execute, Memory, Writeback stages
   output logic FlushD, FlushE, FlushM, FlushW          // Flush Decode, Execute, Memory, Writeback stages

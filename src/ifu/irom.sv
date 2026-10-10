@@ -25,7 +25,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module irom import cvw::*;  #(parameter cvw_t P) (
+module irom import cvw::*; #(parameter cvw_t P) (
   input  logic              clk,       // Clock
   input  logic              ce,        // Chip enable
   input  logic [P.XLEN-1:0] Adr,       // Instruction address
@@ -33,7 +33,7 @@ module irom import cvw::*;  #(parameter cvw_t P) (
 );
 
   localparam XLENBYTES = {{P.PA_BITS-32{1'b0}}, P.XLEN/8}; // XLEN/8, adjusted for width
-  localparam ADDR_WDITH = $clog2(P.IROM_RANGE[P.PA_BITS-1:0]/XLENBYTES);
+  localparam ADDR_WIDTH = $clog2(P.IROM_RANGE[P.PA_BITS-1:0]/XLENBYTES);
   localparam OFFSET = $clog2(XLENBYTES);
 
   logic [P.XLEN-1:0] IROMInstrFFull;
@@ -42,7 +42,7 @@ module irom import cvw::*;  #(parameter cvw_t P) (
 
   // preload IROM with the FPGA bootloader by default so that it synthesizes to something, avoiding having the IEU optimized away because instructions are all 0
   // the testbench replaces these dummy contents with the actual program of interest during simulation
-  rom1p1r #(ADDR_WDITH, P.XLEN, 1) rom(.clk, .ce, .addr(Adr[ADDR_WDITH+OFFSET-1:OFFSET]), .dout(IROMInstrFFull));
+  rom1p1r #(ADDR_WIDTH, P.XLEN, 1) rom(.clk, .ce, .addr(Adr[ADDR_WIDTH+OFFSET-1:OFFSET]), .dout(IROMInstrFFull));
   if (P.XLEN == 32) assign RawIROMInstrF = IROMInstrFFull;
   else              begin
     // IROM is aligned to XLEN words, but instructions are 32 bits.  Select between the two

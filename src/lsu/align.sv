@@ -30,7 +30,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module align import cvw::*;  #(parameter cvw_t P) (
+module align import cvw::*; #(parameter cvw_t P) (
   input  logic                    clk,                      // Clock
   input  logic                    reset,                    // Reset
   input  logic                    StallM, FlushM,           // Stall and flush Memory stage
@@ -40,7 +40,7 @@ module align import cvw::*;  #(parameter cvw_t P) (
   input  logic                    FpLoadStoreM,             // FP load or store
   input  logic [1:0]              MemRWM,                   // Memory read/write control in Memory stage: [1] read, [0] write
   input  logic [P.LLEN*2-1:0]     DCacheReadDataWordM,      // D$ read data, two LLEN words wide
-  input  logic                    CacheBusHPWTStall,        // D$, bus, or HPTW is stalled. Transition to second access of spill after the first completes
+  input  logic                    CacheBusHPTWStall,        // D$, bus, or HPTW is stalled. Transition to second access of spill after the first completes
   input  logic                    SelHPTW,                  // HPTW is accessing memory through the LSU
 
   input  logic [(P.LLEN-1)/8:0]   ByteMaskM,                // Byte write enables
@@ -60,7 +60,7 @@ module align import cvw::*;  #(parameter cvw_t P) (
   localparam LLENINBYTES = P.LLEN/8;
   localparam OFFSET_BIT_POS = $clog2(P.DCACHE_LINELENINBITS/8);
   // A spill occurs when a misaligned access crosses a cache line boundary
-  typedef enum logic [1:0]  {STATE_READY, STATE_SPILL, STATE_STORE_DELAY} statetype;
+  typedef enum logic [1:0] {STATE_READY, STATE_SPILL} statetype;
 
   statetype          CurrState, NextState;
   logic              ValidSpillM;
@@ -122,7 +122,7 @@ module align import cvw::*;  #(parameter cvw_t P) (
   end
   assign MisalignedM = (|MemRWM) & (AccessByteOffsetM != 0);
 
-  assign ValidSpillM = MisalignedM & PotentialSpillM & ~CacheBusHPWTStall;   // Don't take the spill if there is a stall
+  assign ValidSpillM = MisalignedM & PotentialSpillM & ~CacheBusHPTWStall;   // Don't take the spill if there is a stall
 
   always_ff @(posedge clk)
     if (reset | FlushM)    CurrState <= STATE_READY;
@@ -139,7 +139,7 @@ module align import cvw::*;  #(parameter cvw_t P) (
   end
 
   assign SelSpillM = CurrState == STATE_SPILL;
-  assign SelSpillE = (CurrState == STATE_READY & ValidSpillM) | (CurrState == STATE_SPILL & CacheBusHPWTStall);
+  assign SelSpillE = (CurrState == STATE_READY & ValidSpillM) | (CurrState == STATE_SPILL & CacheBusHPTWStall);
   assign SpillSaveM = (CurrState == STATE_READY) & ValidSpillM & ~FlushM;
   assign SpillStallM = SelSpillE;
 

@@ -29,8 +29,8 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module btb import cvw::*;  #(parameter cvw_t P,
-                             parameter Depth = 10) (
+module btb import cvw::*; #(parameter cvw_t P,
+                            parameter Depth = 10) (
   input  logic              clk,                         // Clock
   input  logic              reset,                       // Reset
   input  logic              StallF, StallD, StallE, StallM, StallW, FlushD, FlushE, FlushM, FlushW, // Stall and flush each stage
@@ -94,8 +94,8 @@ module btb import cvw::*;  #(parameter cvw_t P,
   // 1. It gates updates to the BTB when the prediction does not change.  This saves power.
   // 2. BPBTAWrongE is used by the performance counters to track when the BTB's BPBTA or instruction class is wrong.
   flopenrc #(P.XLEN) BTBTargetEReg(clk, reset, FlushE, ~StallE, BPBTAD, BPBTAE);
-  // IClass = {Call, Return, Jump, Branch}: target is checked for branches and non-return jumps (the RAS predicts returns)
-  assign BPBTAWrongE = (BPBTAE != IEUAdrE) & (IClassE[0] | IClassE[1] & ~IClassE[2]);
+  // Target is checked for branches and non-return jumps (the RAS predicts returns)
+  assign BPBTAWrongE = (BPBTAE != IEUAdrE) & (IClassE[ICLASS_BRANCH] | IClassE[ICLASS_JUMP] & ~IClassE[ICLASS_RETURN]);
 
   flopenrc #(1) BPBTAWrongMReg(clk, reset, FlushM, ~StallM, BPBTAWrongE, BPBTAWrongM);
   assign BTBWrongM = BPBTAWrongM | IClassWrongM;

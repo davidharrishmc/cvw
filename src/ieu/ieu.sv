@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module ieu import cvw::*;  #(parameter cvw_t P) (
+module ieu import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset,                      // Clock and reset
   // Decode stage signals
   input  logic [31:0]       InstrD,                          // Instruction in Decode stage

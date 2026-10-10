@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbcontrol import cvw::*;  #(parameter cvw_t P, ITLB = 0) (
+module tlbcontrol import cvw::*; #(parameter cvw_t P, ITLB = 0) (
   input  logic [P.SVMODE_BITS-1:0] SATP_MODE,               // Current address translation mode
   input  logic [P.XLEN-1:0]        VAdr,                    // Address before translation (virtual or physical)
   input  logic                     STATUS_MXR, STATUS_SUM, STATUS_MPRV, // mstatus.MXR, SUM, MPRV: control address translation permissions
@@ -109,11 +109,11 @@ module tlbcontrol import cvw::*;  #(parameter cvw_t P, ITLB = 0) (
     assign InvalidRead = ReadAccess & ~PTE_R & (~STATUS_MXR | ~PTE_X);
     // Check for write error. Writes are invalid when the page's write bit is 0.
     assign InvalidWrite = WriteAccess & ~PTE_W;
-    // cbo.inval/clean/flush (CMOpM[2:0]) need read permission; cbo.zero (CMOpM[3]) needs write permission
+    // cbo.inval/clean/flush (CMOpM[2:0]) need read permission; cbo.zero needs write permission
     assign InvalidCBOM = (|CMOpM[2:0]) & (~PTE_R & (~STATUS_MXR | ~PTE_X));
-    assign InvalidCBOZ = CMOpM[3] & ~PTE_W;
+    assign InvalidCBOZ = CMOpM[CMO_ZERO] & ~PTE_W;
     assign InvalidAccess = InvalidRead | InvalidWrite | InvalidCBOM | InvalidCBOZ | ReservedRW;
-    assign PreUpdateDA = ~PTE_A | (WriteAccess | CMOpM[3]) & ~PTE_D; // set A on any access; also set D on a write or cbo.zero
+    assign PreUpdateDA = ~PTE_A | (WriteAccess | CMOpM[CMO_ZERO]) & ~PTE_D; // set A on any access; also set D on a write or cbo.zero
   end
 
   // Determine whether to update DA bits.  With SVADU, it is done in hardware

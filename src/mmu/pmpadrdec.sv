@@ -31,7 +31,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module pmpadrdec import cvw::*;  #(parameter cvw_t P) (
+module pmpadrdec import cvw::*; #(parameter cvw_t P) (
   input  logic [P.PA_BITS-1:0]  PhysicalAddress, // Physical address
   input  logic [1:0]            Size,            // Access size (log2 bytes)
   input  logic [7:0]            PMPCfg,          // pmpcfg field for this entry

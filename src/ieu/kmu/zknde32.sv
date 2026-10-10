@@ -29,7 +29,6 @@
 module zknde32 import cvw::*; #(parameter cvw_t P) (
   input  logic [31:0] A, B,       // Operands
   input  logic [1:0]  bs,         // Byte select
-  input  logic [3:0]  round,      // Round number
   input  logic [3:0]  ZKNSelect,  // AES operation select
   output logic [31:0] ZKNDEResult // AES result
 );

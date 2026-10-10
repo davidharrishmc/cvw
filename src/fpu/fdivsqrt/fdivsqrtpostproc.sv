@@ -27,7 +27,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module fdivsqrtpostproc import cvw::*;  #(parameter cvw_t P) (
+module fdivsqrtpostproc import cvw::*; #(parameter cvw_t P) (
   input  logic                 clk, reset,          // Clock and reset
   input  logic                 StallM,              // Stall Memory stage
   input  logic [P.DIVb+3:0]    WS, WC,              // Residual in carry-save form (Q4.DIVb)
@@ -51,7 +51,6 @@ module fdivsqrtpostproc import cvw::*;  #(parameter cvw_t P) (
   logic                      NegStickyM;
   logic                      weq0E, WZeroM;
   logic [P.XLEN-1:0]         IntDivResultM;
-  logic                      NegQuotM; // Integer quotient is negative
 
   //////////////////////////
   // Execute Stage: Detect early termination for an exact result
@@ -99,7 +98,7 @@ module fdivsqrtpostproc import cvw::*;  #(parameter cvw_t P) (
 
   // Integer quotient or remainder correction, normalization, and special cases
   if (P.IDIV_ON_FPU) begin : intpostproc // Int supported
-    logic [P.INTDIVb+3:0] UnsignedQuotM, NormRemM, NormRemDM, NormQuotM;
+    logic [P.INTDIVb+3:0] UnsignedQuotM, NormRemDM;
     logic signed [P.INTDIVb+3:0] PreResultM, PreResultShiftedM, PreIntResultM;
     logic [P.INTDIVb+3:0] DTrunc, SumTrunc;
 
@@ -109,12 +108,11 @@ module fdivsqrtpostproc import cvw::*;  #(parameter cvw_t P) (
     assign W = $signed(SumTrunc) >>> P.LOGR;
     assign UnsignedQuotM = {3'b000, PreUmM[P.DIVb:P.DIVb-P.INTDIVb]};
 
-    // Integer remainder: sticky and sign correction muxes
-    assign NegQuotM = AsM ^ BsM; // Integer Quotient is negative
+    // Integer remainder: sticky correction mux
     mux2 #(P.INTDIVb+4) normremdmux(W, W + DTrunc, NegStickyM, NormRemDM);
 
     // Select quotient or remainder and do normalization shift
-    mux2 #(P.INTDIVb+4)    presresultmux(UnsignedQuotM, NormRemDM, RemOpM, PreResultM);
+    mux2 #(P.INTDIVb+4)    preresultmux(UnsignedQuotM, NormRemDM, RemOpM, PreResultM);
     assign PreResultShiftedM = PreResultM >> IntNormShiftM;
     // Negate if the result is negative: a remainder takes the sign of A; a quotient is negative if A and B signs differ
     mux2 #(P.INTDIVb+4)    preintresultmux(PreResultShiftedM, -PreResultShiftedM, AsM ^ (BsM & ~RemOpM), PreIntResultM);

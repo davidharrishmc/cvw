@@ -35,8 +35,8 @@
 ///////////////////////////////////////////
 
 module priorityonehot #(parameter N = 8) (
-  input  logic  [N-1:0] a, // Input
-  output logic  [N-1:0] y  // One-hot: lowest set bit of a
+  input  logic [N-1:0] a, // Input
+  output logic [N-1:0] y  // One-hot: lowest set bit of a
 );
 
   genvar i;

@@ -26,15 +26,15 @@
 
 // This model actually works correctly with vivado.
 
-module rom1p1r #(parameter ADDR_WIDTH = 8, DATA_WIDTH = 32, PRELOAD_ENABLED = 0)
-  (input  logic                  clk,  // Clock
-   input  logic                  ce,   // Chip enable
-   input  logic [ADDR_WIDTH-1:0] addr, // Address
-   output logic [DATA_WIDTH-1:0] dout  // Read data
+module rom1p1r #(parameter ADDR_WIDTH = 8, DATA_WIDTH = 32, PRELOAD_ENABLED = 0) (
+  input  logic                  clk,  // Clock
+  input  logic                  ce,   // Chip enable
+  input  logic [ADDR_WIDTH-1:0] addr, // Address
+  output logic [DATA_WIDTH-1:0] dout  // Read data
 );
 
   // Core Memory
-  bit [DATA_WIDTH-1:0]    ROM [(2**ADDR_WIDTH)-1:0];
+  bit [DATA_WIDTH-1:0] ROM [(2**ADDR_WIDTH)-1:0];
 
   // dh 10/30/23 ROM macros are presently commented out
   // because they don't point to a generated ROM
