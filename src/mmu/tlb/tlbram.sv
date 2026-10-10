@@ -1,7 +1,7 @@
 ///////////////////////////////////////////
 // tlbram.sv
 //
-// Written:  jtorrey@hmc.edu, Thomas Fleming tfleming@hmc.edu 16 February 2021
+// Written:  Jessica Torrey jtorrey@hmc.edu, Thomas Fleming tfleming@hmc.edu 16 February 2021
 // Modified: David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu
 //
 // Purpose: Stores the PTEs of cached translations and reads out the physical page number and permission bits on a hit.

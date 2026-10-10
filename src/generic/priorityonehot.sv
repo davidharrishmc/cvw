@@ -1,7 +1,7 @@
 ///////////////////////////////////////////
 // priorityonehot.sv
 //
-// Written:  Thomas Fleming tfleming@hmc.edu, jtorrey@hmc.edu 7 April 2021
+// Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 7 April 2021
 // Modified: David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, Madeleine Masser-Frye mmasserfrye@hmc.edu, Teo Ene teo.ene@okstate.edu
 //
 // Purpose: Priority circuit that outputs a one-hot vector marking the least significant 1 in its input.

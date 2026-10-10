@@ -1,7 +1,7 @@
 ///////////////////////////////////////////
 // decoder.sv
 //
-// Written:  Thomas Fleming tfleming@hmc.edu, jtorrey@hmc.edu 7 April 2021
+// Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 7 April 2021
 // Modified:
 //
 // Purpose: Decodes a binary value into a one-hot output.
