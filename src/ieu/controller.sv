@@ -459,9 +459,11 @@ module controller import cvw::*;  #(parameter cvw_t P) (
   // forwarding, so wait for an older instruction that writes any of them to reach writeback, where
   // the negedge register file write makes the value visible to this Decode read.
   assign CASMatchE = (RdE != 5'b0) & RegWriteE &
-                     ((RdD == RdE) | (AMOCASPairD & (((RdD | 5'b1) == RdE) | ((Rs2D | 5'b1) == RdE))));
+                     ((RdD == RdE) | (AMOCASPairD & (((RdD | 5'b1) == RdE) | ((Rs2D | 5'b1) == RdE))) |
+                      (AMOCASPairE & ((RdD == (RdE | 5'b1)) | (AMOCASPairD & (((RdD | 5'b1) == (RdE | 5'b1)) | ((Rs2D | 5'b1) == (RdE | 5'b1)))))));
   assign CASMatchM = (RdM != 5'b0) & RegWriteM &
-                     ((RdD == RdM) | (AMOCASPairD & (((RdD | 5'b1) == RdM) | ((Rs2D | 5'b1) == RdM))));
+                     ((RdD == RdM) | (AMOCASPairD & (((RdD | 5'b1) == RdM) | ((Rs2D | 5'b1) == RdM))) |
+                      (AMOCASPairM & ((RdD == (RdM | 5'b1)) | (AMOCASPairD & (((RdD | 5'b1) == (RdM | 5'b1)) | ((Rs2D | 5'b1) == (RdM | 5'b1)))))));
   assign CASHazardD = AMOCASD & (CASMatchE | CASMatchM);
   assign CASReadD   = AMOCASD & ~CASCapturedD & ~CASHazardD; // operands are ready, so borrow the port
   assign CASStallD  = CASReadD | CASHazardD;
@@ -527,11 +529,13 @@ module controller import cvw::*;  #(parameter cvw_t P) (
 
   // Stall on dependent operations that finish in Mem Stage and can't bypass in time
   // Structural hazard causes stall if any of these events occur
-  assign MatchDE = ((Rs1D == RdE) | (Rs2D == RdE)) & (RdE != 5'b0); // Decode-stage instruction source depends on result from execute stage instruction
+  assign MatchDE = ((Rs1D == RdE) | (Rs2D == RdE) | (AMOCASPairE & ((Rs1D == (RdE | 5'b1)) | (Rs2D == (RdE | 5'b1))))) & (RdE != 5'b0);
   assign LoadStallD = (MemReadE|SCE) & MatchDE;
   assign StoreStallD = MemRWD[1] & MemRWE[0];   // Store or AMO followed by load or AMO
   assign CSRRdStallD = CSRReadE & MatchDE;
   assign MDUStallD = MDUE & MatchDE; // Int mult/div is at least two cycle latency, even when coming from the FDIV
   assign FCvtIntStallD = FCvtIntE & MatchDE; // FPU to Integer transfers have single-cycle latency except fcvt
-  assign StructuralStallD = LoadStallD | StoreStallD | CSRRdStallD | MDUStallD | FCvtIntStallD | CASStallD;
+  logic CASUpperMatchM;
+  assign CASUpperMatchM = AMOCASPairM & ((Rs1D == (RdM | 5'b1)) | (Rs2D == (RdM | 5'b1))) & (RdM != 5'b0);
+  assign StructuralStallD = LoadStallD | StoreStallD | CSRRdStallD | MDUStallD | FCvtIntStallD | CASStallD | CASUpperMatchM;
 endmodule
