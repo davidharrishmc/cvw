@@ -27,7 +27,7 @@
 ## and limitations under the License.
 ################################################################################################
 
-VERILATOR_VERSION=v5.036 # Last release as of May 30, 2025
+VERILATOR_VERSION=60f166e1ef2a52ddbf46df0c5bd88783bd1f4a2b # Commit as of October 19, 2026; no release yet has the covergroup fixes functional coverage needs
 
 set -e # break on error
 # If run standalone, check environment. Otherwise, use info from main install script

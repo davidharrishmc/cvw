@@ -343,8 +343,13 @@ module wallyTracer import cvw::*; #(parameter cvw_t P) (rvviTrace rvvi);
   end
 
   // CSR writes
-  assign CSRAdrM  = testbench.dut.core.priv.priv.csr.CSRAdrM;
-  assign CSRWriteM = testbench.dut.core.priv.priv.csr.CSRWriteM;
+  if (P.ZICSR_SUPPORTED) begin : csrwrites
+    assign CSRAdrM   = testbench.dut.core.priv.priv.csr.CSRAdrM;
+    assign CSRWriteM = testbench.dut.core.priv.priv.csr.CSRWriteM;
+  end else begin : nocsrwrites
+    assign CSRAdrM   = '0;
+    assign CSRWriteM = 1'b0;
+  end
 
   // pipeline to writeback stage
   flopenrc #(32)    InstrRawEReg (clk, reset, FlushE, ~StallE, InstrRawD, InstrRawE);
