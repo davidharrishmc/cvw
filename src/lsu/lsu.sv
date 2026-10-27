@@ -362,7 +362,7 @@ module lsu import cvw::*;  #(parameter cvw_t P) (
       assign BusRW = (~CacheableM & ~SelDTIM & ~HoldAccessM) ? LSURWM : '0;
       assign CacheableOrFlushCacheM = CacheableM | FlushDCacheM;
       assign CacheRWM = (CacheableM & ~SelDTIM & ~HoldAccessM) ? LSURWM : '0;
-      assign FlushDCache = FlushDCacheM & ~SelHPTW;                          // exclusion-tag: lsu FlushDCacheSelHPTW
+      assign FlushDCache = FlushDCacheM & ~SelHPTW;
 
       localparam                     LINEBYTELEN = P.DCACHE_LINELENINBITS/8;              // Line length in bytes
       localparam                     OFFSETLEN = $clog2(LINEBYTELEN);                     // Number of bits in offset field

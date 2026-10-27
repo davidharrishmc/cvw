@@ -308,9 +308,10 @@ set line [GetLineNum ${SRC}/mmu/pmachecker.sv "exclusion-tag: unused-atomic"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker -fecexprrow $line 2 4
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 2 4
 # The instruction side ties ExecuteAccessF high and AtomicAccessM low, so AccessRWXC is always 1 and the atomic term
-# is always 0 in the IMMU: AccessRWXC_0 (row 5) and AtomicAllowed_0/1 (rows 9 and 10) cannot be reached.
+# is always 0 in the IMMU: AccessRWXC_0 (row 5), AtomicAccessM_1 (row 8) and AtomicAllowed_0/1 (rows 9 and 10)
+# cannot be reached.
 set line [GetLineNum ${SRC}/mmu/pmachecker.sv "assign PMAAccessFault "]
-coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 5 9 10
+coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 5 8 9 10
 set line [GetLineNum ${SRC}/mmu/pmachecker.sv "exclusion-tag: unused-tim"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker -fecexprrow $line 2 4
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 2 4
@@ -350,14 +351,6 @@ coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/uartdec -fecexprr
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/plicdec -fecexprrow $line 3
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/spidec -fecexprrow $line 3
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/pwmdec -fecexprrow $line 3
-
-# LSU MemAccessDoneM clear (reset | FlushW | ~StallW), FlushW_1 row (FlushW while StallW): the two cannot
-# coincide in this testbench.  FlushW is LatestUnstalledW, which requires ~StallW, or FlushWCause = TrapM &
-# ~WFIInterruptedM.  StallW is (IFUStallF & ~FlushDCause) | (LSUStallM & ~FlushWCause) | ExternalStall;
-# FlushDCause includes TrapM and the LSU term is gated by ~FlushWCause, so both drop when FlushWCause is set,
-# and ExternalStall is the RVVI backpressure, tied low unless the synthesizable RVVI testbench is built.
-set line [GetLineNum ${SRC}/lsu/lsu.sv "reset \\| FlushW \\| ~StallW"]
-coverage exclude -scope /core/lsu -feccondrow $line 6
 
 set line [GetLineNum ${SRC}/mmu/adrdec.sv "exclusion-tag: adrdecSel"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker/adrdecs/clintdec -fecexprrow $line 3 7
@@ -409,8 +402,6 @@ set line [GetLineNum ${SRC}/mmu/pmachecker.sv "ReadAccessM & ~WriteAccessM & PMA
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 1 2 4-6
 set line [GetLineNum ${SRC}/mmu/pmachecker.sv "PMAStoreAmoAccessFaultM ="]
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 2 4-6
-set line [GetLineNum ${SRC}/mmu/pmachecker.sv "AccessRWXC \\| AtomicAccessM"]
-coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 3 6-8
 set line [GetLineNum ${SRC}/mmu/mmu.sv "ExecuteAccessF \\| ReadAccessM"]
 coverage exclude -scope /core/ifu/immu/immu -fecexprrow $line 1 3 4
 set line [GetLineNum ${SRC}/mmu/mmu.sv "ReadAccessM & ~WriteAccessM"]
@@ -450,8 +441,6 @@ coverage exclude -scope /core/ifu/immu/immu -fecexprrow [GetLineNum ${SRC}/mmu/m
 
 # IMMU never disables translations (DisableTranslation_1).
 coverage exclude -scope /core/ifu/immu/immu/tlb/tlb/tlbcontrol -fecexprrow [GetLineNum ${SRC}/mmu/tlb/tlbcontrol.sv "assign Translate"] 2
-# never reaches this when ENVCFG_ADUE_1 because HPTW updates A bit first
-coverage exclude -scope /core/ifu/immu/immu/tlb/tlb/tlbcontrol -fecexprrow [GetLineNum ${SRC}/mmu/tlb/tlbcontrol.sv "assign PrePageFault"] 18
 
 
 
@@ -695,10 +684,3 @@ set fbline [GetLineNum ${SRC}/ebu/ahbcacheinterface.sv "index == BeatCountDelaye
 for {set i 1} {$i < 8} {incr i} {
     coverage exclude -scope /core/ifu/bus/icache/ahbcacheinterface/fetchbufferbeat[$i] -fecexprrow $fbline 1
 }
-
-# FlushDCache = FlushDCacheM & ~SelHPTW : the SelHPTW=1 input-term (Row 4) is unreachable.  fence.i is the
-# only asserter of FlushDCacheM, and while fence.i is in M it pins the front end to an already-translated
-# page (NextValidPCE=PCE), so no ITLB walk can begin while FlushDCacheM=1; a walk that starts earlier stalls
-# fence.i out of M.  See https://github.com/openhwfoundation/cvw/issues/1788.
-set line [GetLineNum ${SRC}/lsu/lsu.sv "exclusion-tag: lsu FlushDCacheSelHPTW"]
-coverage exclude -scope /core/lsu/bus/dcache -fecexprrow $line 4
