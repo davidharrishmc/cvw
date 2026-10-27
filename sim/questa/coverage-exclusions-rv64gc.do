@@ -287,7 +287,7 @@ set line [GetLineNum ${SRC}/mmu/adrdec.sv "exclusion-tag: adrdecSel"]
 # The instruction side drives the MMU with ReadAccessM and WriteAccessM tied low and ExecuteAccessF tied high (see
 # the mmu instantiation in ifu.sv), so AccessRW is 0 and AccessRX/AccessRWXC are 1 there, and the fetch size is fixed.
 # Peripherals qualified by AccessRW never select: every row except AccessValid_0 needs AccessValid = 1.  AccessValid_0
-# (row 5) is reachable by fetching from the peripheral's address range (tests/coverage/fetchperiph.S), so it is
+# (row 5) is reachable by fetching from the peripheral's address range (tests/coverage64gc/fetchperiph.S), so it is
 # counted, except for the UART: it only accepts byte accesses, so SizeValid is 0 for the word-sized fetch.
 foreach dec {clintdec gpiodec plicdec spidec pwmdec} {
   coverage exclude -scope /core/ifu/immu/immu/pmachecker/adrdecs/$dec -fecexprrow $line 1-4 6-8
@@ -307,6 +307,10 @@ coverage exclude -scope /core/ifu/immu/immu/pmachecker/adrdecs/uncoreramdec -fec
 set line [GetLineNum ${SRC}/mmu/pmachecker.sv "exclusion-tag: unused-atomic"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker -fecexprrow $line 2 4
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 2 4
+# The instruction side ties ExecuteAccessF high and AtomicAccessM low, so AccessRWXC is always 1 and the atomic term
+# is always 0 in the IMMU: AccessRWXC_0 (row 5) and AtomicAllowed_0/1 (rows 9 and 10) cannot be reached.
+set line [GetLineNum ${SRC}/mmu/pmachecker.sv "assign PMAAccessFault "]
+coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 5 9 10
 set line [GetLineNum ${SRC}/mmu/pmachecker.sv "exclusion-tag: unused-tim"]
 coverage exclude -scope /core/lsu/dmmu/dmmu/pmachecker -fecexprrow $line 2 4
 coverage exclude -scope /core/ifu/immu/immu/pmachecker -fecexprrow $line 2 4

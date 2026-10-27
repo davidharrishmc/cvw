@@ -55,7 +55,7 @@
 --override iss/cpu0/unaligned_low_pri=T
 
 # Timeout
-#--override iss/cpu0/TW_time_limit=65536  # *** attempted adding this summer 2025 for interrupt tests, but it breaks WALLY-status-tw-01.elf test and tests/coverage/priv.elf.  Not in rv32gc either
+#--override iss/cpu0/TW_time_limit=65536  # *** attempted adding this summer 2025 for interrupt tests, but it breaks WALLY-status-tw-01.elf test and tests/coverage64gc/priv.elf.  Not in rv32gc either
 
 # PMP Configuration
 --override iss/cpu0/PMP_registers=16
