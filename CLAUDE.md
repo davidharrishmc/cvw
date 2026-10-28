@@ -55,8 +55,9 @@ regression-wally --nightly              # extended nightly suite
 ### Run code coverage
 ```bash
 regression-wally --ccov             # look at results in rv64gc_uncovered_hierarchical.rpt
+regression-wally --ccov --coveragesim vcs   # VCS: sim/vcs/cov/rv64gc_coverage_hierarchical.rpt
 ```
-Also possible to run individual files and merge them into the overall coverage.
+Also possible to run individual files and merge them into the overall coverage.  Each simulation writes its own database (`sim/questa/ucdb/*.ucdb`, or `sim/vcs/ucdb/*.vdb` with VCS); `make -C sim QuestaCodeCoverage` (or `VcsCodeCoverage`) merges them and applies `sim/questa/coverage-exclusions-rv64gc.do`, which `sim/vcs/exclusions2el` translates into a URG exclusion file for VCS (`sim/vcs/cov/exclusions-rv64gc.log` says what each exclusion became).
 
 ### Lint
 ```bash
@@ -120,10 +121,10 @@ Five stages: Fetch (F), Decode (D), Execute (E), Memory (M), Writeback (W). Stal
 ### Simulators
 
 - **Verilator**: Default for regression; open-source; no license needed. Compiled per config in `sim/verilator/wkdir/`.
-- **Questa** (Siemens): Required for code coverage, lockstep, testbench_fp, and GUI waveforms. Uses `sim/questa/wkdir/`.
-- **VCS** (Synopsys): Supports standard tests and lockstep.
+- **Questa** (Siemens): Required for testbench_fp and GUI waveforms; runs code/functional coverage and lockstep. Uses `sim/questa/wkdir/`.
+- **VCS** (Synopsys): Supports standard tests, lockstep, and code/functional coverage (merged and reported with `urg`).
 
-All three collect functional coverage (`wsim --fcov`) into `sim/<simulator>/fcov_ucdb`, `fcov_dat` or `fcov_vdb`; `make -C sim QuestaFunctCoverage`, `VerilatorFunctCoverage` or `VCSFunctCoverage` merges the rv64gc runs and writes reports to `sim/<simulator>/fcov/`.
+All three collect functional coverage (`wsim --fcov`) into `sim/questa/fcov_ucdb`, `sim/verilator/fcov_dat` or `sim/vcs/fcov_ucdb`; `make -C sim QuestaFunctCoverage`, `VerilatorFunctCoverage` or `VcsFunctCoverage` merges the rv64gc runs and writes reports to `sim/<simulator>/fcov/`.
 
 Lockstep mode runs Wally in lock-step against ImperasDV (commercial) or the RISC-V Sail model for instruction-by-instruction comparison.
 

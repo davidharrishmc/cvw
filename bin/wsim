@@ -41,7 +41,7 @@ ACT_DIR = "addins/riscv-arch-test"
 FCOV_DIRS = (f"{ACT_DIR}/coverpoints", f"{ACT_DIR}/framework/src/act/fcov", f"{ACT_DIR}/tests/env")
 # Where each simulator writes the per-run functional coverage databases (sim/<simulator>/<dir>), which
 # sim/Makefile merges and reports; the reports go in sim/<simulator>/fcov
-FCOV_DB_DIRS = {"questa": "fcov_ucdb", "verilator": "fcov_dat", "vcs": "fcov_vdb"}
+FCOV_DB_DIRS = {"questa": "fcov_ucdb", "verilator": "fcov_dat", "vcs": "fcov_ucdb"}
 
 
 def parseArgs():
@@ -76,8 +76,8 @@ def validateArgs(args):
     if args.gui and args.sim != "questa":
         print("GUI only supported by Questa")
         sys.exit(1)
-    elif args.ccov and args.sim != "questa":
-        print("Code coverage only supported by Questa")
+    elif args.ccov and args.sim not in ["questa", "vcs"]:
+        print("Code coverage only supported by Questa and VCS")
         sys.exit(1)
     elif args.fcov and not fcovWork(args.config).is_dir():
         print(f"Error: no ACT work directory {fcovWork(args.config)}; build its tests before collecting functional coverage")
@@ -436,7 +436,10 @@ def runVCS(args, flags, env):
 
     # Phase 1: Compile (only once per config/flags/params/defines combo)
     target_mtime = targetMtime(binary)
-    needs_compile = target_mtime is None or not isDesignUpToDate(binary, fcovDirs(args))
+    # run_vcs holds the compile options and coverage.hier the code coverage scope, so they are sources too
+    scripts = [WALLY / "sim" / "vcs" / f for f in ("run_vcs", "coverage.hier")]
+    needs_compile = (target_mtime is None or not isDesignUpToDate(binary, fcovDirs(args))
+                     or any(f.stat().st_mtime > target_mtime for f in scripts))
     with compileLock("vcs", f"{args.config}_{args.tb}{'_' + bhash if bhash else ''}"):
         current_mtime = targetMtime(binary)
         if needs_compile and current_mtime == target_mtime:
