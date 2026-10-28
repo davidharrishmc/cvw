@@ -173,7 +173,7 @@ def prepSim(args, elfs):
     if args.fcov:
         flagsList.append("--fcov")
         defineList.append("+define+FCOV")
-        groups = fcovGroups(args.config)
+        groups = fcovGroups(args.config, elfs)
         print(f"Functional coverage: {len(groups)} covergroups")
         defineList += [f"+define+{group.upper()}_COVERAGE" for group in groups]
     if args.gui:
@@ -259,12 +259,18 @@ def fcovWork(config):
     return WALLY / ACT_DIR / "work" / f"cvw-{config}"
 
 
-def fcovGroups(config):
-    """The covergroups --fcov compiles in, each enabled by a +define+<GROUP>_COVERAGE.  ACT derives its
-    coverage groups from the directory structure of the generated tests, so take the same set: every
-    directory of built tests for the configuration that has a matching covergroup file."""
-    elfs = fcovWork(config) / "elfs"
-    names = {d.name for d in elfs.rglob("*") if d.is_dir()} if elfs.is_dir() else set()
+def fcovGroups(config, elfs):
+    """The covergroups --fcov compiles in, each enabled by a +define+<GROUP>_COVERAGE.  ACT names a coverage
+    group after the directory of its tests and collects each group from its own tests only, so take the
+    groups of the directories the ELFs being run come from.  That matches ACT's results (a group is not
+    credited with bins that another suite's tests happen to hit, and the hint groups do not take
+    instructions away from the base groups), and a build with a few covergroups compiles and runs much
+    faster than one with all of them.  Without ELFs (buildroot), take every directory of built tests."""
+    if elfs:
+        names = {Path(e).parent.name for e in elfs}
+    else:
+        built = fcovWork(config) / "elfs"
+        names = {d.name for d in built.rglob("*") if d.is_dir()} if built.is_dir() else set()
     return sorted(n for n in names if any((WALLY / ACT_DIR / "coverpoints" / k / f"{n}_coverage.svh").exists()
                                           for k in ("unpriv", "priv")))
 

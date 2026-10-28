@@ -812,9 +812,8 @@ def selectTests(args, sims, coverStr):
     # copy would race it for the same log and testlist files.
     if args.fcov:
         buildTests(periph=False)
-        # Functional coverage slows the simulation to between half a minute and two minutes per
-        # ELF (the Ssstrict tests are the slowest), so split each directory into simulations of at
-        # most 8 ELFs
+        # Each simulation compiles in only the covergroups of its own directory (see wsim fcovGroups).
+        # Split each directory into simulations of at most 8 ELFs so that the large ones run in parallel.
         addTestsByDir(actElfDir("rv64gc"), "rv64gc", coveragesim, coverStr, configs, chunk=8)
      # run branch predictor tests
     if args.branch:
