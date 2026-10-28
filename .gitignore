@@ -116,6 +116,8 @@ simv
 sim/vcs/logs
 sim/vcs/wkdir
 sim/vcs/ucdb
+sim/vcs/fcov
+sim/vcs/fcov_vdb
 sim/vcs/csrc
 sim/vcs/profileReport*
 sim/vcs/program.out
@@ -129,6 +131,8 @@ sim/vcs/simprofile*
 # Verilator
 sim/verilator/logs
 sim/verilator/wkdir
+sim/verilator/fcov
+sim/verilator/fcov_dat
 
 # Examples
 examples/verilog/fulladder/csrc/

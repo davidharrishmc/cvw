@@ -15,7 +15,7 @@ coveragetests:
 deriv:
 	derivgen.pl
 
-.PHONY: QuestaFunctCoverage QuestaCodeCoverage
+.PHONY: QuestaFunctCoverage VerilatorFunctCoverage VCSFunctCoverage QuestaCodeCoverage
 
 # Merge the per-test functional coverage databases written by wsim --fcov and report the total.
 QuestaFunctCoverage:
@@ -25,6 +25,22 @@ QuestaFunctCoverage:
 	vcover report questa/fcov_ucdb/fcov.ucdb -cvg > questa/fcov/fcov.summary.log
 	vcover report questa/fcov_ucdb/fcov.ucdb -details -cvg -below 100 > questa/fcov/fcov.uncovered.log
 	grep -E "TOTAL COVERGROUP COVERAGE" questa/fcov/fcov.summary.log
+
+# The same for wsim --fcov --sim verilator
+VerilatorFunctCoverage:
+	mkdir -p verilator/fcov
+	verilator_coverage --write verilator/fcov/fcov.dat verilator/fcov_dat/rv64gc*.dat
+	verilator_coverage --report hier verilator/fcov/fcov.dat > verilator/fcov/fcov.log
+	verilator_coverage --report summary verilator/fcov/fcov.dat > verilator/fcov/fcov.summary.log
+	grep -v "100.0%" verilator/fcov/fcov.log > verilator/fcov/fcov.uncovered.log
+	grep -E "covergroup" verilator/fcov/fcov.summary.log
+
+# The same for wsim --fcov --sim vcs; the report directory holds dashboard.txt (the total), groups.txt
+# (each covergroup) and grpinfo.txt (each bin)
+VCSFunctCoverage:
+	mkdir -p vcs/fcov
+	urg -full64 -dir vcs/fcov_vdb/rv64gc*.vdb -dbname vcs/fcov/fcov.vdb -report vcs/fcov/report -format text -log vcs/fcov/urg.log
+	grep -A2 "Total Coverage Summary" vcs/fcov/report/dashboard.txt
 
 # Merge the per-test code coverage databases written by wsim --ccov, apply the rv64gc exclusions to the merged
 # database, and write the reports.  The per-test databases carry no exclusions, so editing

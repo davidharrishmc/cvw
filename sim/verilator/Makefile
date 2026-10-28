@@ -13,6 +13,7 @@ PARAM_ARGS  =               # Compile-time parameter overrides (e.g. MAKE_VCD=1)
 DEFINE_ARGS =               # Compile-time defines (e.g. +define+USE_IMPERAS_DV)
 BUILD_HASH ?=               # Hash suffix for workdir when PARAM_ARGS/DEFINE_ARGS vary;
                             # computed by wsim to avoid shell-escaping issues in Make
+FCOV       ?= 0             # 1 compiles in the riscv-arch-test covergroups (wsim --fcov)
 
 # ------ Verilator flags ------
 VERILATOR_FLAGS = --assert --no-trace-top --stats
@@ -35,6 +36,24 @@ SOURCES       = ${WALLY}/src/cvw.sv ${WALLY}/testbench/${TESTBENCH}.sv ${WALLY}/
 # Only the synthesizable RVVI interface (wsim --rvvi) uses the verilog-ethernet MAC
 ifneq ($(findstring RVVI_SYNTH_SUPPORTED=1,$(PARAM_ARGS)),)
     SOURCES += ${WALLY}/addins/verilog-ethernet/*/*.sv ${WALLY}/addins/verilog-ethernet/*/*/*/*.sv
+endif
+
+# Functional coverage comes from riscv-arch-test: riscv_arch_test.sv instantiates the generated
+# covergroups and samples them off the RVVI trace.  It needs four include paths: its own sources,
+# the generated coverpoints, the test environment for derived_config.svh, and the env directory of
+# the matching ACT configuration (cvw-<config>) for the generated rvtest_config.svh and
+# rvmodel_macros.svh.  wsim passes +define+FCOV and a +define+<GROUP>_COVERAGE for each covergroup
+# in DEFINE_ARGS, and names the coverage file at run time.
+ifeq ($(strip $(FCOV)),1)
+    ACT_DIR = ${WALLY}/addins/riscv-arch-test
+    FCOV_SRC = $(ACT_DIR)/framework/src/act/fcov
+    # riscv-arch-test's covergroups still draw Verilator warnings (e.g. COVERIGN for bin arrays wider
+    # than Verilator supports), which are not Wally's to fix, so report them without stopping the build
+    VERILATOR_FLAGS += --coverage-user -Wno-fatal
+    INCLUDE_PATH += "-I$(FCOV_SRC)" "-I$(ACT_DIR)/coverpoints" "-I$(ACT_DIR)/coverpoints/unpriv" \
+                    "-I$(ACT_DIR)/coverpoints/priv" "-I$(ACT_DIR)/tests/env" \
+                    "-I$(ACT_DIR)/work/cvw-$(strip $(WALLYCONF))/env"
+    SOURCES := $(FCOV_SRC)/rvviTrace.sv $(FCOV_SRC)/riscv_arch_test.sv $(SOURCES)
 endif
 
 # Convert PARAM_ARGS entries (e.g. "MAKE_VCD=1") into verilator -G flags (e.g. "-GMAKE_VCD=1")

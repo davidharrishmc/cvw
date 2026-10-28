@@ -21,6 +21,8 @@ cfgdir = f"{WALLY}/config"
 srcdir = f"{WALLY}/src"
 tbdir  = f"{WALLY}/testbench"
 logdir = f"{simdir}/logs"
+actdir = f"{WALLY}/addins/riscv-arch-test"
+fcovsrc = f"{actdir}/framework/src/act/fcov"
 
 # Memories that are generated per FPGA target rather than compiled into the simulation
 EXCLUDED_SOURCES = {f"{srcdir}/generic/mem/{name}.sv" for name in
@@ -42,10 +44,13 @@ def parseArgs():
     parser.add_argument("--define", "-d", help="Optional define macros passed to simulator", default="")
     parser.add_argument("--lockstep", "-l", help="Run ImperasDV lock, step, and compare.", action="store_true")
     parser.add_argument("--breker", "-b", help="Run Breker test", action="store_true")
+    parser.add_argument("--fcov", "-f", help="Compile in the riscv-arch-test covergroups", action="store_true")
     return parser.parse_args()
 
-def generateFileList(testbench, params):
+def generateFileList(testbench, params, fcov):
     files = [f"{tbdir}/{testbench}.sv", *svFiles(srcdir), *svFiles(f"{tbdir}/common")]
+    if fcov:
+        files = [f"{fcovsrc}/rvviTrace.sv", f"{fcovsrc}/riscv_arch_test.sv", *files]
     # Only the synthesizable RVVI interface (wsim --rvvi) uses the verilog-ethernet MAC
     if "RVVI_SYNTH_SUPPORTED=1" in params.split():
         files += svFiles(f"{WALLY}/addins/verilog-ethernet")
@@ -62,6 +67,14 @@ def getCompileOptions(wkdir, args):
                                f"+incdir+{imperas}/ImpProprietary/include/host/idv",
                                *sorted(glob.glob(f"{imperas}/ImpPublic/source/host/rvvi/*.sv")),
                                *sorted(glob.glob(f"{imperas}/ImpProprietary/source/host/idv/*.sv"))])
+    if args.fcov:
+        # riscv_arch_test.sv instantiates the generated covergroups and samples them off the RVVI trace.
+        # It needs its own sources, the generated coverpoints, the test environment for derived_config.svh,
+        # and the env directory of the matching ACT configuration (cvw-<config>) for the generated
+        # rvtest_config.svh and rvmodel_macros.svh.  wsim passes the +define+<GROUP>_COVERAGE for each covergroup.
+        compileOptions.extend([f"+incdir+{fcovsrc}", f"+incdir+{actdir}/coverpoints",
+                               f"+incdir+{actdir}/coverpoints/unpriv", f"+incdir+{actdir}/coverpoints/priv",
+                               f"+incdir+{actdir}/tests/env", f"+incdir+{actdir}/work/cvw-{args.config}/env"])
     if args.breker:
         WALLY_UVM_PKG = os.environ.get('WALLY_UVM_PKG')
         if not WALLY_UVM_PKG:
@@ -86,6 +99,11 @@ def getSimvOptions(args):
         if not BREKER_HOME:
             raise RuntimeError("BREKER_HOME environment variable is not set for Breker test!")
         simvOptions.extend(["-sv_lib", f"{BREKER_HOME}/linux64/lib/libtrek"])
+    if args.fcov:
+        # VCS counts the values of a bin in a signed 64-bit integer, so a legal bin of 2^63 values, such as
+        # {[$:-1]} on the signed 64-bit branch offsets of the riscv-arch-test covergroups, trips an internal
+        # assertion (CovgCountStates result is negative); riscv-arch-test's own VCS flow turns it off the same way
+        simvOptions.extend(["-cm_dir", f"{simdir}/fcov_vdb/{args.config}_{args.testsuite}.vdb", "-vcs_assert", "off"])
     return simvOptions
 
 def setupParamOverrides(wkdir, args):
@@ -101,7 +119,7 @@ def compileDesign(wkdir, args):
     """Compile the design with VCS."""
     os.makedirs(wkdir, exist_ok=True)
     os.makedirs(logdir, exist_ok=True)
-    rtlFiles = generateFileList(args.tb, args.params)
+    rtlFiles = generateFileList(args.tb, args.params, args.fcov)
     compileOptions = getCompileOptions(wkdir, args)
     includePath = [f"+incdir+{cfgdir}/{args.config}", f"+incdir+{cfgdir}/deriv/{args.config}", f"+incdir+{cfgdir}/shared",
                    f"+incdir+{WALLY}/tests", f"+incdir+{tbdir}", f"+incdir+{srcdir}"]
@@ -120,7 +138,7 @@ def run(wkdir, args):
 
 def main(args):
     wkdir = args.wkdir if args.wkdir else f"{simdir}/wkdir/{args.config}_{args.testsuite}"
-    print(f"run_vcs {args.action} Config={args.config} tests={args.testsuite} lockstep={args.lockstep} args='{args.args}' params='{args.params}' define='{args.define}'")
+    print(f"run_vcs {args.action} Config={args.config} tests={args.testsuite} lockstep={args.lockstep} fcov={args.fcov} args='{args.args}' params='{args.params}' define='{args.define}'")
     if args.action == "compile":
         compileDesign(wkdir, args)
     elif args.action == "run":
