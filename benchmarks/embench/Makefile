@@ -6,7 +6,7 @@ embench_dir = ../../addins/embench-iot
 # assert() in embench's support code embeds __FILE__, an absolute path; strip the checkout location so the
 # binaries, and the cycle counts compared with expected_embench_results, do not depend on where the
 # repository is checked out
-PREFIX_MAP = -fmacro-prefix-map=$(abspath $(embench_dir))/=
+PREFIX_MAP = -ffile-prefix-map=$(abspath $(embench_dir))/=
 ARCH=rv32imac_zicsr
 
 all: build
