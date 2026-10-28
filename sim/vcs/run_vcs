@@ -100,10 +100,7 @@ def getSimvOptions(args):
             raise RuntimeError("BREKER_HOME environment variable is not set for Breker test!")
         simvOptions.extend(["-sv_lib", f"{BREKER_HOME}/linux64/lib/libtrek"])
     if args.fcov:
-        # VCS counts the values of a bin in a signed 64-bit integer, so a legal bin of 2^63 values, such as
-        # {[$:-1]} on the signed 64-bit branch offsets of the riscv-arch-test covergroups, trips an internal
-        # assertion (CovgCountStates result is negative); riscv-arch-test's own VCS flow turns it off the same way
-        simvOptions.extend(["-cm_dir", f"{simdir}/fcov_vdb/{args.config}_{args.testsuite}.vdb", "-vcs_assert", "off"])
+        simvOptions.extend(["-cm_dir", f"{simdir}/fcov_vdb/{args.config}_{args.testsuite}.vdb"])
     return simvOptions
 
 def setupParamOverrides(wkdir, args):
