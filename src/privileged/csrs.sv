@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Ben Bracker, Noah Boorstin, Domenico Ottolia dottolia@hmc.edu, Kip Macsai-Goren, Jacob Pease, Ayesha Anwaar
 //
-// Purpose: Supervisor-mode control and status registers.
+// Purpose: Supervisor-mode CSRs.
 //
 // Documentation: RISC-V System on Chip Design
 //

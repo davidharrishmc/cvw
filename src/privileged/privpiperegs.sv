@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 12 May 2022
 // Modified: Rose Thompson
 //
-// Purpose: Pipeline registers that carry early exceptions from Fetch and Decode to the Memory stage.
+// Purpose: Pipeline registers for early exceptions.
 //
 // Documentation: RISC-V System on Chip Design
 //

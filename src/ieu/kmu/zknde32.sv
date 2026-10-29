@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 27 November 2023
 // Modified: David Harris
 //
-// Purpose: RV32 Zkne/Zknd unit for the aes32esi, aes32esmi, aes32dsi, and aes32dsmi instructions.
+// Purpose: RV32 Zkne/Zknd AES unit.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

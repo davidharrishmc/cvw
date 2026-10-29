@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 9 October 2023
 // Modified:
 //
-// Purpose: Bit interleave (zip) and deinterleave (unzip) for Zbkb.
+// Purpose: Zbkb zip and unzip.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

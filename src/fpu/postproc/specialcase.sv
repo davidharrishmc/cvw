@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: James Stine, David Harris, Jordan Carlin
 //
-// Purpose: Select the final result for NaN, infinity, overflow, underflow, and invalid integer conversion cases.
+// Purpose: Special-case floating-point results.
 //
 // Documentation: RISC-V System on Chip Design
 //

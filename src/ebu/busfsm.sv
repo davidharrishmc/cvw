@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 29 December 2021
 // Modified:
 //
-// Purpose: Simple AHB bus controller state machine for single (NONSEQ) transfers without bursts.
+// Purpose: AHB bus state machine for single transfers.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 15 February 2021
 // Modified: David Harris
 //
-// Purpose: Return address stack that predicts the target address of function returns.
+// Purpose: Return address stack.
 //
 // Documentation: RISC-V System on Chip Design
 //

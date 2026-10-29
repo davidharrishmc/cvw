@@ -4,7 +4,7 @@
 // Written:  James Stine james.stine@okstate.edu 28 January 2023
 // Modified: Rose Thompson, David Harris
 //
-// Purpose: Wrapper that instantiates a 2048x64 two-port SRAM macro.
+// Purpose: 2048x64 two-port SRAM macro wrapper.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

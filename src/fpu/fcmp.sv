@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 2 July 2021
 // Modified: David Harris, Vikram Krishna, Noah Limpert
 //
-// Purpose: Floating-point compare, min, and max, including the Zfa fminm, fmaxm, fleq, and fltq variants.
+// Purpose: Floating-point compare, min, and max.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Shreya Sanghai, Rose Thompson, Ben Bracker, Abdul Rafay
 //
-// Purpose: Counter CSRs: cycle, time, instret, and hardware performance monitors.
+// Purpose: Counter CSRs.
 //
 // Documentation: RISC-V System on Chip Design
 //

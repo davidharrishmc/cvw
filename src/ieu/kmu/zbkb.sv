@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 4 October 2023
 // Modified: David Harris
 //
-// Purpose: Zbkb unit for brev8, pack, packh, packw, zip, and unzip.
+// Purpose: Zbkb unit.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris
 //
-// Purpose: Inverse S-box and InvMixColumns on one byte for the RV32 aes32dsi and aes32dsmi decryption instructions.
+// Purpose: RV32 AES decryption (aes32dsi, aes32dsmi).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

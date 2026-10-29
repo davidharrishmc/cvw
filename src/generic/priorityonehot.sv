@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 7 April 2021
 // Modified: David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, Madeleine Masser-Frye, Teo Ene
 //
-// Purpose: Priority circuit that outputs a one-hot vector marking the least significant 1 in its input.
+// Purpose: One-hot marking of the least significant 1.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

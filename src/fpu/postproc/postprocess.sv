@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: David Harris
 //
-// Purpose: Normalize, round, and select special-case results and flags for FMA, divide/square root, and conversion operations.
+// Purpose: Floating-point normalization, rounding, and special cases.
 //
 // Documentation: RISC-V System on Chip Design
 //

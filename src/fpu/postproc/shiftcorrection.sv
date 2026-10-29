@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: David Harris, Kevin Kim
 //
-// Purpose: Correct the normalized result and exponent for the one-bit error of the FMA leading zero anticipator and the divider.
+// Purpose: Corrects the one-bit normalization shift error.
 //
 // Documentation: RISC-V System on Chip Design
 //

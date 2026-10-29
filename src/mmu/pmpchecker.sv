@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 28 April 2021
 // Modified: David Harris, Kip Macsai-Goren, Rose Thompson, Madeleine Masser-Frye
 //
-// Purpose: Checks each physical access against the PMP registers and raises access faults on illegal reads, writes, and fetches.
+// Purpose: Physical memory protection checker.
 //
 // Documentation: RISC-V System on Chip Design
 //

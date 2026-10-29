@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Fused multiply-add datapath producing the unrounded sum, its sign and exponent, and the normalization shift count.
+// Purpose: Fused multiply-add datapath.
 //
 // Documentation: RISC-V System on Chip Design
 //

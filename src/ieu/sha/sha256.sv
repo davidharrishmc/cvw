@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 13 February 2024
 // Modified: David Harris
 //
-// Purpose: SHA-256 sig0, sig1, sum0, and sum1 functions built from selected rotates and shifts and a three-input XOR.
+// Purpose: SHA-256 sig and sum functions.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

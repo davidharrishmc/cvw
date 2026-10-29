@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris
 //
-// Purpose: Inverse ShiftRows, SubBytes, and MixColumns for the RV64 aes64ds, aes64dsm, and aes64im instructions.
+// Purpose: RV64 AES decryption (aes64ds, aes64dsm, aes64im).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified:
 //
-// Purpose: Four AES S-boxes that substitute each byte of a 32-bit word.
+// Purpose: AES S-boxes for a 32-bit word.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

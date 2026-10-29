@@ -4,7 +4,7 @@
 // Written:  Jessica Torrey jtorrey@hmc.edu 16 February 2021
 // Modified: Thomas Fleming, David Harris, Kip Macsai-Goren kmacsaigoren@hmc.edu, Rose Thompson, Ayesha Anwaar, Muhammad Zain
 //
-// Purpose: Translation lookaside buffer that caches virtual-to-physical address translations.
+// Purpose: Translation lookaside buffer.
 //
 // Documentation: RISC-V System on Chip Design
 //

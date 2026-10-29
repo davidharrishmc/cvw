@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu 8 December 2021
 // Modified: Madeleine Masser-Frye
 //
-// Purpose: Equality and signed or unsigned less-than comparison for branches.
+// Purpose: Branch comparator.
 //
 // Documentation: RISC-V System on Chip Design
 //

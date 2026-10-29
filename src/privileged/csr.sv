@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Ben Bracker, Domenico Ottolia dottolia@hmc.edu, Udeema Shakya, Katherine Parry, Jordan Carlin
 //
-// Purpose: Control and status registers, including CSR read/write muxing, trap vector selection, and exception PC handling.
+// Purpose: Control and status registers.
 //
 // Documentation: RISC-V System on Chip Design
 //

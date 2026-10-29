@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Multiply the FMA input significands.
+// Purpose: FMA significand multiplier.
 //
 // Documentation: RISC-V System on Chip Design
 //

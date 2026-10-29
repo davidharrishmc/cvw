@@ -4,7 +4,7 @@
 // Written:  Jessica Torrey jtorrey@hmc.edu, Thomas Fleming tfleming@hmc.edu 16 February 2021
 // Modified: David Harris, Kip Macsai-Goren
 //
-// Purpose: Stores the PTEs of cached translations and reads out the physical page number and permission bits on a hit.
+// Purpose: TLB PTE storage.
 //
 // Documentation: RISC-V System on Chip Design
 //

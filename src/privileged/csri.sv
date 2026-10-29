@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Ben Bracker, Rose Thompson, Kip Macsai-Goren, Harshini Srinath
 //
-// Purpose: Interrupt pending and enable CSRs (mip/mie and sip/sie).
+// Purpose: Interrupt pending and enable CSRs.
 //
 // Documentation: RISC-V System on Chip Design
 //

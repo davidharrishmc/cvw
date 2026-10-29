@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 4 February 2021
 // Modified: Brett Mathis, David Harris, Sydney Riley, Rose Thompson, Corey Hickson, Jordan Carlin
 //
-// Purpose: Decode floating-point instructions, detect illegal ones, and pipeline the FPU control signals to the Execute, Memory, and Writeback stages.
+// Purpose: Floating-point instruction decoder and control pipeline.
 //
 // Documentation: RISC-V System on Chip Design
 //

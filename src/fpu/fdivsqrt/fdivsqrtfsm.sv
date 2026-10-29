@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 7 July 2022
 // Modified:
 //
-// Purpose: State machine that starts, counts, and completes multicycle divide and square root operations, finishing special cases early.
+// Purpose: Divide and square root state machine.
 //
 // Documentation: RISC-V System on Chip Design
 //

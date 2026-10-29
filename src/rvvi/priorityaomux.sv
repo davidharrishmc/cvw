@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 24 January 2024
 // Modified:
 //
-// Purpose: AND-OR multiplexer that selects the row with the lowest-index asserted select bit.
+// Purpose: Priority AND-OR multiplexer.
 //
 // Documentation:
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Jordan Carlin, Kevin Thomas
 //
-// Purpose: Expands 16-bit compressed instructions into their 32-bit equivalents.
+// Purpose: Compressed instruction expander.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

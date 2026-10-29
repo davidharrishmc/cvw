@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 16 January 2024
 // Modified:
 //
-// Purpose: Look up the Zfa fli floating-point immediate for the selected format.
+// Purpose: Zfa fli immediate lookup.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu, Kevin Kim kekim@hmc.edu 9 January 2021
 // Modified: Rose Thompson, James Stine, Ben Bracker, Katherine Parry, Shreya Sanghai, Madeleine Masser-Frye, Alec Vercruysse
 //
-// Purpose: Decodes instructions, pipelines integer control signals from Decode to Writeback, and detects structural hazards.
+// Purpose: Integer decoder and control pipeline.
 //
 // Documentation: RISC-V System on Chip Design
 //

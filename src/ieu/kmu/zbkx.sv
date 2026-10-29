@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 1 February 2024
 // Modified: David Harris
 //
-// Purpose: Zbkx crossbar permutations xperm4 and xperm8.
+// Purpose: Zbkx xperm4 and xperm8.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

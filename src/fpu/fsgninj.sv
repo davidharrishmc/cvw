@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com
 // Modified: David Harris
 //
-// Purpose: Floating-point sign injection for fsgnj, fsgnjn, and fsgnjx.
+// Purpose: Floating-point sign injection.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 26 May 2022
 // Modified:
 //
-// Purpose: Compute the sign, exponent, and normalization shift for integer and floating-point format conversions.
+// Purpose: Floating-point and integer conversions.
 //
 // Documentation: RISC-V System on Chip Design
 //

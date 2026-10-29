@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 19 May 2021
 // Modified: Rose Thompson
 //
-// Purpose: Detect floating-point register dependencies to stall Decode and select forwarding for the Execute-stage operands.
+// Purpose: Floating-point hazard detection and forwarding.
 //
 // Documentation: RISC-V System on Chip Design
 //

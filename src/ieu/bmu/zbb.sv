@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 2 February 2023
 // Modified:
 //
-// Purpose: Zbb unit that selects among count, extend, byte, and min/max results.
+// Purpose: Zbb unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

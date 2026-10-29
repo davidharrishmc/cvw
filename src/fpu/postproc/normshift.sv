@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified:
 //
-// Purpose: Normalization left shifter for the postprocessor.
+// Purpose: Normalization shifter.
 //
 // Documentation: RISC-V System on Chip Design
 //

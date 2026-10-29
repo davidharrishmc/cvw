@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 5 March 2024
 // Modified: David Harris
 //
-// Purpose: AES InvMixColumns of a 32-bit column whose only nonzero byte is the low byte, as used by aes32d.
+// Purpose: AES InvMixColumns on a column with one nonzero byte.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

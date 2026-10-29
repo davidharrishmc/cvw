@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Compute the FMA product exponent from the input exponents.
+// Purpose: FMA product exponent.
 //
 // Documentation: RISC-V System on Chip Design
 //

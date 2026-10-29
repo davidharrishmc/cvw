@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 29 August 2022
 // Modified: David Harris
 //
-// Purpose: External bus unit that arbitrates IFU and LSU requests onto a single AHB-Lite bus, with the LSU having priority.
+// Purpose: External bus unit: arbitrates the IFU and LSU onto one AHB-Lite bus.
 //          See ARM IHI0033A AMBA AHB-Lite Specification 1.0. Bus width presently matches XLEN.
 //
 // Documentation: RISC-V System on Chip Design

@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified:
 //
-// Purpose: Compute the IEEE 754 exception flags for the postprocessed result.
+// Purpose: IEEE 754 exception flags.
 //
 // Documentation: RISC-V System on Chip Design
 //

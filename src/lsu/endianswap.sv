@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 7 May 2022
 // Modified:
 //
-// Purpose: Reverses the byte order of data for big-endian memory accesses.
+// Purpose: Big-endian byte swap.
 //
 // Documentation: RISC-V System on Chip Design
 //

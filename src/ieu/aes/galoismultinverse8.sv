@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified:
 //
-// Purpose: Reduces an 11-bit GF(2) polynomial product to a byte modulo the AES polynomial for InvMixColumns.
+// Purpose: GF(2^8) reduction for AES InvMixColumns.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

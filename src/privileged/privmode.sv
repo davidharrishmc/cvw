@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 12 May 2022
 // Modified:
 //
-// Purpose: Tracks the current privilege mode and updates it on traps and returns.
+// Purpose: Privilege mode tracking.
 //
 // Documentation: RISC-V System on Chip Design
 //

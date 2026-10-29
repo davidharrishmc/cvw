@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 27 May 2022
 // Modified: James Stine james.stine@okstate.edu, Marcus Mellor marcus@infinitymdm.dev, Kevin Kim
 //
-// Purpose: Counts the leading zeros of its input.
+// Purpose: Leading zero counter.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

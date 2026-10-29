@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 3 July 2022
 // Modified:
 //
-// Purpose: Select the sign of the normalized result according to the operation.
+// Purpose: Sign of the normalized result.
 //
 // Documentation: RISC-V System on Chip Design
 //

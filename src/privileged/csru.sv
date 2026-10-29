@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Katherine Parry
 //
-// Purpose: User-mode floating-point CSRs (fflags, frm, and fcsr).
+// Purpose: Floating-point CSRs (fflags, frm, fcsr).
 //
 // Documentation: RISC-V System on Chip Design
 //

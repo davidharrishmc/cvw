@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 26 June 2024
 // Modified:
 //
-// Purpose: Watches incoming Ethernet frames for a specific trigger frame and pulses an ILA trigger when it arrives.
+// Purpose: ILA trigger on a specific Ethernet frame.
 //
 // Documentation:
 //

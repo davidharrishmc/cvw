@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: James Stine, Rose Thompson
 //
-// Purpose: Multiply/divide unit implementing the M extension.
+// Purpose: Multiply/divide unit (M extension).
 //
 // Documentation: RISC-V System on Chip Design
 //

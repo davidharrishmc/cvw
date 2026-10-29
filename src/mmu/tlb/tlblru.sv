@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 16 February 2021
 // Modified: David Harris, Kip Macsai-Goren
 //
-// Purpose: Pseudo-LRU replacement policy that selects the next TLB entry to write.
+// Purpose: TLB pseudo-LRU replacement.
 //
 // Documentation: RISC-V System on Chip Design
 //

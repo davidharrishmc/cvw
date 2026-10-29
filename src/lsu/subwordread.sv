@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Kevin Kim, Katherine Parry
 //
-// Purpose: Selects and sign- or zero-extends the addressed byte, halfword, word, or doubleword from read data.
+// Purpose: Subword load extraction and extension.
 //
 // Documentation: RISC-V System on Chip Design
 //

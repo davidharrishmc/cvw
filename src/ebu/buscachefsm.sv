@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 29 December 2021
 // Modified: David Harris
 //
-// Purpose: AHB bus controller state machine for cache line bursts, writebacks, atomics, and uncached accesses.
+// Purpose: AHB bus state machine for cache bursts and uncached accesses.
 //
 // Documentation: RISC-V System on Chip Design
 //

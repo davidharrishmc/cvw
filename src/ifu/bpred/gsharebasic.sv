@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net, Shreya Sanghai ssanghai@hmc.edu 16 March 2021
 // Modified:
 //
-// Purpose: Basic gshare or global-history branch direction predictor that updates the history only in the Memory stage.
+// Purpose: Basic gshare / global-history direction predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 1 February 2023
 // Modified:
 //
-// Purpose: Reverses the bit order of a word.
+// Purpose: Bit reversal.
 //
 // Documentation: RISC-V System on Chip Design
 //

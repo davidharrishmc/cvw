@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 15 February 2021
 // Modified: David Harris
 //
-// Purpose: Branch target buffer that predicts the target address and instruction class of control-flow instructions.
+// Purpose: Branch target buffer.
 //
 // Documentation: RISC-V System on Chip Design
 //

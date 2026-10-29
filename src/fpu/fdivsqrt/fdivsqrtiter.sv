@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 15 July 2022
 // Modified: Kevin Kim, Alessandro Maiuolo
 //
-// Purpose: Registers for the residual and partial result, with DIVCOPIES recurrence stages per cycle.
+// Purpose: Divide and square root recurrence registers and stages.
 //
 // Documentation: RISC-V System on Chip Design
 //

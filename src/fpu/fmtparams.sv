@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 11 May 2024
 // Modified:
 //
-// Purpose: Look up the exponent bias and number of fraction bits for the selected floating-point format.
+// Purpose: Exponent bias and fraction width for the selected format.
 //
 // Documentation: RISC-V System on Chip Design
 //

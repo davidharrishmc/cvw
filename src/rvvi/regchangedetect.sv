@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 24 January 2024
 // Modified:
 //
-// Purpose: Detects when a register value differs from its value in the previous cycle.
+// Purpose: Register change detector.
 //
 // Documentation:
 //

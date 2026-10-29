@@ -4,7 +4,7 @@
 // Written:  Katherine Parry, David Harris David_Harris@hmc.edu 21 August 2022
 // Modified:
 //
-// Purpose: 3:2 carry-save adder that reduces three operands to a sum and a carry.
+// Purpose: 3:2 carry-save adder.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

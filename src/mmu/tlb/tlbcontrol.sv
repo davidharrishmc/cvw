@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 5 July 2021
 // Modified: Rose Thompson, Kip Macsai-Goren, Muhammad Zain
 //
-// Purpose: TLB control logic for translation enable, hit and miss, permission checks, and page faults.
+// Purpose: TLB hit, miss, permission, and page fault logic.
 //
 // Documentation: RISC-V System on Chip Design
 //

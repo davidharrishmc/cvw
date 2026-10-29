@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 26 February 2023
 // Modified: David Harris
 //
-// Purpose: Partially decodes fetched instructions to classify them as call, return, jump, or branch.
+// Purpose: Instruction class predecoder.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

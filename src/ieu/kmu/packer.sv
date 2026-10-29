@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 5 October 2023
 // Modified: David Harris
 //
-// Purpose: Zbkb pack, packh, and packw operations.
+// Purpose: Zbkb pack, packh, and packw.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Thomas Fleming, Jarred Allen, Kip Macsai-Goren, Shreya Sanghai, Ben Bracker, Jordan Carlin
 //
-// Purpose: Instruction fetch unit containing the PC logic, branch predictor, ITLB, instruction cache or IROM, and bus interface.
+// Purpose: Instruction fetch unit.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

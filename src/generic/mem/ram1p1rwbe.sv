@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 3 May 2021
 // Modified: David Harris, James Stine, Jacob Pease
 //
-// Purpose: Single-port RAM with byte write enables and a synchronous read, built from a behavioral array or SRAM macros.
+// Purpose: Single-port RAM with byte write enables.
 //
 // Documentation:
 //

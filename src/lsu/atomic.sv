@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 31 January 2022
 // Modified: David Harris
 //
-// Purpose: Atomic memory operation support combining the AMO ALU and the LR/SC reservation logic.
+// Purpose: Atomic memory operations and LR/SC.
 //
 // Documentation: RISC-V System on Chip Design
 //

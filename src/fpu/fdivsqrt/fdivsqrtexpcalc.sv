@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 26 December 2022
 // Modified:
 //
-// Purpose: Compute the biased result exponent for floating-point divide and square root.
+// Purpose: Result exponent for divide and square root.
 //
 // Documentation: RISC-V System on Chip Design
 //

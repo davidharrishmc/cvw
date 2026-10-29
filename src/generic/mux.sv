@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: James Stine
 //
-// Purpose: Parameterized-width 2- through 7-input multiplexers.
+// Purpose: 2- through 7-input multiplexers.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

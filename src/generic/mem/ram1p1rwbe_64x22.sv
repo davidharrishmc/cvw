@@ -4,7 +4,7 @@
 // Written:  James Stine james.stine@okstate.edu 2 February 2023
 // Modified: David Harris
 //
-// Purpose: Wrapper that instantiates a 64x22 single-port SRAM macro with bit write enables.
+// Purpose: 64x22 single-port SRAM macro wrapper.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

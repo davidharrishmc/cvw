@@ -4,10 +4,9 @@
 // Written:  David Harris David_Harris@hmc.edu 21 January 2021
 // Modified: Rose Thompson, Ben Bracker, Lucio, Jacob Pease
 //
-// Purpose: UART with FIFOs emulating the Texas Instruments PC16550D.
+// Purpose: UART emulating the TI PC16550D.
 //          Datasheet: https://media.digikey.com/pdf/Data%20Sheets/Texas%20Instruments%20PDFs/PC16550D.pdf
-//          Compatible with the UART in the Imperas Virtio model. Known exception to PC16550D compatibility:
-//            Generates 2 rather than 1.5 stop bits when 5-bit word length is selected and LCR[2] = 1
+//          Exception: 2 rather than 1.5 stop bits with 5-bit words and LCR[2] = 1.
 //
 // Documentation: RISC-V System on Chip Design
 //

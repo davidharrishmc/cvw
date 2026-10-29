@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 29 January 2021
 // Modified:
 //
-// Purpose: Decodes whether a physical address falls within one memory region and the access size is supported.
+// Purpose: Address decoder for one memory region.
 //
 // Documentation: RISC-V System on Chip Design
 //

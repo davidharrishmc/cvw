@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified:
 //
-// Purpose: AES inverse S-box lookup table for one byte.
+// Purpose: AES inverse S-box.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

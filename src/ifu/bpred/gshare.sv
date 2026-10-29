@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net, Shreya Sanghai ssanghai@hmc.edu 16 March 2021
 // Modified:
 //
-// Purpose: Gshare or global-history branch direction predictor with forwarding of in-flight branch updates.
+// Purpose: Gshare / global-history direction predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

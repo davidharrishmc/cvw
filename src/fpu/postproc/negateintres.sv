@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 3 July 2022
 // Modified: David Harris
 //
-// Purpose: Round and conditionally negate the integer result of a floating-point to integer conversion.
+// Purpose: Rounds and negates float-to-integer conversion results.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 24 January 2024
 // Modified:
 //
-// Purpose: Converts a one-hot RVVI CSR write index into the CSR address.
+// Purpose: Converts a one-hot RVVI CSR index to an address.
 //
 // Documentation:
 //

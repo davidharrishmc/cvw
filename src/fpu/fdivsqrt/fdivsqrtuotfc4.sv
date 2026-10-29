@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 15 July 2022
 // Modified: David Harris
 //
-// Purpose: Radix-4 unified on-the-fly converter that accumulates quotient or root digits into U and UM.
+// Purpose: Radix-4 on-the-fly quotient/root converter.
 //
 // Documentation: RISC-V System on Chip Design
 //

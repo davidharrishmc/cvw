@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 21 May 2024
 // Modified:
 //
-// Purpose: Packs compressed RVVI trace records into Ethernet frames sent as AXI4 write bursts.
+// Purpose: Packs RVVI trace records into Ethernet frames.
 //
 // Documentation:
 //

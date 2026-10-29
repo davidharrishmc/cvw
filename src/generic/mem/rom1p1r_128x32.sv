@@ -4,7 +4,7 @@
 // Written:  James Stine james.stine@okstate.edu 28 January 2023
 // Modified:
 //
-// Purpose: Wrapper that instantiates a 128x32 ROM macro.
+// Purpose: 128x32 ROM macro wrapper.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

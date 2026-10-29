@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kelvin Tran kelvin.tran@okstate.edu 16 February 2023
 // Modified: David Harris, James Stine
 //
-// Purpose: Decodes bit-manipulation and scalar crypto instructions and generates their Decode and Execute stage control signals.
+// Purpose: Bit-manipulation and scalar crypto decoder.
 //
 // Documentation: RISC-V System on Chip Design
 //

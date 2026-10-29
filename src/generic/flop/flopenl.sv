@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified:
 //
-// Purpose: D flip-flop with enable and synchronous load of a given value.
+// Purpose: D flip-flop with enable and synchronous load.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

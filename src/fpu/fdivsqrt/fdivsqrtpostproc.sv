@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 7 September 2022
 // Modified: Kevin Kim, Alessandro Maiuolo
 //
-// Purpose: Detect a zero residual, compute the sticky bit, and correct the quotient and remainder for floating-point and integer division.
+// Purpose: Divide and square root result correction and sticky bit.
 //
 // Documentation: RISC-V System on Chip Design
 //

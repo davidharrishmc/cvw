@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 12 September 2021
 // Modified: Rose Thompson, Ben Bracker, Skylar Litz
 //
-// Purpose: Iterative restoring integer divider that computes quotient and remainder several bits per cycle.
+// Purpose: Iterative integer divider.
 //
 // Documentation: RISC-V System on Chip Design
 //

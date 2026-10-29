@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 23 June 2022
 // Modified: David Harris, Cedar Turek
 //
-// Purpose: Compute the normalization shift amount and subnormal status for divide and square root results.
+// Purpose: Normalization shift for divide and square root results.
 //
 // Documentation: RISC-V System on Chip Design
 //

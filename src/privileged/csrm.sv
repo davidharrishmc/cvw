@@ -4,9 +4,8 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Ben Bracker, Thomas Fleming, Domenico Ottolia dottolia@hmc.edu, Rose Thompson, Noah Boorstin, Kip Macsai-Goren, James Stine, Syed Moeed Ali, Abe
 //
-// Purpose: Machine-mode control and status registers.
-//          Unsupported optional features: disabling parts of the ISA with MISA bits, and
-//          changing from RV64 to RV32 by writing the SXL/UXL bits of STATUS.
+// Purpose: Machine-mode CSRs.
+//          Unsupported: disabling extensions with MISA bits, and changing XLEN with SXL/UXL.
 //
 // Documentation: RISC-V System on Chip Design
 //

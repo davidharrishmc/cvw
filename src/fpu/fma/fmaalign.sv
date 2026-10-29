@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Shift the FMA addend into alignment with the product and compute its sticky bit.
+// Purpose: FMA addend alignment.
 //
 // Documentation: RISC-V System on Chip Design
 //

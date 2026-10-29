@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 14 January 2021
 // Modified: Rose Thompson, Ben Bracker
 //
-// Purpose: Core-local interruptor (CLINT) with machine timer and software interrupts on an APB interface.
+// Purpose: Core-local interruptor (CLINT) on APB.
 //          See FE310-G002-Manual-v19p05.
 //
 // Documentation: RISC-V System on Chip Design

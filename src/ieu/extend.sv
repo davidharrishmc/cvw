@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu 9 January 2021
 // Modified: Rose Thompson
 //
-// Purpose: Sign-extends the immediate field for each instruction format.
+// Purpose: Immediate sign extension.
 //
 // Documentation: RISC-V System on Chip Design
 //

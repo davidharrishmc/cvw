@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 6 November 2020
 // Modified: Rose Thompson, Jacob Pease, Ben Bracker, Naiche Whyte-Aguayo
 //
-// Purpose: System on chip containing the pipelined core and the uncore memories and peripherals.
+// Purpose: System on chip: core and uncore.
 //
 // Documentation: RISC-V System on Chip Design
 //

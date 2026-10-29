@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris
 //
-// Purpose: ShiftRows, SubBytes, and MixColumns for the RV64 aes64es and aes64esm encryption instructions.
+// Purpose: RV64 AES encryption (aes64es, aes64esm).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

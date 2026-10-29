@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 4 June 2021
 // Modified: Rose Thompson, Muhammad Zain
 //
-// Purpose: Memory management unit containing the TLB, PMA checker, and PMP checker, which reports page and access faults.
+// Purpose: Memory management unit: TLB, PMA, and PMP checks.
 //
 // Documentation: RISC-V System on Chip Design
 //

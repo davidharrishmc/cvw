@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris
 //
-// Purpose: Lookup table for the AES key schedule round constant, zero-extended to 32 bits.
+// Purpose: AES key schedule round constant lookup.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

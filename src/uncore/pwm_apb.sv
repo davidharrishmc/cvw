@@ -4,7 +4,7 @@
 // Written:  Naiche Whyte-Aguayo 29 April 2026
 // Modified: David Harris
 //
-// Purpose: Pulse-width modulation (PWM) peripheral with an APB interface.
+// Purpose: PWM on APB.
 //
 // Documentation:
 // Based on PWM design from SiFive FU540-C000 manual version 1.0

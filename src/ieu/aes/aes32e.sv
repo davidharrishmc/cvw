@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris
 //
-// Purpose: S-box and MixColumns on one byte for the RV32 aes32esi and aes32esmi encryption instructions.
+// Purpose: RV32 AES encryption (aes32esi, aes32esmi).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

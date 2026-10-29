@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kelvin Tran kelvin.tran@okstate.edu 23 March 2023
 // Modified: David Harris, James Stine
 //
-// Purpose: Bit-manipulation ALU that computes Zba, Zbb, Zbc, Zbs, Zbk*, and Zkn* results and merges them with the base ALU.
+// Purpose: Bit-manipulation and scalar crypto ALU.
 //
 // Documentation: RISC-V System on Chip Design
 //

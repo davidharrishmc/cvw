@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu, David Harris David_Harris@hmc.edu 20 February 2024
 // Modified: Kelvin Tran
 //
-// Purpose: AES MixColumns transformation of one 32-bit column.
+// Purpose: AES MixColumns on one column.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

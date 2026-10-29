@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 14 February 2021
 // Modified:
 //
-// Purpose: Bimodal branch direction predictor using a PC-indexed table of 2-bit saturating counters.
+// Purpose: Bimodal direction predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

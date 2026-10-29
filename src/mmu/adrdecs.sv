@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 22 June 2021
 // Modified: Rose Thompson, Naiche Whyte-Aguayo, Jacob Pease
 //
-// Purpose: Address decoders for every memory and peripheral region in the physical memory map.
+// Purpose: Address decoders for the physical memory map.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris, Kip Macsai-Goren kmacsaigoren@hmc.edu 7 June 2021
 // Modified: Ayesha Anwaar
 //
-// Purpose: Forms the physical address by combining physical and virtual page number segments according to the page size and NAPOT encoding.
+// Purpose: Forms the physical address from the page number segments.
 //
 // Documentation: RISC-V System on Chip Design
 //

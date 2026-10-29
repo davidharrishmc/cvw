@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 17 July 2021
 // Modified: Rose Thompson
 //
-// Purpose: Tracks load-reserved reservations and suppresses failing store-conditionals.
+// Purpose: LR/SC reservation.
 //
 // Documentation: RISC-V System on Chip Design
 //

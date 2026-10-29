@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 23 January 2024
 // Modified:
 //
-// Purpose: Synthesizable RVVI tracer that compresses each retired instruction and its register and CSR updates into a packed record.
+// Purpose: Synthesizable RVVI tracer.
 //
 // Documentation:
 //

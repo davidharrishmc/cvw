@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu, Kevin Kim kekim@hmc.edu 9 January 2021
 // Modified:
 //
-// Purpose: Funnel shifter for logical and arithmetic shifts and rotates, including RV64 W-type operations.
+// Purpose: Shifter and rotator.
 //
 // Documentation: RISC-V System on Chip Design
 //

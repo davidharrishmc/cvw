@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Jacob Pease, Ben Bracker, Noah Boorstin, Naiche Whyte-Aguayo, Thomas Fleming
 //
-// Purpose: System-on-chip components outside the core: memories, peripherals, and bus interconnect.
+// Purpose: Memories and peripherals outside the core.
 //
 // Documentation: RISC-V System on Chip Design
 //

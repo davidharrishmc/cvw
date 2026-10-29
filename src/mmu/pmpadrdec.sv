@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu 28 April 2021
 // Modified: David Harris, Kip Macsai-Goren, Madeleine Masser-Frye
 //
-// Purpose: Determines whether an address matches one PMP entry in TOR, NA4, or NAPOT mode.
+// Purpose: Address match for one PMP entry.
 //
 // Documentation: RISC-V System on Chip Design
 //

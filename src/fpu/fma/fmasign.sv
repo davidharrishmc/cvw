@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Compute the FMA product and addend signs and detect effective subtraction.
+// Purpose: FMA signs and effective subtraction.
 //
 // Documentation: RISC-V System on Chip Design
 //

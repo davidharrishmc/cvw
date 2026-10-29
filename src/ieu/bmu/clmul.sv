@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 1 February 2023
 // Modified:
 //
-// Purpose: Carry-less multiplication of two words.
+// Purpose: Carry-less multiplier.
 //
 // Documentation: RISC-V System on Chip Design
 //

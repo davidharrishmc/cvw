@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 28 January 2022
 // Modified: David Harris
 //
-// Purpose: Splits an instruction fetch that crosses a cache-line boundary (or an XLEN/8 boundary without a cache) into two accesses and merges the halves.
+// Purpose: Splits a fetch that crosses a line boundary into two.
 //
 // Documentation: RISC-V System on Chip Design
 //

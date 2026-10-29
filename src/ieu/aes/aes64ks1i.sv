@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: David Harris, Kelvin Tran
 //
-// Purpose: AES key schedule step for aes64ks1i: rotate a word, substitute it through the shared S-box, and XOR the round constant.
+// Purpose: AES key schedule step aes64ks1i.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

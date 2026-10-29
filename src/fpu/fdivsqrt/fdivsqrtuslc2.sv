@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 20 September 2022
 // Modified:
 //
-// Purpose: Radix-2 unified quotient and square root digit selection from the leading bits of the redundant residual.
+// Purpose: Radix-2 quotient/root digit selection.
 //
 // Documentation: RISC-V System on Chip Design
 //

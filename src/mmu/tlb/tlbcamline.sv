@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 6 April 2021
 // Modified: David Harris, Kip Macsai-Goren kmacsaigoren@hmc.edu, Ayesha Anwaar, Muhammad Zain
 //
-// Purpose: One TLB CAM entry that matches a virtual page number and ASID against its stored key for its page size.
+// Purpose: One TLB CAM entry.
 //
 // Documentation: RISC-V System on Chip Design
 //

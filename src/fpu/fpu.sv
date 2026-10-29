@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, James Stine, Brett Mathis, David Harris
 // Modified: Rose Thompson, Cedar Turek, Ben Bracker
 //
-// Purpose: Top level of the floating-point unit, connecting the register file, hazard logic, functional units, and result selection.
+// Purpose: Floating-point unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

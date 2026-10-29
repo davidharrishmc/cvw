@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Rose Thompson rose@rosethompson.net 9 January 2021
 // Modified: Katherine Parry, Kip Macsai-Goren, Muhammad Zain
 //
-// Purpose: Load/store unit containing the DMMU, HPTW, data cache or DTIM, bus interface, atomics, misaligned access, endian swap, and subword logic.
+// Purpose: Load/store unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

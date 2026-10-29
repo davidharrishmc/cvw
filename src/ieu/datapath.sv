@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu 9 January 2021
 // Modified: Katherine Parry, Rose Thompson, Kevin Kim, James Stine, Kip Macsai-Goren, Madeleine Masser-Frye, Shreya Sanghai
 //
-// Purpose: Integer datapath with register file, immediate extension, forwarding muxes, ALU, and result selection from Decode to Writeback.
+// Purpose: Integer datapath.
 //
 // Documentation: RISC-V System on Chip Design
 //

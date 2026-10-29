@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Leading zero anticipator that predicts the FMA normalization shift count in parallel with the addition.
+// Purpose: FMA leading zero anticipator.
 //
 // Documentation: RISC-V System on Chip Design
 //    See also [Schmookler & Nowka, Leading zero anticipation and detection, IEEE Sym. Computer Arithmetic, 2001]

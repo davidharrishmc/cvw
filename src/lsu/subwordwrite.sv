@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson
 //
-// Purpose: Replicates store data across all byte lanes for subword writes.
+// Purpose: Subword store data replication.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Ben Bracker, Noah Boorstin
 //
-// Purpose: On-chip RAM with an AHB interface.
+// Purpose: On-chip RAM on AHB.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Katherine Parry, Kevin Kim, James Stine, Ben Bracker
 //
-// Purpose: Integer execution unit that connects the controller and datapath.
+// Purpose: Integer execution unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

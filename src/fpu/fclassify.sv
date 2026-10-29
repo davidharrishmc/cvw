@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 2 July 2021
 // Modified: David Harris
 //
-// Purpose: Classify a floating-point input into the ten fclass categories as a one-hot integer result.
+// Purpose: Floating-point classify (fclass).
 //
 // Documentation: RISC-V System on Chip Design
 //

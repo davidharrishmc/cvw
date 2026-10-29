@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Lucio 7 June 2022
 // Modified:
 //
-// Purpose: Bridges the AHB bus to the APB peripherals.
+// Purpose: AHB to APB bridge.
 //
 // Documentation: RISC-V System on Chip Design
 //

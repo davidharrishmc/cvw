@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu 4 February 2023
 // Modified:
 //
-// Purpose: Sign and zero extension for sext.b, sext.h, and zext.h.
+// Purpose: sext.b, sext.h, and zext.h.
 //
 // Documentation: RISC-V System on Chip Design
 //

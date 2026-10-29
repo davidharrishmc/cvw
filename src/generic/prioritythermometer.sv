@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 7 April 2021
 // Modified: Kip Macsai-Goren, David Harris David_Harris@hmc.edu
 //
-// Purpose: Thermometer code with 1s in all bits below the least significant 1 of the input.
+// Purpose: Thermometer code below the least significant 1.
 //          Example:  msb           lsb
 //                in  01011101010100000
 //                out 00000000000011111

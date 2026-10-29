@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 20 September 2022
 // Modified:
 //
-// Purpose: Table-based radix-4 unified quotient and square root digit selection.
+// Purpose: Table-based radix-4 quotient/root digit selection.
 //
 // Documentation: RISC-V System on Chip Design
 //

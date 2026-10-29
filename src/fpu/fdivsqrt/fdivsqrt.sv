@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu, Alessandro Maiuolo amaiuolo@hmc.edu 7 July 2022
 // Modified: Kevin Kim
 //
-// Purpose: Top level of the unified floating-point divide/square root and integer divide/remainder unit.
+// Purpose: Unified floating-point divide/square root and integer divider.
 //
 // Documentation: RISC-V System on Chip Design
 //

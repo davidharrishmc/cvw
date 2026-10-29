@@ -4,7 +4,7 @@
 // Written:  Jessica Torrey jtorrey@hmc.edu 16 February 2021
 // Modified: David Harris, Kip Macsai-Goren kmacsaigoren@hmc.edu, Thomas Fleming, Ayesha Anwaar
 //
-// Purpose: Content-addressable memory of TLB virtual page numbers that determines whether a translation hits.
+// Purpose: TLB virtual page number CAM.
 //
 // Documentation: RISC-V System on Chip Design
 //

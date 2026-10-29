@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu 4 February 2023
 // Modified: Kip Macsai-Goren
 //
-// Purpose: Counts the number of one bits in a word.
+// Purpose: Population count.
 //
 // Documentation: RISC-V System on Chip Design
 //

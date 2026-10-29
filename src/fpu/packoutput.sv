@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 11 May 2024
 // Modified:
 //
-// Purpose: Pack a result from the largest supported format into the selected format, NaN-boxed to FLEN.
+// Purpose: Packs a result into the selected format, NaN-boxed.
 //
 // Documentation: RISC-V System on Chip Design
 //

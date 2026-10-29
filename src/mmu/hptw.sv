@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu 2 March 2021
 // Modified: Rose Thompson, David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu, Ayesha Anwaar, Muhammad Zain, Flavien Solt, Abdul Rafay
 //
-// Purpose: Hardware page table walker that refills the TLBs on a miss and updates PTE A/D bits.
+// Purpose: Hardware page table walker.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 20 April 2021
 // Modified: David Harris, Rose Thompson, Muhammad Zain
 //
-// Purpose: Determines the physical memory attributes of each access and reports access faults for illegal accesses.
+// Purpose: Physical memory attribute checker.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 23 January 2023
 // Modified: David Harris
 //
-// Purpose: Arbitration state machine that grants the AHB bus to the IFU or LSU, giving the LSU priority and holding the grant through a burst.
+// Purpose: Arbitrates the AHB bus between the IFU and LSU, LSU first.
 //
 // Documentation: RISC-V System on Chip Design
 //

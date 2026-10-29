@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 9 July 2021
 // Modified:
 //
-// Purpose: Decodes a binary value into a one-hot output; the output width must be a power of 2.
+// Purpose: Binary to one-hot decoder.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

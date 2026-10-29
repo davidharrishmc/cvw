@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 30 January 2022
 // Modified: David Harris
 //
-// Purpose: Instruction ROM tightly integrated into the IFU.
+// Purpose: Instruction ROM.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

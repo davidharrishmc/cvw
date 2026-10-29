@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: David Harris
 //
-// Purpose: Compute the normalization shift amount, normalized exponent, and subnormal status for FMA results.
+// Purpose: Normalization shift for FMA results.
 //
 // Documentation: RISC-V System on Chip Design
 //

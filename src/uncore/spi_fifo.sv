@@ -4,7 +4,7 @@
 // Written:  Naiche Whyte-Aguayo 16 November 2022
 // Modified: David Harris, Rose Thompson, Jacob Pease
 //
-// Purpose: Synchronous FIFO with read and write watermarks for the SPI peripheral.
+// Purpose: SPI FIFO with watermarks.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

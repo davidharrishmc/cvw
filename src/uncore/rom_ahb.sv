@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson
 //
-// Purpose: On-chip ROM with an AHB interface.
+// Purpose: On-chip ROM on AHB.
 //
 // Documentation: RISC-V System on Chip Design
 //

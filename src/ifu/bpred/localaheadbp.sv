@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 16 March 2021
 // Modified:
 //
-// Purpose: Local-history branch direction predictor with ahead pipelining for SRAM-based tables.
+// Purpose: Ahead-pipelined local-history direction predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 29 August 2022
 // Modified: David Harris
 //
-// Purpose: Translates cache line fetches, writebacks, and uncached memory requests into AHB transactions.
+// Purpose: AHB interface for cache line fills, writebacks, and uncached accesses.
 //
 // Documentation: RISC-V System on Chip Design
 //

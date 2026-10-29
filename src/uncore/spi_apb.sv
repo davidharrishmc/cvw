@@ -4,10 +4,8 @@
 // Written:  Naiche Whyte-Aguayo nwhyteaguayo@g.hmc.edu, Jacob Pease jacobpease@protonmail.com 16 November 2022
 // Modified: Rose Thompson
 //
-// Purpose: SPI controller peripheral following the SiFive FU540-C000 SPI specification, with an APB interface and transmit and receive FIFOs.
-//          8-byte transmit and receive FIFOs feed shift registers controlled by an FSM. Uses 4 tristate data pins,
-//          a 4-bit chip select, a clock, and an interrupt to the core.
-//          Limitations: flash read sequencer mode is not implemented; dual and quad modes are not supported.
+// Purpose: SPI controller on APB, after the SiFive FU540-C000 SPI.
+//          Not supported: flash read sequencer mode, dual and quad modes.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

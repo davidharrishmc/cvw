@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 7 September 2022
 // Modified:
 //
-// Purpose: Detects whether A + B equals zero without a carry-propagate addition.
+// Purpose: Detects A + B == 0 without a carry-propagate add.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

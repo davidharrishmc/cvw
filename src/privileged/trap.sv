@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Domenico Ottolia dottolia@hmc.edu, Rose Thompson, Ben Bracker, Jinghe Yu, Kip Macsai-Goren, Thomas Fleming
 //
-// Purpose: Detects and prioritizes exceptions and interrupts and selects the trap cause.
+// Purpose: Exception and interrupt prioritization.
 //
 // Documentation: RISC-V System on Chip Design
 //

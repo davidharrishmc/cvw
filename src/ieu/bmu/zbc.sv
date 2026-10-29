@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 2 February 2023
 // Modified: David Harris
 //
-// Purpose: Zbc and Zbkc carry-less multiply unit for clmul, clmulh, and clmulr.
+// Purpose: Zbc and Zbkc carry-less multiply unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Ben Bracker, Noah Boorstin, Katherine Parry, Kip Macsai-Goren, Rose Thompson, Jordan Carlin, Haiqua Ghaffar
 //
-// Purpose: Status registers (mstatus, mstatush, and sstatus) shared across privilege modes.
+// Purpose: Status CSRs (mstatus, mstatush, sstatus).
 //
 // Documentation: RISC-V System on Chip Design
 //

@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 9 October 2022
 // Modified: Kevin Kim, Alessandro Maiuolo
 //
-// Purpose: Comparator-based radix-4 unified quotient and square root digit selection.
+// Purpose: Comparator-based radix-4 quotient/root digit selection.
 //
 // Documentation: RISC-V System on Chip Design
 //

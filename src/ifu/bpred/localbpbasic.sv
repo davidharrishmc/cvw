@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net, Shreya Sanghai 16 March 2021
 // Modified: Jarred Allen
 //
-// Purpose: Basic local-history branch direction predictor using flip-flop history registers without speculative repair.
+// Purpose: Basic local-history direction predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

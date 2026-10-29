@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 20 September 2022
 // Modified:
 //
-// Purpose: Generate the radix-4 square root addend F from the selected digit and the partial root.
+// Purpose: Radix-4 square root addend generation.
 //
 // Documentation: RISC-V System on Chip Design
 //

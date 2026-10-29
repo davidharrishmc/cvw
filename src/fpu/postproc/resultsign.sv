@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified:
 //
-// Purpose: Compute the FMA result sign, including the sign of exact zero results.
+// Purpose: FMA result sign.
 //
 // Documentation: RISC-V System on Chip Design
 //

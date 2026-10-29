@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 27 January 2023
 // Modified: Rose Thompson, James Stine, Naiche Whyte-Aguayo, Kevin Kim, Jordan Carlin
 //
-// Purpose: Package defining the cvw_t configuration structure that parameterizes every module.
+// Purpose: Package defining the cvw_t configuration structure.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

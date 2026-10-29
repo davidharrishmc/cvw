@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Sarah Harris Sarah.Harris@unlv.edu 9 January 2021
 // Modified: Noah Boorstin
 //
-// Purpose: Integer register file with two read ports and one write port; x0 is hardwired to zero.
+// Purpose: Integer register file.
 //
 // Documentation: RISC-V System on Chip Design
 //

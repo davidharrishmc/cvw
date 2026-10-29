@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 13 February 2024
 // Modified:
 //
-// Purpose: RV32 Zknh unit for the SHA-256 and SHA-512 hash instructions.
+// Purpose: RV32 Zknh SHA unit.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

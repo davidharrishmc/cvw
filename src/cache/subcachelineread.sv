@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 4 February 2022
 // Modified:
 //
-// Purpose: Selects the addressed word from a cache line, zero-padding the line so I$ reads can extend past its end.
+// Purpose: Selects the addressed word from a cache line.
 //
 // Documentation: RISC-V System on Chip Design
 //

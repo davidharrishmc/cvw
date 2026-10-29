@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 29 August 2022
 // Modified: David Harris
 //
-// Purpose: Translates simple uncached IFU or LSU memory requests into single (NONSEQ) AHB transactions.
+// Purpose: AHB interface for uncached single-transfer IFU or LSU requests.
 //
 // Documentation: RISC-V System on Chip Design
 //

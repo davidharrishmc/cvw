@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 24 August 2022
 // Modified: Jacob Pease, Rose Thompson, James Stine, Kunlin Han, Lucio
 //
-// Purpose: Single-port ROM with a synchronous read, optionally preloaded with boot code.
+// Purpose: Single-port ROM.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

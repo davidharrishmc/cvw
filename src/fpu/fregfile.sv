@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Katherine Parry, James Stine
 //
-// Purpose: Floating-point register file with three read ports and one write port.
+// Purpose: Floating-point register file.
 //
 // Documentation: RISC-V System on Chip Design
 //

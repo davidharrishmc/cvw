@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: David Harris, Mason Adams
 //
-// Purpose: Find the guard, round, and sticky bits and decide whether to round up for the selected rounding mode and format.
+// Purpose: Floating-point rounding.
 //
 // Documentation: RISC-V System on Chip Design
 //

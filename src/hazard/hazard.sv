@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Katherine Parry, Jarred Allen
 //
-// Purpose: Computes the pipeline stall and flush signals for every stage.
+// Purpose: Pipeline stall and flush control.
 //
 // Documentation: RISC-V System on Chip Design
 //

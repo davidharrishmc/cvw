@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 25 August 2021
 // Modified: David Harris, Alec Vercruysse, Limnanthes Serafini, Haiqua Ghaffar
 //
-// Purpose: Cache controller state machine that sequences hits, misses, line fetches, writebacks, flushes, and cache management operations.
+// Purpose: Cache controller state machine.
 //
 // Documentation: RISC-V System on Chip Design
 //

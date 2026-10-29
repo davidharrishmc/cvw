@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu, Katherine Parry me@KatherineParry.com, Cedar Turek cturek@hmc.edu 7 July 2022
 // Modified: Kevin Kim, Alessandro Maiuolo
 //
-// Purpose: Normalize floating-point and integer operands for divide and square root, and compute the result exponent and cycle count.
+// Purpose: Divide and square root operand normalization.
 //
 // Documentation: RISC-V System on Chip Design
 //

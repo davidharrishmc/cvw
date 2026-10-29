@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 15 April 2023
 // Modified:
 //
-// Purpose: Local-history branch direction predictor with speculative history update and repair.
+// Purpose: Local-history direction predictor with repair.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

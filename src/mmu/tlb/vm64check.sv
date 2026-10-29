@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 4 November 2022
 // Modified: Ayesha Anwaar, Muhammad Zain
 //
-// Purpose: Checks that the unused upper virtual address bits are a sign extension in RV64 virtual memory modes.
+// Purpose: RV64 virtual address sign-extension check.
 //
 // Documentation: RISC-V System on Chip Design
 //

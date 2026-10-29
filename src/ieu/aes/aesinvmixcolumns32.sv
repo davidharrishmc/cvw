@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 5 March 2024
 // Modified:
 //
-// Purpose: AES InvMixColumns transformation of one 32-bit column.
+// Purpose: AES InvMixColumns on one column.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

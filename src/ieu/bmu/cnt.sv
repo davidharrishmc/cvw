@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu 4 February 2023
 // Modified:
 //
-// Purpose: Leading zero, trailing zero, and population counts for clz, ctz, cpop, and their W forms.
+// Purpose: clz, ctz, and cpop.
 //
 // Documentation: RISC-V System on Chip Design
 //

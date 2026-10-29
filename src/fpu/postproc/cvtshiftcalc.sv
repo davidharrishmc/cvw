@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com 13 June 2022
 // Modified: David Harris, James Stine
 //
-// Purpose: Prepare the normalization shifter input and detect underflow for conversion results.
+// Purpose: Normalization shift for conversion results.
 //
 // Documentation: RISC-V System on Chip Design
 //

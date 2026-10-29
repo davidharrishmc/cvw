@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 31 August 2022
 // Modified:
 //
-// Purpose: Holds a manager's AHB request while another manager is granted the bus and replays it once this manager wins arbitration.
+// Purpose: Holds a manager's AHB request until it wins arbitration.
 //          See ARM IHI0033A AMBA AHB-Lite Specification 1.0.
 //
 // Documentation: RISC-V System on Chip Design

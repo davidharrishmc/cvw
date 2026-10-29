@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 10 March 2021
 // Modified:
 //
-// Purpose: Computes the result of atomic memory operations (AMOs).
+// Purpose: AMO ALU.
 //
 // Documentation: RISC-V System on Chip Design
 //

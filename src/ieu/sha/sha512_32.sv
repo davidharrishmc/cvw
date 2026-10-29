@@ -4,7 +4,7 @@
 // Written:  Kelvin Tran kelvin.tran@okstate.edu, James Stine james.stine@okstate.edu 13 February 2024
 // Modified: David Harris
 //
-// Purpose: RV32 SHA-512 sig0h/l, sig1h/l, sum0r, and sum1r functions on a 64-bit value split across two registers.
+// Purpose: RV32 SHA-512 sig and sum functions.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

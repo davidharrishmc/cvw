@@ -4,7 +4,7 @@
 // Written:  Kevin Kim kekim@hmc.edu, Kelvin Tran kelvin.tran@okstate.edu 1 February 2023
 // Modified: David Harris
 //
-// Purpose: Byte operations rev8 and orc.b.
+// Purpose: rev8 and orc.b.
 //
 // Documentation: RISC-V System on Chip Design
 //

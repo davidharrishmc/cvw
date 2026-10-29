@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 4 July 2021
 // Modified:
 //
-// Purpose: One TLB RAM entry with an enabled register and AND-OR read logic.
+// Purpose: One TLB RAM entry.
 //
 // Documentation: RISC-V System on Chip Design
 //

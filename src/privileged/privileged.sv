@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 5 January 2021
 // Modified: Rose Thompson, Thomas Fleming, Ben Bracker, Kip Macsai-Goren
 //
-// Purpose: Privileged unit containing the CSRs, privilege mode tracking, trap handling, and privileged instruction decode.
+// Purpose: Privileged unit.
 //
 // Documentation: RISC-V System on Chip Design
 //

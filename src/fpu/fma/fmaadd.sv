@@ -4,7 +4,7 @@
 // Written:  Katherine Parry me@KatherineParry.com, David Harris David_Harris@hmc.edu 23 June 2021
 // Modified:
 //
-// Purpose: Add the product and aligned addend significands for the FMA, inverting the addend for effective subtraction.
+// Purpose: FMA significand addition.
 //
 // Documentation: RISC-V System on Chip Design
 //

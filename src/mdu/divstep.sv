@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 2 October 2021
 // Modified:
 //
-// Purpose: One radix-2 step of the restoring integer divider.
+// Purpose: One integer divider step.
 //
 // Documentation: RISC-V System on Chip Design
 //

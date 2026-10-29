@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 3 May 2021
 // Modified: David Harris, James Stine james.stine@okstate.edu
 //
-// Purpose: Two-port RAM with one read port and one byte-enabled write port, built from a behavioral array or SRAM macros.
+// Purpose: Two-port RAM (one read, one byte-enabled write).
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

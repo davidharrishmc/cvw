@@ -4,8 +4,8 @@
 // Written:  David Harris David_Harris@hmc.edu 14 January 2021
 // Modified: Ben Bracker bbracker@hmc.edu
 //
-// Purpose: General-purpose I/O peripheral with an APB interface.
-//          See FE310-G002-Manual-v19p05. No interrupts, drive strength, or pull-ups supported.
+// Purpose: GPIO on APB.
+//          See FE310-G002-Manual-v19p05. No interrupts, drive strength, or pull-ups.
 //
 // Documentation: RISC-V System on Chip Design
 //

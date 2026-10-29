@@ -4,11 +4,9 @@
 // Written:  Ben Bracker bbracker@hmc.edu 18 January 2021
 // Modified: David Harris, Rose Thompson, Jacob Pease, Juan Schroeder
 //
-// Purpose: Platform-level interrupt controller (PLIC) with an APB interface.
-//          Based on https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc with clarifications
-//          from https://roalogic.github.io/plic/docs/AHB-Lite_PLIC_Datasheet.pdf.
-//          Supports only 1 target core and only a global threshold. Serves as both the PLIC gateways and PLIC core.
-//          Assumes interrupt sources are level-triggered wires.
+// Purpose: Platform-level interrupt controller (PLIC) on APB.
+//          Based on https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc.
+//          Supports 1 target and a global threshold only; sources are level-triggered.
 //
 // Documentation: RISC-V System on Chip Design
 //

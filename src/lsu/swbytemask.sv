@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson
 //
-// Purpose: Generates byte write enables from the store size and address.
+// Purpose: Store byte mask.
 //
 // Documentation: RISC-V System on Chip Design
 //

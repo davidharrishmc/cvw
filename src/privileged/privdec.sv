@@ -4,7 +4,7 @@
 // Written:  David Harris David_Harris@hmc.edu 9 January 2021
 // Modified: Rose Thompson, Jinghe Yu, Domenico Ottolia, Katherine Parry
 //
-// Purpose: Decodes privileged instructions and flags illegal privileged instructions.
+// Purpose: Privileged instruction decoder.
 //
 // Documentation: RISC-V System on Chip Design
 //

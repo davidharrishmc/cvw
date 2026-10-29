@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 12 February 2021
 // Modified: David Harris, Shreya Sanghai, Ben Bracker
 //
-// Purpose: Branch predictor that predicts the direction, target, and class of control-flow instructions in Fetch and corrects mispredictions in Execute.
+// Purpose: Branch predictor.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw

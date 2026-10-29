@@ -4,7 +4,7 @@
 // Written:  Ryan Swann ryan.swann@okstate.edu, James Stine james.stine@okstate.edu 20 February 2024
 // Modified: Kelvin Tran, David Harris
 //
-// Purpose: AES ShiftRows on a 128-bit state, producing the low 64 bits of the result.
+// Purpose: AES ShiftRows, low 64 bits.
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
