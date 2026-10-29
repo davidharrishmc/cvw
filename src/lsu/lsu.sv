@@ -192,7 +192,7 @@ module lsu import cvw::*; #(parameter cvw_t P) (
 
   if (P.ZICBOZ_SUPPORTED) begin : cboz
     assign WriteDataZM = LSUCMOpM[CMO_ZERO] ? 0 : WriteDataM;
-  end else begin : nocboz
+  end else begin : cboz
     assign WriteDataZM = WriteDataM;
   end
 

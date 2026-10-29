@@ -208,7 +208,7 @@ module cache import cvw::*; #(parameter cvw_t P,
     if (NUMWAYS > 1) assign NextFlushWay = {FlushWay[NUMWAYS-2:0], FlushWay[NUMWAYS-1]};
     else             assign NextFlushWay = FlushWay[NUMWAYS-1];
     assign FlushWayFlag = FlushWay[NUMWAYS-1];
-  end else begin : noflushlogic // I$ is never flushed because it is never dirty
+  end else begin : flushlogic // I$ is never flushed because it is never dirty
     assign FlushWay = '0;
     assign FlushWayFlag = 1'b0;
     assign FlushAdrFlag = 1'b0;

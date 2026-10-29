@@ -80,7 +80,7 @@ module cacheway import cvw::*; #(parameter cvw_t P,
     // FlushWay is part of a one hot way selection. Must clear it if FlushWay not selected.
     // coverage off -item e 1 -fecexprrow 3
     // nonzero ways will never see FlushCache=0 while FlushWay=1 since FlushWay only advances on a subset of FlushCache assertion cases.
-  end else begin : noflushlogic // no flush operation for read-only caches.
+  end else begin : flushlogic // no flush operation for read-only caches.
     assign SelectedDirty = VictimWay;
     mux2 #(1) selectedwaymux(HitWay, SelectedDirty, SelVictim, SelectedWay);
   end
