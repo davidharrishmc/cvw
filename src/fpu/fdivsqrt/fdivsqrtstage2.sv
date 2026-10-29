@@ -16,7 +16,6 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 module fdivsqrtstage2 import cvw::*;  #(parameter cvw_t P) (
   input  logic [P.DIVb+3:0] D, DBar,        // Q4.DIVb
   input  logic [P.DIVb:0]   U, UM,          // U1.DIVb
@@ -39,7 +38,7 @@ module fdivsqrtstage2 import cvw::*;  #(parameter cvw_t P) (
   // Given partial remainder, select digit of +1, 0, or -1 (up, uz, un)
   fdivsqrtuslc2 uslc2(.WS(WS[P.DIVb+3:P.DIVb]), .WC(WC[P.DIVb+3:P.DIVb]), .up, .uz, .un);
 
-  // Sqrt F generation.  Extend C, U, UM to Q4.k
+  // Sqrt F generation.  Extend C, U, UM to Q4.DIVb
   fdivsqrtfgen2 #(P) fgen2(.up, .uz, .C({2'b11, CNext}), .U({3'b000, U}), .UM({3'b000, UM}), .F);
 
   // Divisor multiple
@@ -51,7 +50,7 @@ module fdivsqrtstage2 import cvw::*;  #(parameter cvw_t P) (
   // Residual Update
   //  WSA, WCA = WS + WC - qD
   mux2 #(P.DIVb+4) addinmux(Dsel, F, SqrtE, AddIn);
-  csa #(P.DIVb+4) csa(WS, WC, AddIn, up&~SqrtE, WSA, WCA);
+  csa #(P.DIVb+4) csa(WS, WC, AddIn, up & ~SqrtE, WSA, WCA); // carry in completes the 2's complement of -D for division digit +1
   assign WSNext = WSA << 1;
   assign WCNext = WCA << 1;
 

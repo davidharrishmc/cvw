@@ -16,8 +16,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module ahbapbbridge import cvw::*;  #(parameter cvw_t P,
-                                      parameter PERIPHS = 2) (
+module ahbapbbridge import cvw::*; #(parameter cvw_t P,
+                                     parameter PERIPHS = 2) (
   input  logic                 HCLK, HRESETn,
   input  logic [PERIPHS-1:0]   HSEL,
   input  logic [P.PA_BITS-1:0] HADDR,
@@ -81,14 +81,14 @@ module ahbapbbridge import cvw::*;  #(parameter cvw_t P,
     // default: no peripheral selected: read 0, indicate ready during access phase so bus doesn't hang
     HRDATA = '0;
     PREADYOUT = 1'b1;
-    for (i=0; i<PERIPHS; i++)  begin
+    for (i = 0; i < PERIPHS; i++) begin
       if (PSEL[i]) begin // highest numbered peripheral has priority, but multiple PSEL should never be asserted
-          HRDATA = PRDATA[i];
-          PREADYOUT = PREADY[i];
+        HRDATA = PRDATA[i];
+        PREADYOUT = PREADY[i];
       end
     end
   end
-assign HREADYOUT = PREADYOUT & ~initTransSelD; // don't raise HREADYOUT before access phase
+  assign HREADYOUT = PREADYOUT & ~initTransSelD; // don't raise HREADYOUT before access phase
 
   // resp logic
   assign HRESP = 1'b0; // bridge never indicates errors

@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module adder #(parameter WIDTH=8) (
+module adder #(parameter WIDTH = 8) (
   input  logic [WIDTH-1:0] a, b,
   output logic [WIDTH-1:0] y
 );

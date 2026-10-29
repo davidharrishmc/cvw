@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module tlbcam  import cvw::*;  #(parameter cvw_t P,
+module tlbcam import cvw::*;  #(parameter cvw_t P,
                                  parameter TLB_ENTRIES = 8, KEY_BITS = 20, SEGMENT_BITS = 10) (
   input  logic                    clk, reset,
   input  logic [P.VPN_BITS-1:0]   VPN,
@@ -27,7 +27,7 @@ module tlbcam  import cvw::*;  #(parameter cvw_t P,
   input  logic                    TLBFlushAll,  // Flush global (G=1) entries too
   input  logic [TLB_ENTRIES-1:0]  WriteEnables,
   input  logic [TLB_ENTRIES-1:0]  PTE_Gs,
-  input  logic [TLB_ENTRIES-1:0]  PTE_NAPOTs,  // entry is in NAPOT mode (N bit set and PPN[3:0] = 1000)
+  input  logic [TLB_ENTRIES-1:0]  PTE_NAPOTs,   // entry is in NAPOT mode (N bit set and PPN[3:0] = 1000)
   input  logic [P.ASID_BITS-1:0]  SATP_ASID,
   input  logic                    TLBWrite, WritePTE_G, WritePTE_NAPOT,
   output logic [TLB_ENTRIES-1:0]  Matches,
@@ -47,5 +47,5 @@ module tlbcam  import cvw::*;  #(parameter cvw_t P,
     .clk, .reset, .VPN, .SATP_ASID, .SV39Mode, .SV48Mode, .PTE_G(PTE_Gs), .PTE_NAPOT(PTE_NAPOTs), .PageTypeWriteVal, .TLBFlush, .TLBFlushAll,
     .WriteEnable(WriteEnables), .TLBWrite, .WritePTE_G, .WritePTE_NAPOT, .PageTypeRead, .Match(Matches));
   assign CAMHit = |Matches & ~TLBFlush;
-  or_rows #(TLB_ENTRIES,3) PageTypeOr(PageTypeRead, HitPageType);
+  or_rows #(TLB_ENTRIES, 3) PageTypeOr(PageTypeRead, HitPageType);
 endmodule

@@ -16,8 +16,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module rom_ahb import cvw::*;  #(parameter cvw_t P,
-                                 parameter RANGE = 65535, PRELOAD = 0) (
+module rom_ahb import cvw::*; #(parameter cvw_t P,
+                                parameter RANGE = 65535, PRELOAD = 0) (
   input  logic                 HCLK, HRESETn,
   input  logic                 HSELRom,
   input  logic [P.PA_BITS-1:0] HADDR,

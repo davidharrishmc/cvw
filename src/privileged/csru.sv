@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module csru import cvw::*;  #(parameter cvw_t P) (
+module csru import cvw::*; #(parameter cvw_t P) (
   input  logic              clk, reset,
   input  logic              InstrValidNotFlushedM,
   input  logic              CSRUWriteM,
@@ -45,7 +45,7 @@ module csru import cvw::*;  #(parameter cvw_t P) (
   assign WriteFRMM    = CSRUWriteM & (STATUS_FS != 2'b00) & (CSRAdrM == FRM | CSRAdrM == FCSR);
   assign WriteFFLAGSM = CSRUWriteM & (STATUS_FS != 2'b00) & (CSRAdrM == FFLAGS | CSRAdrM == FCSR);
 
-  // Write Values
+  // Write Values: fcsr holds frm in bits 7:5 and fflags in bits 4:0
   assign NextFRMM          = (CSRAdrM == FCSR) ? CSRWriteValM[7:5] : CSRWriteValM[2:0];
   assign NextFFLAGSM       = WriteFFLAGSM ? CSRWriteValM[4:0] : FFLAGS_REGW | SetFflagsM;
   assign SetOrWriteFFLAGSM = WriteFFLAGSM | (|SetFflagsM & InstrValidNotFlushedM);
