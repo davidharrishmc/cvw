@@ -349,15 +349,17 @@ module lsu import cvw::*; #(parameter cvw_t P) (
       logic                    BusAtomic;
 
       // Each datapath is gated on the extension that needs it: cbo.zero to uncached memory on Zicboz,
-      // the cache CMO port on either CBO extension, and uncached AMOs on Zaamo
+      // the cache CMO port on either CBO extension, and uncached AMOs on Zaamo.
+      // cbo.clean/flush/inval ignore cacheability, so they reach the D$ even through a PBMT=NC/IO alias
+      // of a cacheable page; only cbo.zero to an uncacheable address goes to the bus instead.
       if (P.ZICBOZ_SUPPORTED) assign BusCMOZero = LSUCMOpM[CMO_ZERO] & ~CacheableM & ~HoldAccessM;
       else                    assign BusCMOZero = 1'b0;
-      if (P.ZICBOM_SUPPORTED | P.ZICBOZ_SUPPORTED) assign CacheCMOpM = (CacheableM & ~SelHPTW & ~HoldAccessM) ? CMOpM : '0;
+      if (P.ZICBOM_SUPPORTED | P.ZICBOZ_SUPPORTED) assign CacheCMOpM = (~SelHPTW & ~HoldAccessM) ? {CMOpM[CMO_ZERO] & CacheableM, CMOpM[CMO_FLUSH:CMO_INVAL]} : '0;
       else                                         assign CacheCMOpM = '0;
       if (P.ZAAMO_SUPPORTED) assign BusAtomic = AtomicM[1] & ~CacheableM;
       else                   assign BusAtomic = 1'b0;
       assign BusRW = (~CacheableM & ~SelDTIM & ~HoldAccessM) ? LSURWM : '0;
-      assign CacheableOrFlushCacheM = CacheableM | FlushDCacheM;
+      assign CacheableOrFlushCacheM = CacheableM | FlushDCacheM | (|CacheCMOpM[2:0]); // the D$ writes back on the bus for a CMO
       assign CacheRWM = (CacheableM & ~SelDTIM & ~HoldAccessM) ? LSURWM : '0;
       assign FlushDCache = FlushDCacheM & ~SelHPTW;                          // exclusion-tag: lsu FlushDCacheSelHPTW
 
