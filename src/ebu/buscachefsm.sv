@@ -127,12 +127,14 @@ module buscachefsm #(
   assign CaptureEn = (CurrState == DATA_PHASE & BusRW[1] & ~Flush) | (CurrState == CACHE_FETCH & HREADY);
   assign CacheAccess = CurrState == CACHE_FETCH | CurrState == CACHE_WRITEBACK;
 
+  // An uncached cbo.zero stalls through its final beat and retires in MEM3, like an uncached store, so the next
+  // access is not presented while the FSM sits in MEM3 and ignores it
   assign BusStall = (CurrState == ADR_PHASE & ((|BusRW) | (|CacheBusRW) | BusCMOZero)) |
                     (CurrState == DATA_PHASE) |
                     (CurrState == ATOMIC_PHASE) |
                     (CurrState == ATOMIC_READ_DATA_PHASE) |
                     (CurrState == CACHE_FETCH & ~FinalBeatCount) |
-                    (CurrState == CACHE_WRITEBACK & ~FinalBeatCount);
+                    (CurrState == CACHE_WRITEBACK & (~FinalBeatCount | BusCMOZero));
 
   assign BusCommitted = (CurrState != ADR_PHASE) & ~(READ_ONLY_CACHE & CurrState == MEM3);
 
