@@ -47,9 +47,10 @@ endif
 ifeq ($(strip $(FCOV)),1)
     ACT_DIR = ${WALLY}/addins/riscv-arch-test
     FCOV_SRC = $(ACT_DIR)/framework/src/act/fcov
-    # riscv-arch-test's covergroups still draw Verilator warnings (e.g. COVERIGN for bin arrays wider
-    # than Verilator supports), which are not Wally's to fix, so report them without stopping the build
-    VERILATOR_FLAGS += --coverage-user -Wno-fatal
+    # riscv-arch-test's covergroups still draw Verilator warnings, which are not Wally's to fix, so
+    # report them without stopping the build.  Some bin arrays sweep more values than Verilator's
+    # default limit of 1024 (e.g. all 2^14 compressed encodings), so raise the limit to keep them.
+    VERILATOR_FLAGS += --coverage-user --coverage-max-bins 16384 -Wno-fatal
     INCLUDE_PATH += "-I$(FCOV_SRC)" "-I$(ACT_DIR)/coverpoints" "-I$(ACT_DIR)/coverpoints/unpriv" \
                     "-I$(ACT_DIR)/coverpoints/priv" "-I$(ACT_DIR)/tests/env" \
                     "-I$(ACT_DIR)/work/cvw-$(strip $(WALLYCONF))/env"
