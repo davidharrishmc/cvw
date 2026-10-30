@@ -38,7 +38,7 @@ module ram1p1rwe import cvw::*; #(parameter USE_SRAM = 0, DEPTH = 64, WIDTH = 44
   input  logic [$clog2(DEPTH)-1:0] addr, // Address
   input  logic [WIDTH-1:0]         din,  // Write data
   input  logic                     we,   // Write enable
-  output logic [WIDTH-1:0]        dout   // Read data
+  output logic [WIDTH-1:0]         dout  // Read data
 );
 
   //////////////////////////////////////////////////////////////////////////////
