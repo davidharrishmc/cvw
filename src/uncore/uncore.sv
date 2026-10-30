@@ -1,18 +1,17 @@
 ///////////////////////////////////////////
 // uncore.sv
 //
-// Written: David_Harris@hmc.edu 9 January 2021
-// Modified: Ben Bracker 6 Mar 2021 to better fit AMBA 3 AHB-Lite spec
+// Written:  David Harris David_Harris@hmc.edu 9 January 2021
+// Modified: Rose Thompson, Jacob Pease, Ben Bracker, Noah Boorstin, Naiche Whyte-Aguayo, Thomas Fleming
 //
-// Purpose: System-on-Chip components outside the core
-//          Memories, peripherals, external bus control
+// Purpose: Memories and peripherals outside the core.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-26 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
