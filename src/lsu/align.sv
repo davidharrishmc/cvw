@@ -1,20 +1,18 @@
 ///////////////////////////////////////////
-// spill.sv
+// align.sv
 //
-// Written: Rose Thompson rose@rosethompson.net
-// Created: 26 October 2023
-// Modified: 26 October 2023
+// Written:  Rose Thompson rose@rosethompson.net 26 October 2023
+// Modified: David Harris
 //
-// Purpose: This module implements native alignment support for the Zicclsm extension
-//          It is similar to the IFU's spill module and probably could be merged together with
-//          some effort.
+// Purpose: Splits misaligned accesses that cross a line boundary (Zicclsm).
+//          Similar to the IFU's spill module; the two could be merged with some effort.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2023-26 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
