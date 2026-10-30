@@ -42,8 +42,8 @@ module cache import cvw::*; #(parameter cvw_t P,
   input  logic [3:0]             CMOpM,             // Cache management operation: 1 cbo.inval, 2 cbo.clean, 4 cbo.flush, 8 cbo.zero
   input  logic [OFFSETLEN+SETLEN-1:0] NextSet,      // Set and offset bits of the next access address (untranslated)
   input  logic [PA_BITS-1:0]     PAdr,              // Physical address
-  input  logic [(WORDLEN-1)/8:0] ByteMask,          // Byte write enables
-  input  logic [WORDLEN-1:0]     WriteData,         // Write data
+  input  logic [(WORDLEN-1)/8:0] ByteMask,          // Byte write enables (D$ only)
+  input  logic [WORDLEN-1:0]     WriteData,         // Write data (D$ only)
   output logic                   CacheCommitted,    // Cache has started bus operation that shouldn't be interrupted
   output logic                   CacheStall,        // Cache stalls pipeline during multicycle operation
   output logic [WORDLEN-1:0]     ReadDataWord,      // Word read from cache line
