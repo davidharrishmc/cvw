@@ -2,7 +2,7 @@
 // or_rows.sv
 //
 // Written:  David Harris David_Harris@hmc.edu 13 July 2021
-// Modified: Rose Thompson
+// Modified: Rose Thompson rose@rosethompson.net
 //
 // Purpose: ORs the rows of a 2D array.
 //
