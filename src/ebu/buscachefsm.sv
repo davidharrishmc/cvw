@@ -52,7 +52,7 @@ module buscachefsm #(
 
   // cache interface
   input  logic [1:0]             CacheBusRW,         // Cache bus operation: 10 line fetch, 01 line writeback
-  output logic                   CacheBusAck,        // Bus operation for the cache completed
+  output logic                   CacheBusAck,        // Completed bus operation
 
   // lsu interface
   output logic [AHBWLOGBWPL-1:0] BeatCount,          // Beat within the cache line in the Address phase
@@ -60,7 +60,7 @@ module buscachefsm #(
   output logic                   SelBusBeat,         // Select the cache line word from BeatCount rather than PAdr
 
   // BUS interface
-  input  logic                   HREADY,             // AHB ready
+  input  logic                   HREADY,             // AHB bus ready
   output logic [1:0]             HTRANS,             // AHB transfer type: 00 IDLE, 10 NONSEQ, 11 SEQ
   output logic                   HWRITE,             // AHB write (1) or read (0)
   output logic [2:0]             HBURST              // AHB burst type
