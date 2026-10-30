@@ -1,30 +1,19 @@
 ///////////////////////////////////////////
 // mmu.sv
 //
-// Written: david_harris@hmc.edu and kmacsaigoren@hmc.edu 4 June 2021
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu, Kip Macsai-Goren kmacsaigoren@hmc.edu 4 June 2021
+// Modified: Rose Thompson, Muhammad Zain
 //
-// Purpose: Memory management unit, including TLB, PMA, PMP
+// Purpose: Memory management unit: TLB, PMA, and PMP checks.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-26 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-//
-// Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may not use this file
-// except in compliance with the License, or, at your option, the Apache License version 2.0. You
-// may obtain a copy of the License at
-//
-// https://solderpad.org/licenses/SHL-2.1/
-//
-// Unless required by applicable law or agreed to in writing, any work distributed under the
-// License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-// either express or implied. See the License for the specific language governing permissions
-// and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module mmu import cvw::*;  #(parameter cvw_t P,
@@ -37,10 +26,10 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   input  logic [1:0]           STATUS_MPP,         // Status CSR: previous machine privilege level
   input  logic                 ENVCFG_PBMTE,       // Page-based memory types enabled
   input  logic                 ENVCFG_ADUE,        // HPTW A/D Update enable
-  input  logic [1:0]           PrivilegeModeW,     // Current privilege level of the processeor
+  input  logic [1:0]           PrivilegeModeW,     // Current privilege level of the processor
   input  logic                 DisableTranslation, // virtual address translation disabled during D$ flush and HPTW walk that use physical addresses
   input  logic [P.XLEN+1:0]    VAdr,               // virtual/physical address from IEU or physical address from HPTW
-  input  logic [1:0]           Size,               // access size: 00 = 8 bits, 01 = 16 bits, 10 = 32 bits , 11 = 64 bits
+  input  logic [1:0]           Size,               // access size: 00 = 8 bits, 01 = 16 bits, 10 = 32 bits, 11 = 64 bits
   input  logic [P.XLEN-1:0]    PTE,                // page table entry
   input  logic [2:0]           PageTypeWriteVal,   // page type
   input  logic                 TLBWrite,           // write TLB entry
@@ -54,7 +43,7 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   // Faults
   output logic                 InstrAccessFaultF, LoadAccessFaultM, StoreAmoAccessFaultM, // access fault sources
   output logic                 InstrPageFaultF, LoadPageFaultM, StoreAmoPageFaultM,       // page fault sources
-  output logic                 UpdateDA,                                                  // page fault due to setting dirty or access bit
+  output logic                 UpdateDA,                                                  // TLB hit needs to set the dirty or access bit
   output logic                 LoadMisalignedFaultM, StoreAmoMisalignedFaultM,            // misaligned fault sources
   // PMA checker signals
   input  logic [3:0]           CMOpM,                                                     // Cache management instructions
@@ -78,9 +67,10 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   logic                        MisalignedCausesAccessFaultM; // Misaligned access throws an access fault instead of a misaligned fault
   logic [1:0]                  EffectivePrivilegeModeW;  // Effective privilege mode accounting for MPRV
   logic                        MisalignedFaultAllowedM;  // System can throw misaligned if ZICCLSM is not supported, or access is uncachable, idempotent, and TLB has found the entry.
+  logic                        PAOutOfRange;             // Untranslated address has nonzero bits above PA_BITS
 
   // Get Effective Privilege Mode
-  // for DLB, when mstatus.MPRV=1, use mstatus.MPP rather than the current privilege mode
+  // for DTLB, when mstatus.MPRV=1, use mstatus.MPP rather than the current privilege mode
   assign EffectivePrivilegeModeW = IMMU ? PrivilegeModeW : (STATUS_MPRV ? STATUS_MPP : PrivilegeModeW);
 
   // only instantiate TLB if Virtual Memory is supported
@@ -112,11 +102,17 @@ module mmu import cvw::*;  #(parameter cvw_t P,
   mux2 #(P.PA_BITS-12) addressmux(VAdr[P.PA_BITS-1:12], TLBPAdr[P.PA_BITS-1:12], Translate, PhysicalAddress[P.PA_BITS-1:12]);
   assign PhysicalAddress[11:0] = VAdr[11:0];
 
+  // An untranslated address is a physical address, so bits XLEN-1:PA_BITS must be zero.  Otherwise it is outside
+  // the physical address space rather than an alias of a lower address, and the PMA checker raises an access fault.
+  // Translated addresses come from the PPN and always fit; RV32 addresses are narrower than PA_BITS.
+  if (P.XLEN > P.PA_BITS) assign PAOutOfRange = ~Translate & (|VAdr[P.XLEN-1:P.PA_BITS]);
+  else                    assign PAOutOfRange = 1'b0;
+
   ///////////////////////////////////////////
   // Check physical memory accesses
   ///////////////////////////////////////////
 
-  pmachecker #(P) pmachecker(.PhysicalAddress, .Size, .CMOpM,
+  pmachecker #(P) pmachecker(.PhysicalAddress, .PAOutOfRange, .Size, .CMOpM,
     .AtomicAccessM, .ExecuteAccessF, .WriteAccessM, .ReadAccessM, .PBMemoryType,
     .Cacheable, .Idempotent, .SelTIM,
     .PMAInstrAccessFaultF, .PMALoadAccessFaultM, .PMAStoreAmoAccessFaultM);
@@ -132,11 +128,11 @@ module mmu import cvw::*;  #(parameter cvw_t P,
     assign PMPLoadAccessFaultM      = 1'b0;
   end
 
-  assign ReadNoAmoAccessM  = ReadAccessM & ~WriteAccessM;// AMO causes StoreAmo rather than Load fault
+  assign ReadNoAmoAccessM = ReadAccessM & ~WriteAccessM; // AMO causes StoreAmo rather than Load fault
 
   // Misaligned faults
   always_comb // exclusion-tag: immu-wordaccess
-    case(Size)
+    case (Size)
       2'b00:  DataMisalignedM = 1'b0;              // lb, sb, lbu
       2'b01:  DataMisalignedM = VAdr[0];           // lh, sh, lhu
       2'b10:  DataMisalignedM = VAdr[1] | VAdr[0]; // lw, sw, flw, fsw, lwu

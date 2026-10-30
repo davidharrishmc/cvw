@@ -57,7 +57,7 @@ regression-wally --nightly              # extended nightly suite
 regression-wally --ccov             # look at results in rv64gc_uncovered_hierarchical.rpt
 regression-wally --ccov --coveragesim vcs   # VCS: sim/vcs/cov/rv64gc_coverage_hierarchical.rpt
 ```
-Also possible to run individual files and merge them into the overall coverage.  Each simulation writes its own database (`sim/questa/ucdb/*.ucdb`, or `sim/vcs/ucdb/*.vdb` with VCS); `make -C sim QuestaCodeCoverage` (or `VcsCodeCoverage`) merges them and applies `sim/questa/coverage-exclusions-rv64gc.do`, which `sim/vcs/exclusions2el` translates into a URG exclusion file for VCS (`sim/vcs/cov/exclusions-rv64gc.log` says what each exclusion became).
+Also possible to run individual files and merge them into the overall coverage.  Each simulation writes its own database (`sim/questa/ucdb/*.ucdb`, or `sim/vcs/ucdb/*.vdb` with VCS); `make -C sim QuestaCodeCoverage` (or `VcsCodeCoverage`) merges them for one configuration (`CONFIG=rv64gc`, the default, `rv32gc` or `rv32imc`) and applies `sim/questa/coverage-exclusions-<config>.do`, which `sim/vcs/exclusions2el` translates into a URG exclusion file for VCS (`sim/vcs/cov/exclusions-<config>.log` says what each exclusion became).
 
 ### Lint
 ```bash
@@ -131,7 +131,7 @@ Lockstep mode runs Wally in lock-step against ImperasDV (commercial) or the RISC
 There is no central test list; tests are ELF files passed to `wsim` by path or directory:
 - `addins/riscv-arch-test/work/cvw-<config>/elfs/` — RISC-V Arch Tests (ACT4), built per cvw configuration by `make act` (or by `regression-wally`); one leaf directory per extension/feature
 - `tests/periph/rv32/`, `tests/periph/rv64/` — Self-checking peripheral tests: one source per test in `tests/periph/src/`, built for both widths by `make periph`; each embeds its expected signature and compares every entry as it is written
-- `tests/coverage/` — Coverage-targeted tests for each unit; they pass if they run to completion
+- `tests/coverage64gc/`, `tests/coverage32gc/`, `tests/coverage32imc/` — Coverage-targeted tests for each unit of the rv64gc, rv32gc and rv32imc configurations; they pass if they run to completion
 
 Every test reports its result by storing to `tohost`: 1 = pass, `(exit code << 1) | 1` = fail. A test that halts without storing to `tohost` is reported as a failure.
 - `buildroot` — Linux boot from prebuilt memory images (`wsim buildroot buildroot`)

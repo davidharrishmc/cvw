@@ -1,56 +1,42 @@
 ///////////////////////////////////////////
 // tlbcamline.sv
 //
-// Written: tfleming@hmc.edu & jtorrey@hmc.edu 6 April 2021
-// Modified: kmacsaigoren@hmc.edu 1 June 2021
-//            Implemented SV48 on top of SV39. This included adding SvMode input signal and the wally constants
-//            Mostly this was done to make the PageNumberMixer work.
+// Written:  Thomas Fleming tfleming@hmc.edu, Jessica Torrey jtorrey@hmc.edu 6 April 2021
+// Modified: David Harris, Kip Macsai-Goren kmacsaigoren@hmc.edu, Ayesha Anwaar, Muhammad Zain
 //
-// Purpose: CAM line for the translation lookaside buffer (TLB)
-//          Determines whether a virtual page number matches the stored key.
+// Purpose: One TLB CAM entry.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2021-26 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-//
-// Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may not use this file
-// except in compliance with the License, or, at your option, the Apache License version 2.0. You
-// may obtain a copy of the License at
-//
-// https://solderpad.org/licenses/SHL-2.1/
-//
-// Unless required by applicable law or agreed to in writing, any work distributed under the
-// License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-// either express or implied. See the License for the specific language governing permissions
-// and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 module tlbcamline import cvw::*;  #(parameter cvw_t P,
                                     parameter KEY_BITS = 20, SEGMENT_BITS = 10) (
-  input  logic                  clk, reset,
-  input  logic [P.VPN_BITS-1:0]  VPN, // The requested page number to compare against the key
+  input  logic                   clk, reset,
+  input  logic [P.VPN_BITS-1:0]  VPN,          // The requested page number to compare against the key
   input  logic [P.ASID_BITS-1:0] SATP_ASID,
-  input  logic                  SV39Mode,
-  input  logic                  SV48Mode,
-  input  logic                  WriteEnable,  // Write a new entry to this line
-  input  logic                  PTE_G,
-  input  logic                  PTE_NAPOT,  // entry is in NAPOT mode (N bit set and PPN[3:0] = 1000)
-  input  logic [2:0]            PageTypeWriteVal,
-  input  logic                  TLBFlush,     // Flush this line (set valid to 0)
-  input  logic                  TLBFlushAll,  // Flush global (G=1) entries too; when 0, G=1 entries are preserved
-  input  logic                  TLBWrite,       // a PTE is being written into the TLB
-  input  logic                  WritePTE_G,     // G bit of the PTE being written
-  input  logic                  WritePTE_NAPOT, // the PTE being written is a NAPOT entry
-  output logic [2:0]            PageTypeRead,
-  output logic                  Match
+  input  logic                   SV39Mode,
+  input  logic                   SV48Mode,
+  input  logic                   WriteEnable,  // Write a new entry to this line
+  input  logic                   PTE_G,
+  input  logic                   PTE_NAPOT,    // entry is in NAPOT mode (N bit set and PPN[3:0] = 1000)
+  input  logic [2:0]             PageTypeWriteVal,
+  input  logic                   TLBFlush,     // Flush this line (set valid to 0)
+  input  logic                   TLBFlushAll,  // Flush global (G=1) entries too; when 0, G=1 entries are preserved
+  input  logic                   TLBWrite,     // a PTE is being written into the TLB
+  input  logic                   WritePTE_G,   // G bit of the PTE being written
+  input  logic                   WritePTE_NAPOT, // the PTE being written is a NAPOT entry
+  output logic [2:0]             PageTypeRead,
+  output logic                   Match
 );
 
-  // PageTypeRead is a key for a tera, giga, mega, or kilopage.
+  // PageTypeRead is a key for a peta, tera, giga, mega, or kilopage.
   // PageType == 3'b000 --> kilopage
   // PageType == 3'b001 --> megapage
   // PageType == 3'b010 --> gigapage
