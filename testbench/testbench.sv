@@ -935,9 +935,6 @@ module testbench;
     if (labFD != 0) $fclose(labFD);
   endtask
 
-`ifdef PMP_COVERAGE
-test_pmp_coverage #(P) pmp_inst(clk);
-`endif
   /* verilator lint_on WIDTHTRUNC */
   /* verilator lint_on WIDTHEXPAND */
 
