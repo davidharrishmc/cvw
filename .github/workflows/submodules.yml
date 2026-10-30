@@ -1,0 +1,19 @@
+name: Submodules
+
+on:
+  pull_request:
+
+jobs:
+  submodule-bumps:
+    name: Submodule bumps move forward
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0 # the merge base with the base branch is needed
+
+    - name: Check that changed submodules move forward on their upstream branches
+      run: .github/scripts/check-submodule-bumps.sh ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
