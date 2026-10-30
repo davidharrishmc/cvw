@@ -930,8 +930,17 @@ def main():
             f.write(f"{status:14s} {cmd.replace(chr(31), ' ')}\n               {detail}\n")
         summary = ", ".join(f"{n} {s.lower()}" for s, n in sorted(counts.items()))
         f.write(f"\n{len(t.log)} exclusions: {summary}\n")
+        # VCS cannot exclude every Questa expression or condition row on its own, so some of what Questa
+        # excludes still counts as uncovered in the VCS report
+        unported = counts["NOT PORTED"] + counts["PARTLY PORTED"]
+        warning = (f"Warning: {unported} of the {len(t.log)} Questa exclusions are not fully applied to VCS, so the "
+                   f"VCS report shows some items Questa excludes as uncovered; see {a.log}") if unported else ""
+        if warning:
+            f.write(f"{warning}\n")
     print(f"exclusions2el: {len(t.log)} exclusions: {summary}; {sum(len(v) for v in t.selected.values())} "
           f"VCS objects excluded; see {a.log}")
+    if warning:
+        print(f"exclusions2el: {warning}", file=sys.stderr)
     stale = [(cmd, detail) for cmd, status, detail in t.log if status == "STALE"]
     if stale:
         for cmd, detail in stale:

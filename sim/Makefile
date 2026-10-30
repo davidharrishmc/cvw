@@ -94,6 +94,7 @@ VcsCodeCoverage:
 	cp $(VCSCOV)/report/hierarchy.txt vcs/cov/$(CONFIG)_coverage_hierarchical.rpt
 	cp $(VCSCOV)/unexcluded/hierarchy.txt vcs/cov/$(CONFIG)_coverage_hierarchical_unexcluded.rpt
 	@grep -A2 "^Total Coverage Summary" $(VCSCOV)/report/dashboard.txt
+	@grep "^Warning" vcs/cov/exclusions-$(CONFIG).log || true
 
 benchmarks:
 	$(MAKE) -C ${WALLY}benchmarks/embench build
