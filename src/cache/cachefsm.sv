@@ -32,7 +32,7 @@ module cachefsm #(parameter READ_ONLY_CACHE = 0) (
   input  logic       clk,
   input  logic       reset,
   // hazard and privilege unit
-  input  logic       Stall,             // Pipeline is stalled
+  input  logic       Stall,             // Pipeline is stalled. Stall cache. In-flight access continues, but does not return to CACHE_ACCESS (ready state)
   input  logic       FlushStage,        // Pipeline flush of second stage (prevent writes and bus operations)
   input  logic       InvalidateFlushStage, // Flush of the stage issuing InvalidateCache (suppresses the invalidate)
   output logic       CacheCommitted,    // Cache has started bus operation that shouldn't be interrupted
@@ -43,7 +43,7 @@ module cachefsm #(parameter READ_ONLY_CACHE = 0) (
   input  logic       InvalidateCache,   // Clear all valid bits
   input  logic [3:0] CMOpM,             // Cache management operation: 1 cbo.inval, 2 cbo.clean, 4 cbo.flush, 8 cbo.zero
   // Bus controls
-  input  logic       CacheBusAck,       // Bus operation for the cache completed
+  input  logic       CacheBusAck,       // Cache bus operation completed
   output logic [1:0] CacheBusRW,        // Cache bus operation: 10 line fetch, 01 line writeback
   // performance counter outputs
   output logic       CacheMiss,         // Cache miss
