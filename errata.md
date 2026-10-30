@@ -17,6 +17,8 @@ Please contribute by making a pull request to modify this document on GitHub.  S
 | 133 | 3.7 | The ACT suite has been completely redesigned and no longer uses RISCOF.  |See the [riscv-arch-test](https://github.com/riscv-non-isa/riscv-arch-test) repository for updated information.|David Harris, Claremont, CA | 1/4/26 |
 | 226 | 5.9.2 | cvw-arch-verif has been deprecated and no longer is in use | Replace with riscv-arch-test | David Harris, Claremont, CA | 1/4/26 |
 | 227 | 5.11 | The ACT suite has been completely redesigned and no longer uses RISCOF.  *** Other big changes pending in this section. | n/a | David Harris, Claremont, CA | 1/4/26 |
+| 310 | Equation 7.10 | $G_{i:j} = G_{i:k} + P_{i:k}P_{k-1:0}$ | $G_{i:j} = G_{i:k} + P_{i:k}G_{k-1:j}$ | Mohammad Alavi | 9/11/26 |
+| 310 | Equation 7.13 | $eq = (\text{Sum} == 0) = P_{N-1:0}$ | $eq = (\text{Sum} == 2^N-1) = P_{N-1:0}$ | Mohammad Alavi | 9/11/26 |
 | 347 | 8.2.3.4, introduction to the register list | "Performance monitoring CSRs (see Table I.9) include the following:" | Change to "Performance monitoring registers include the following:" when adding the memory-mapped `mtime` counter to the list. | Sotaro Fujimoto, Japan | 9/9/26 |
 | 347 | 8.2.3.4, first bullet | The list of "Up to 32 performance counters" omits `mtime` and lists only 31 counters. | Insert `mtime` after `mcycle/h`. | Sotaro Fujimoto, Japan | 9/9/26 |
 | 347 | 8.2.3.4, sidebar | "time/h is a memory-mapped register, not a CSR." | Replace with "mtime is a 64-bit memory-mapped register, not a CSR. All other performance-monitoring registers described in this section, including the read-only counter views, are CSRs (see Table I.9)." | Sotaro Fujimoto, Japan | 9/9/26 |
