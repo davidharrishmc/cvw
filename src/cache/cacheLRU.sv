@@ -4,7 +4,7 @@
 // Written:  Rose Thompson rose@rosethompson.net 20 July 2021
 // Modified: David Harris, Alec Vercruysse
 //
-// Purpose: Tree-based pseudo-LRU cache replacement.
+// Purpose: Tree-based pseudo-LRU cache replacement. Works for powers of 2.
 //
 // Documentation: RISC-V System on Chip Design
 //
