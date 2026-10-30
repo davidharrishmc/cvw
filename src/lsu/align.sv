@@ -105,7 +105,10 @@ module align import cvw::*;  #(parameter cvw_t P) (
       3'b001: PotentialSpillM = IEUAdrM[OFFSET_BIT_POS-1:1] == '1; // half access
       3'b010: PotentialSpillM = IEUAdrM[OFFSET_BIT_POS-1:2] == '1; // word access
       3'b011: PotentialSpillM = IEUAdrM[OFFSET_BIT_POS-1:3] == '1; // double access
+      // coverage off
+      // RV64GC doesn't support Q
       3'b100: PotentialSpillM = IEUAdrM[OFFSET_BIT_POS-1:4] == '1; // quad access
+      // coverage on
       default: PotentialSpillM = 1'b0;
     endcase
   end
