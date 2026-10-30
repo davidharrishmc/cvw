@@ -1,17 +1,17 @@
 ///////////////////////////////////////////
-// wally-pipelinedsoc.sv
+// wallypipelinedsoc.sv
 //
-// Written: David_Harris@hmc.edu 6 November 2020
-// Modified:
+// Written:  David Harris David_Harris@hmc.edu 6 November 2020
+// Modified: Rose Thompson, Jacob Pease, Ben Bracker, Naiche Whyte-Aguayo
 //
-// Purpose: System on chip including pipelined processor and uncore memories/peripherals
+// Purpose: System on chip: core and uncore.
 //
 // Documentation: RISC-V System on Chip Design
 //
 // A component of the CORE-V-WALLY configurable RISC-V project.
 // https://github.com/openhwfoundation/cvw
 //
-// Copyright (C) 2021-23 Harvey Mudd College & Oklahoma State University
+// Copyright (C) 2020-26 Harvey Mudd College & Oklahoma State University
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
