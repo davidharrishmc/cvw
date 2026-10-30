@@ -67,7 +67,8 @@ if check_tool_version $VERILATOR_VERSION; then
     unset VERILATOR_ROOT
     cd "$RISCV"/verilator
     autoconf
-    ./configure --prefix="$RISCV"
+    # Verilator needs Python 3.8 or newer, but OpenSUSE 15.6's python3 is 3.6, so use the version installed for Wally
+    ./configure --prefix="$RISCV" PYTHON3="${PYTHON_VERSION:-python3}"
     make -j "${NUM_THREADS}" 2>&1 | logger; [ "${PIPESTATUS[0]}" == 0 ]
     make install 2>&1 | logger; [ "${PIPESTATUS[0]}" == 0 ]
     if [ "$clean" = true ]; then
