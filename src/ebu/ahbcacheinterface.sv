@@ -38,7 +38,7 @@ module ahbcacheinterface import cvw::*; #(
 )(
   input  logic                   HCLK, HRESETn,          // AHB clock and reset (active low)
   // bus interface controls
-  input  logic                   HREADY,                 // AHB ready
+  input  logic                   HREADY,                 // AHB bus ready
   output logic [1:0]             HTRANS,                 // AHB transfer type: 00 IDLE, 10 NONSEQ, 11 SEQ
   output logic                   HWRITE,                 // AHB write (1) or read (0)
   output logic [2:0]             HSIZE,                  // AHB transfer size
@@ -55,17 +55,17 @@ module ahbcacheinterface import cvw::*; #(
   input  logic                   CacheableOrFlushCacheM, // Memory operation is cacheable or flushing D$
   input  logic                   Cacheable,              // PMA indicates memory address is cacheable
   input  logic [1:0]             CacheBusRW,             // Cache bus operation: 10 line fetch, 01 line writeback
-  output logic                   CacheBusAck,            // Bus operation for the cache completed
+  output logic                   CacheBusAck,            // Bus transaction completed
   output logic [LINELEN-1:0]     FetchBuffer,            // Data captured from the bus
   output logic [AHBWLOGBWPL-1:0] BeatCount,              // Beat within the cache line in the Address phase
   output logic                   SelBusBeat,             // Select the cache line word from BeatCount rather than PAdr
 
   // uncached interface
   input  logic [P.PA_BITS-1:0]   PAdr,                   // Physical address
-  input  logic [P.LLEN-1:0]      WriteDataM,             // Write data from IEU
+  input  logic [P.LLEN-1:0]      WriteDataM,             // IEU Write data: Used for uncached accesses
   input  logic [1:0]             BusRW,                  // Uncached memory operation: 10 read, 01 write
   input  logic                   BusAtomic,              // Uncached atomic memory operation
-  input  logic [2:0]             Size,                   // Access size (log2 bytes)
+  input  logic [2:0]             Size,                   // Uncached access size (log2 bytes)
   input  logic                   BusCMOZero,             // Uncached cbo.zero must write zero to full sized cacheline without going through the cache
 
   // lsu/ifu interface
