@@ -16,11 +16,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module atomic import cvw::*;  #(parameter cvw_t P) (
+module atomic import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
   input  logic                 clk,
   input  logic                 reset,
   input  logic                 StallW,
-  input  logic [P.XLEN-1:0]    ReadDataM,      // LSU ReadData XLEN because FPU does not issue atomic memory operation from FPU registers
+  input  logic [P.LLEN-1:0]    ReadDataWordM,  // Endian-swapped LSU data before load formatting
+  input  logic                 BigEndianM,    // Select the addressed lane within the swapped data
   input  logic [P.XLEN-1:0]    IHWriteDataM,   // LSU WriteData XLEN because FPU does not issue atomic memory operation from FPU registers
   input  logic [P.PA_BITS-1:0] PAdrM,          // Physical memory address
   input  logic [6:0]           LSUFunct7M,     // AMO alu operation gated by HPTW
@@ -38,7 +39,12 @@ module atomic import cvw::*;  #(parameter cvw_t P) (
 
   // AMO ALU
   if (P.ZAAMO_SUPPORTED) begin
-    amoalu #(P) amoalu(.ReadDataM, .IHWriteDataM, .LSUFunct7M, .LSUFunct3M, .AMOResultM);
+    logic [P.XLEN-1:0] AMOReadDataM;
+
+    // MINWIDTH can become 8 when subword atomics are supported by instruction decode.
+    amoread #(P, MINWIDTH) amoread(.ReadDataWordM, .PAdrM(PAdrM[3:0]), .BigEndianM,
+      .SizeM(LSUFunct3M[1:0]), .AMOReadDataM);
+    amoalu #(P, MINWIDTH) amoalu(.ReadDataM(AMOReadDataM), .IHWriteDataM, .LSUFunct7M, .LSUFunct3M, .AMOResultM);
     mux2 #(P.XLEN) wdmux(IHWriteDataM, AMOResultM, LSUAtomicM[1], IMAWriteDataM);
   end else
     assign IMAWriteDataM = IHWriteDataM;
