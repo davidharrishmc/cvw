@@ -49,11 +49,11 @@ module amoread import cvw::*; #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED
   end
 
   if (P.LLEN == 32) assign WordM = ReadDataWordM;
-  else             assign WordM = ReadDataWordM[32*LaneAdrM[ADRBITS-1:2] +: 32];
+  else              assign WordM = ReadDataWordM[32*LaneAdrM[ADRBITS-1:2] +: 32];
 
   if (P.XLEN == 64) begin
     if (P.LLEN == 64) assign DblWordM = ReadDataWordM;
-    else             assign DblWordM = ReadDataWordM[64*LaneAdrM[ADRBITS-1:3] +: 64];
+    else              assign DblWordM = ReadDataWordM[64*LaneAdrM[ADRBITS-1:3] +: 64];
   end else assign DblWordM = '0;
 
   // Distributed AND-OR mux: gate each operand by its width decode, then OR the results.
