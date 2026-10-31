@@ -49,7 +49,8 @@ module amoread import cvw::*; #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED
     assign Operands[i] = {P.XLEN{SizeM == 2'(SIZE)}} & {{P.XLEN-WIDTH{1'b0}}, Operand};
   end
 
-  // Parallel width decode and OR selection; unsupported widths produce zero.
+  // Distributed AND-OR mux: gate each operand by its width decode, then OR the results.
+  // Unsupported widths produce zero.
   always_comb begin
     AMOReadDataM = '0;
     for (int i = 0; i < NUMWIDTHS; i++) AMOReadDataM |= Operands[i];
