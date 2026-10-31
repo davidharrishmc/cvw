@@ -48,7 +48,7 @@ module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
   end
 
   // Optional narrow comparisons use the operand's sign bit, not XLEN's sign bit.
-  // These comparators and their selection logic disappear for today's W/D-only AMOs.
+  // Zabha byte/halfword comparators and selection logic are omitted when MINWIDTH is 32.
   if (MINWIDTH == 8) begin : byteamo
     logic eq8, lt8, eq16, lt16;
     comparator #(8) cmp8(a[7:0], b[7:0], sngd, {eq8, lt8});
