@@ -7,8 +7,8 @@
 //          that are reserved on rv32imc or belong to extensions it lacks (F, D, Zcb, A, RV64-only
 //          opcodes, sfence.vma without S mode), each of which must raise an illegal instruction
 //          exception, base opcodes with reserved funct3/funct7 fields (ld, sd, slli with a bad funct7,
-//          an OP funct7, branch funct3 010, jalr funct3 001, SYSTEM funct3 100), and the compressed HINT
-//          encodings, which must execute as nops.
+//          an OP funct7, branch funct3 010, jalr funct3 001, SYSTEM funct3 100, ebreak with rs1 = x1),
+//          and the compressed HINT encodings, which must execute as nops.
 //          Also runs addi HINTs whose immediate equals the sfence.w.inval / sfence.inval.ir
 //          funct12, which privdec decodes from the instruction bits whatever the opcode.
 //
@@ -112,6 +112,7 @@ main:
     RESERVED32 0x00002063, 92   // BRANCH funct3 010
     RESERVED32 0x00001067, 95   // JALR funct3 001
     RESERVED32 0x00004073, 98   // SYSTEM funct3 100
+    RESERVED32 0x00108073, 101  // ebreak's funct12 with rs1 = x1: privdec requires rs1 = 0
 
     // addi HINTs (rd = x0) and an addi whose immediate is the sfence.w.inval (0x180) or
     // sfence.inval.ir (0x181) funct12, with rs1 and rd each zero and nonzero

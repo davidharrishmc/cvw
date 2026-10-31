@@ -79,6 +79,10 @@ coverage exclude -scope "${USLC4}\[1\]/stage/fdivsqrtstage/uslc4" -linerange [Ta
 ExcludeRows $FPU/postprocess/flags e {DivByZero_1 +UfPlus1_*}
 ExcludeRows $FPU/postprocess/flags e {DivByZero_1 +Overflow_*}
 
+# The (FullRe == 1)_0 row of Underflow needs FullRe other than 0 or 1 while Me == 0, but a subnormal (Me = 0) rounds
+# to FullRe = 0 or 1 (as in coverage-exclusions-rv64gc.do).
+ExcludeRows $FPU/postprocess/flags e {{(FullRe == 1)_0} +UfPlus1_*}
+
 # funct7 1011011 (fmvp.q.x) has FMT = 11, quad precision.  Q_SUPPORTED = 0, so fctrl rejects the instruction as an
 # unsupported format before this case statement and the arm is never selected.
 coverage exclude -scope $FPU/fctrl -linerange [TagLine ${SRC}/fpu/fctrl.sv fmvp-q-x] -item b 1
