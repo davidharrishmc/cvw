@@ -41,10 +41,10 @@ module amoread import cvw::*; #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED
 
   // Select each width directly from the input, independently of other widths.
   if (ZABHA_SUPPORTED) begin
-    assign ByteM = ReadDataWordM[8*LaneAdrM +: 8];
+    assign ByteM     = ReadDataWordM[8*LaneAdrM +: 8];
     assign HalfwordM = ReadDataWordM[16*LaneAdrM[ADRBITS-1:1] +: 16];
   end else begin
-    assign ByteM = '0;
+    assign ByteM     = '0;
     assign HalfwordM = '0;
   end
 
