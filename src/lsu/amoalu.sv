@@ -25,7 +25,7 @@ module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
 );
 
   logic [P.XLEN-1:0] a, b, y;
-  logic              lt, ltWordDbl, cmp, sngd, sngd32, eq32, lt32, wordop;
+  logic              ltAMO, lt, cmp, sngd, sngd32, eq32, lt32, w64;
 
   // Rename inputs
   assign a = ReadDataM;
@@ -33,18 +33,18 @@ module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
 
   // Share hardware among the four amomin/amomax comparators
   assign sngd = ~LSUFunct7M[5]; // Funct7[5] = 0 for signed amomin/max
-  assign wordop = (LSUFunct3M[1:0] == 2'b10); // operate on bottom 32 bits
-  assign sngd32 = sngd & (P.XLEN == 32 | wordop); // flip sign in lower 32 bits on 32-bit comparisons only
+  assign w64 = (LSUFunct3M[1:0] == 2'b10); // operate on bottom 32 bits
+  assign sngd32 = sngd & (P.XLEN == 32 | w64); // flip sign in lower 32 bits on 32-bit comparisons only
 
   comparator #(32) cmp32(a[31:0], b[31:0], sngd32, {eq32, lt32});
   if (P.XLEN == 32) begin
-    assign ltWordDbl = lt32;
+    assign lt = lt32;
   end else begin
     logic equpper, ltupper, lt64;
 
     comparator #(32) cmpupper(a[63:32], b[63:32], sngd, {equpper, ltupper});
     assign lt64 = ltupper | equpper & lt32;
-    assign ltWordDbl = wordop ? lt32 : lt64;
+    assign lt = w64 ? lt32 : lt64;
   end
 
   // Optional narrow comparisons use the operand's sign bit, not XLEN's sign bit.
@@ -53,16 +53,16 @@ module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
     logic eq8, lt8, eq16, lt16;
     comparator #(8) cmp8(a[7:0], b[7:0], sngd, {eq8, lt8});
     comparator #(16) cmp16(a[15:0], b[15:0], sngd, {eq16, lt16});
-    mux4 #(1) ltMux(lt8, lt16, ltWordDbl, ltWordDbl, LSUFunct3M[1:0], lt);
+    mux4 #(1) ltMux(lt8, lt16, lt, lt, LSUFunct3M[1:0], ltAMO);
   end else if (MINWIDTH == 16) begin : halfwordamo
     logic eq16, lt16;
     comparator #(16) cmp16(a[15:0], b[15:0], sngd, {eq16, lt16});
-    assign lt = (LSUFunct3M[1:0] == 2'b01) ? lt16 : ltWordDbl;
+    assign ltAMO = (LSUFunct3M[1:0] == 2'b01) ? lt16 : lt;
   end else begin : wordamo
-    assign lt = ltWordDbl;
+    assign ltAMO = lt;
   end
 
-  assign cmp = lt ^ LSUFunct7M[4]; // flip sense of comparison for maximums
+  assign cmp = ltAMO ^ LSUFunct7M[4]; // flip sense of comparison for maximums
 
   // AMO ALU
   always_comb
