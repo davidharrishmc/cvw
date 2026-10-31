@@ -29,30 +29,38 @@ module amoread import cvw::*; #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED
 );
 
   localparam ADRBITS = $clog2(P.LLEN/8);
-  localparam MINWIDTH = ZABHA_SUPPORTED ? 8 : 32;
-  localparam NUMWIDTHS = $clog2(P.XLEN/MINWIDTH)+1;
   logic [ADRBITS-1:0] LaneAdrM;
-  logic [P.XLEN-1:0] Operands [NUMWIDTHS];
+  logic [7:0] ByteM;
+  logic [15:0] HalfwordM;
+  logic [31:0] WordM;
+  logic [63:0] DblWordM;
 
   // Match subwordread's lane convention after the LSU endian swap.
   if (P.BIGENDIAN_SUPPORTED) assign LaneAdrM = PAdrM[ADRBITS-1:0] ^ {ADRBITS{BigEndianM}};
   else                       assign LaneAdrM = PAdrM[ADRBITS-1:0];
 
-  for (genvar i = 0; i < NUMWIDTHS; i++) begin : widths
-    localparam WIDTH = MINWIDTH << i;
-    localparam SIZE = $clog2(WIDTH/8);
-    logic [WIDTH-1:0] Operand;
-
-    // Each width selects directly from the input, independently of other widths.
-    if (WIDTH == P.LLEN) assign Operand = ReadDataWordM;
-    else assign Operand = ReadDataWordM[WIDTH*LaneAdrM[ADRBITS-1:SIZE] +: WIDTH];
-    assign Operands[i] = {P.XLEN{SizeM == 2'(SIZE)}} & {{P.XLEN-WIDTH{1'b0}}, Operand};
+  // Select each width directly from the input, independently of other widths.
+  if (ZABHA_SUPPORTED) begin
+    assign ByteM = ReadDataWordM[8*LaneAdrM +: 8];
+    assign HalfwordM = ReadDataWordM[16*LaneAdrM[ADRBITS-1:1] +: 16];
+  end else begin
+    assign ByteM = '0;
+    assign HalfwordM = '0;
   end
+
+  if (P.LLEN == 32) assign WordM = ReadDataWordM;
+  else             assign WordM = ReadDataWordM[32*LaneAdrM[ADRBITS-1:2] +: 32];
+
+  if (P.XLEN == 64) begin
+    if (P.LLEN == 64) assign DblWordM = ReadDataWordM;
+    else             assign DblWordM = ReadDataWordM[64*LaneAdrM[ADRBITS-1:3] +: 64];
+  end else assign DblWordM = '0;
 
   // Distributed AND-OR mux: gate each operand by its width decode, then OR the results.
   // Unsupported widths produce zero.
-  always_comb begin
-    AMOReadDataM = '0;
-    for (int i = 0; i < NUMWIDTHS; i++) AMOReadDataM |= Operands[i];
-  end
+  assign AMOReadDataM =
+    ({P.XLEN{SizeM == 2'b00}} & P.XLEN'(ByteM)) |
+    ({P.XLEN{SizeM == 2'b01}} & P.XLEN'(HalfwordM)) |
+    ({P.XLEN{SizeM == 2'b10}} & P.XLEN'(WordM)) |
+    ({P.XLEN{SizeM == 2'b11}} & P.XLEN'(DblWordM));
 endmodule
