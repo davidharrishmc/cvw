@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
+module amoalu import cvw::*;  #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED = 0) (
   input  logic [P.XLEN-1:0] ReadDataM,    // LSU's ReadData
   input  logic [P.XLEN-1:0] IHWriteDataM, // LSU's WriteData
   input  logic [6:0]        LSUFunct7M,   // ALU Operation
@@ -48,16 +48,12 @@ module amoalu import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
   end
 
   // Optional narrow comparisons use the operand's sign bit, not XLEN's sign bit.
-  // Zabha byte/halfword comparators and selection logic are omitted when MINWIDTH is 32.
-  if (MINWIDTH == 8) begin : byteamo
+  // Zabha adds byte/halfword comparators and selection logic.
+  if (ZABHA_SUPPORTED) begin : byteamo
     logic eq8, lt8, eq16, lt16;
     comparator #(8) cmp8(a[7:0], b[7:0], sngd, {eq8, lt8});
     comparator #(16) cmp16(a[15:0], b[15:0], sngd, {eq16, lt16});
     mux4 #(1) ltMux(lt8, lt16, lt, lt, LSUFunct3M[1:0], ltAMO);
-  end else if (MINWIDTH == 16) begin : halfwordamo
-    logic eq16, lt16;
-    comparator #(16) cmp16(a[15:0], b[15:0], sngd, {eq16, lt16});
-    assign ltAMO = (LSUFunct3M[1:0] == 2'b01) ? lt16 : lt;
   end else begin : wordamo
     assign ltAMO = lt;
   end

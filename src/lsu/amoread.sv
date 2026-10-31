@@ -20,7 +20,7 @@
 // and limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module amoread import cvw::*; #(parameter cvw_t P, parameter MINWIDTH = 32) (
+module amoread import cvw::*; #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED = 0) (
   input  logic [P.LLEN-1:0] ReadDataWordM, // Data already byte-swapped for big endian
   input  logic [3:0]        PAdrM,
   input  logic              BigEndianM,
@@ -29,6 +29,7 @@ module amoread import cvw::*; #(parameter cvw_t P, parameter MINWIDTH = 32) (
 );
 
   localparam ADRBITS = $clog2(P.LLEN/8);
+  localparam MINWIDTH = ZABHA_SUPPORTED ? 8 : 32;
   localparam NUMWIDTHS = $clog2(P.XLEN/MINWIDTH)+1;
   logic [ADRBITS-1:0] LaneAdrM;
   logic [P.XLEN-1:0] Operands [NUMWIDTHS];

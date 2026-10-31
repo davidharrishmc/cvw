@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-module atomic import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
+module atomic import cvw::*;  #(parameter cvw_t P, parameter bit ZABHA_SUPPORTED = 0) (
   input  logic                 clk,
   input  logic                 reset,
   input  logic                 StallW,
@@ -41,10 +41,10 @@ module atomic import cvw::*;  #(parameter cvw_t P, parameter MINWIDTH = 32) (
   if (P.ZAAMO_SUPPORTED) begin
     logic [P.XLEN-1:0] AMOReadDataM;
 
-    // MINWIDTH can become 8 when subword atomics are supported by instruction decode.
-    amoread #(P, MINWIDTH) amoread(.ReadDataWordM, .PAdrM(PAdrM[3:0]), .BigEndianM,
+    // Enable the Zabha datapath when instruction decode supports the extension.
+    amoread #(P, ZABHA_SUPPORTED) amoread(.ReadDataWordM, .PAdrM(PAdrM[3:0]), .BigEndianM,
       .SizeM(LSUFunct3M[1:0]), .AMOReadDataM);
-    amoalu #(P, MINWIDTH) amoalu(.ReadDataM(AMOReadDataM), .IHWriteDataM, .LSUFunct7M, .LSUFunct3M, .AMOResultM);
+    amoalu #(P, ZABHA_SUPPORTED) amoalu(.ReadDataM(AMOReadDataM), .IHWriteDataM, .LSUFunct7M, .LSUFunct3M, .AMOResultM);
     mux2 #(P.XLEN) wdmux(IHWriteDataM, AMOResultM, LSUAtomicM[1], IMAWriteDataM);
   end else
     assign IMAWriteDataM = IHWriteDataM;
