@@ -108,14 +108,19 @@ module debugger import cvw::*;  #(parameter cvw_t P)(
   // revisit this after initializing is if we need to set DMIReset if
   // we encounter the sticky error in the DMI.
 
+  // tcktime is set at run time and is never 0.
+  // verilator lint_off ZERODLY
+
   // Task for writing instructions to the DTM
   task write_instr(input logic [4:0] INST);
     logic [11:0] tms_seq;
     logic [11:0] tdi_seq;
+    logic [4:0]  inst_rev;
     begin
       tms_seq = {4'b0110, 5'b0, 3'b110};
       // Reverse instruction so LSB is first
-      tdi_seq = {5'b0, {<<{INST}}, 2'b0};
+      inst_rev = {<<{INST}};
+      tdi_seq = {5'b0, inst_rev, 2'b0};
 
       // Clock should be idling high, TMS should be low keeping
       // us in the Run-test/Idle state and the input should not
@@ -161,6 +166,7 @@ module debugger import cvw::*;  #(parameter cvw_t P)(
     #(tcktime) tdo_o = tdo;
     tck = 1;
   endtask
+  // verilator lint_on ZERODLY
 
   // IR or DR scan of width bits (<= 64), starting in Run-Test/Idle or
   // Update-xR and ending in Update-xR. out[k] is the k-th bit shifted
@@ -890,10 +896,10 @@ module debugger import cvw::*;  #(parameter cvw_t P)(
 
   // Debug Commands
   initial begin
-    JTAG_DR #(32) idcode = new();
-    JTAG_DR #(32) dtmcs = new();
-    DMI dmireg = new();
-    Debugger debugger = new();
+    static JTAG_DR #(32) idcode = new();
+    static JTAG_DR #(32) dtmcs = new();
+    static DMI dmireg = new();
+    static Debugger debugger = new();
 
     // Park JTAG pins: TCK high, TMS high (TAP stays in Test-Logic-Reset).
     // TAP is also held in reset by system reset; these pins stay parked for
