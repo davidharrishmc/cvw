@@ -27,7 +27,8 @@
 module watchdog #(parameter XLEN, WatchDogTimerThreshold, SameTrapPCThreshold = 100)
   (input clk,
    input reset,
-   string TEST
+   string TEST,
+   input logic Enable
    );
 
   // check for hang up.
@@ -74,8 +75,8 @@ module watchdog #(parameter XLEN, WatchDogTimerThreshold, SameTrapPCThreshold = 
   end
 
   always_comb begin
-    WatchDogTimeOut = WatchDogTimerCount >= WatchDogTimerThreshold;
-    SameTrapPCTimeOut = SameTrapPCCount >= SameTrapPCThreshold;
+    WatchDogTimeOut = Enable & (WatchDogTimerCount >= WatchDogTimerThreshold);
+    SameTrapPCTimeOut = Enable & (SameTrapPCCount >= SameTrapPCThreshold);
     if(WatchDogTimeOut | SameTrapPCTimeOut) begin
       if (TEST == "buildroot" & WatchDogTimeOut) $display("Watch Dog Time Out triggered.  This is a normal termination for a full buildroot boot.  Check sim/<simulator>/logs/buildroot_uart.log to check if the boot printed the login prompt.");
       else if (WatchDogTimeOut) $display("FAILURE: Watch Dog Time Out triggered. PCW stuck at %x for more than %d cycles", PCW, WatchDogTimerCount);

@@ -46,6 +46,14 @@ For each test, this regenerates the vectors, builds the memfile, and runs `wsim`
 wsim debug64 tests/debug/build/<test>.elf --debug tests/debug/build/testvectors/<test>.tv
 ```
 
+## Live JTAG (remote bitbang)
+
+With `+RBB_PORT=<port>`, the testbench serves Wally's JTAG pins over the remote_bitbang protocol, as Spike does with `--rbb-port` (`testbench/common/jtag_rbb.sv` and `jtag_rbb.c`). Port 0 picks a free port; the simulation prints `Listening for remote bitbang connection on port <n>.` and waits for a host. It advances only while the host sends JTAG traffic, ends when the host disconnects, and turns off the watchdog. A host can be OpenOCD (`adapter driver remote_bitbang`) or the External Debug tests in riscv-arch-test, which react to each response instead of replaying recorded vectors.
+
+```bash
+wsim debug64 --sim verilator --args +RBB_PORT=0 --elf <program>.elf
+```
+
 ## Per-rule tests
 
 Tests named `WALLY-debug-<rule>` check one normative rule of the Debug specification each. `<rule>` is the rule name from the Debug normative-rule tags:

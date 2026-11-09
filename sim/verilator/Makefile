@@ -42,7 +42,7 @@ endif
 
 # The regular testbench uses a C wrapper providing the getenvval DPI function
 ifeq ($(TESTBENCH), testbench)
-    WRAPPER = ${WALLY}/sim/verilator/wrapper.c
+    WRAPPER = ${WALLY}/sim/verilator/wrapper.c ${WALLY}/testbench/common/jtag_rbb.c
 else
     WRAPPER =
 endif

@@ -91,8 +91,11 @@ module testbench;
   string       UART_LOG_FILE;
   integer      UART_LOG;
 
-  // Debugger signals
+  // Debugger signals: the JTAG pins come from the testvector debugger, or from a
+  // remote_bitbang host (jtag_rbb) when +RBB_PORT is given
   logic        tck, tms, tdi, tdo;
+  logic        tvtck, tvtms, tvtdi;
+  logic        rbbtck, rbbtms, rbbtdi, RbbActive;
 
   // DUT signals
   logic [P.AHBW-1:0]    HRDATAEXT;
@@ -735,11 +738,14 @@ module testbench;
   end
 
   if (P.DEBUG_SUPPORTED) begin
-    debugger #(P) debugger(.clk, .reset, .tck, .tms, .tdi, .tdo, .filename(debugger_filename), .DebuggerErrors);
+    debugger #(P) debugger(.clk, .reset, .tck(tvtck), .tms(tvtms), .tdi(tvtdi), .tdo, .filename(debugger_filename), .DebuggerErrors);
+    jtag_rbb jtag_rbb(.tck(rbbtck), .tms(rbbtms), .tdi(rbbtdi), .tdo, .Active(RbbActive));
+    assign {tck, tms, tdi} = RbbActive ? {rbbtck, rbbtms, rbbtdi} : {tvtck, tvtms, tvtdi};
   end else begin
     assign tck = 1;
     assign tdi = 0;
     assign tms = 0;
+    assign RbbActive = 0;
   end
 
   wallypipelinedsoc  #(P) dut(.clk, .reset_ext, .reset, .ExternalStall(RVVIStall),
@@ -802,7 +808,7 @@ module testbench;
 `ifdef MEMPIPE_PROBE
   `include "mempipeprobe.svh"
 `endif
-  watchdog #(P.XLEN, 1000000) watchdog(.clk, .reset, .TEST);  // check if PCW is stuck
+  watchdog #(P.XLEN, 1000000) watchdog(.clk, .reset, .TEST, .Enable(~RbbActive));  // check if PCW is stuck; off while a host debugger has control
   ramxdetector #(P.XLEN, P.LLEN) ramxdetector(clk, dut.core.lsu.MemRWM[1], dut.core.lsu.LSULoadAccessFaultM, dut.core.lsu.ReadDataM,
                                       dut.core.ifu.PCM, InstrM, dut.core.lsu.IEUAdrM, dut.core.lsu.StallW, InstrMName);
   riscvassertions       #(P) riscvassertions();     // check assertions for a legal architectural configuration
